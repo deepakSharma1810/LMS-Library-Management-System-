@@ -17,12 +17,12 @@ const authorSchema = new mongoose.Schema(
     books: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Books",
+        ref: "book",
       },
     ],
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
-const Author = mongoose.model("authores", authorSchema);
+const Author = mongoose.model("author", authorSchema);
 module.exports = Author;

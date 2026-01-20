@@ -1,5 +1,6 @@
 import React from "react";
 import { IoMdHeart } from "react-icons/io";
+import { Link } from "react-router-dom";
 
 const items = [
   {
@@ -54,28 +55,30 @@ const BookPage = () => {
       </h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {items.map((item, index) => (
-          <div
-            key={index}
-            className="bg-[#1b2e31] rounded-xl overflow-hidden shadow-xl/40"
-          >
-            <img
-              src={item.image}
-              alt={item.imageName}
-              className="w-full h-40 object-cover rounded-t-xl border-b"
-            />
-            <div className="p-3 flex flex-col gap-2">
-              <div className="flex justify-between items-center">
-                <p className="text-sm font-semibold text-amber-50 truncate">
-                  {item.imageName}
-                </p>
-                <IoMdHeart className="text-lg text-gray-400" />
-              </div>
-              <div className="flex justify-between items-center text-xs text-gray-400">
-                <p>{item.authorName}</p>
-                <p className="text-yellow-300">{item.viewers}</p>
+          <Link to={`/book/${index + 1}`} key={index}>
+            <div
+              key={index}
+              className="bg-[#1b2e31] rounded-xl overflow-hidden shadow-xl/40"
+            >
+              <img
+                src={item.image}
+                alt={item.imageName}
+                className="w-full h-40 object-cover rounded-t-xl border-b"
+              />
+              <div className="p-3 flex flex-col gap-2">
+                <div className="flex justify-between items-center">
+                  <p className="text-sm font-semibold text-amber-50 truncate">
+                    {item.imageName}
+                  </p>
+                  <IoMdHeart className="text-lg text-gray-400" />
+                </div>
+                <div className="flex justify-between items-center text-xs text-gray-400">
+                  <p>{item.authorName}</p>
+                  <p className="text-yellow-300">{item.viewers}</p>
+                </div>
               </div>
             </div>
-          </div>
+          </Link>
         ))}
       </div>
     </div>

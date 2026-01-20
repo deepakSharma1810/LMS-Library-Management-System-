@@ -1,4 +1,3 @@
-const { get } = require("mongoose");
 const Book = require("../model/Book");
 const Category = require("../model/Category");
 
@@ -29,6 +28,20 @@ const createBook = async (req, res) => {
     res.status(201).json({ message: "Book Successfully Created" });
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+};
+
+const readAllBook = async (req, res) => {
+  try {
+    const books = await Book.find().populate("author");
+
+    if (!books || books.length === 0) {
+      return res.status(404).json({ message: "Author not found" });
+    }
+
+    res.status(200).json(books);
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
   }
 };
 
@@ -72,7 +85,9 @@ const updateBook = async (req, res) => {
       return res.status(400).json({ message: "Please fill all the feilds" });
     }
 
-    const getBook = await Book.findOne({ name });
+    const { id } = req.params;
+
+    const getBook = await Book.findById(id);
 
     if (!getBook) {
       return res.status(404).json({ message: "Book not found" });
@@ -93,9 +108,10 @@ const updateBook = async (req, res) => {
 
 const deleteBook = async (req, res) => {
   try {
-    const { name } = req.body;
+    const { id } = req.params;
 
-    const book = await Book.findOneAndDelete({ name });
+    console.log(id);
+    const book = await Book.findByIdAndDelete(id);
 
     if (!book) {
       return res.status(404).json({ message: "Book not found" });
@@ -109,6 +125,7 @@ const deleteBook = async (req, res) => {
 
 module.exports = {
   createBook,
+  readAllBook,
   readBook,
   readBookByAuthor,
   updateBook,

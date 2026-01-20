@@ -44,15 +44,31 @@ const readAuthor = async (req, res) => {
   }
 };
 
+const getAllAuthors = async (req, res) => {
+  try {
+    const authors = await Author.find();
+    // console.log(authors);
+    if (!authors || authors.length === 0) {
+      return res.status(404).json({ message: "Author not found" });
+    }
+
+    res.status(200).json(authors);
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
 const updateAuthor = async (req, res) => {
   try {
-    const { name, coverPhoto, info } = req.body;
+    const { name, info, coverPhoto, books } = req.body;
 
-    if (!name || !coverPhoto || !info) {
+    if (!name || !info) {
       return res.status(400).json({ message: "PLease fill all the feilds" });
     }
 
-    const author = await Author.findOne({ name });
+    const { id } = req.params;
+
+    const author = await Author.findById(id);
 
     if (!author) {
       return res.status(404).json({ message: "Author not found" });
@@ -61,8 +77,9 @@ const updateAuthor = async (req, res) => {
     author.name = name;
     author.coverPhoto = coverPhoto;
     author.info = info;
+    author.books = books;
 
-    author.save();
+    await author.save();
 
     res.status(200).json({ message: "Author Successfully Updated" });
   } catch (error) {
@@ -72,9 +89,9 @@ const updateAuthor = async (req, res) => {
 
 const deleteAuthor = async (req, res) => {
   try {
-    const { name } = req.body;
+    const { id } = req.params;
 
-    const author = await Author.findOneAndDelete({ name });
+    const author = await Author.findByIdAndDelete(id);
 
     if (!author) {
       return res.status(404).json({ message: "Author not found" });
@@ -89,6 +106,7 @@ const deleteAuthor = async (req, res) => {
 module.exports = {
   createAuthor,
   readAuthor,
+  getAllAuthors,
   updateAuthor,
   deleteAuthor,
 };

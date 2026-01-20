@@ -1,73 +1,272 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { GoBell } from "react-icons/go";
-import { CiMail, CiSearch } from "react-icons/ci";
+import { CiSearch } from "react-icons/ci";
+import { CgProfile } from "react-icons/cg";
+import { IoIosArrowDown } from "react-icons/io";
+import { HiMenu, HiX } from "react-icons/hi";
+import { IoCartOutline } from "react-icons/io5";
 import { Link } from "react-router-dom";
 
 const Navbar = () => {
+  const [showProfile, setShowProfile] = useState(false);
+  const [mobileMenu, setMobileMenu] = useState(false);
+  const [mobileProfileOpen, setMobileProfileOpen] = useState(false);
+
+  // Close mobile menu on Escape
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key === "Escape") {
+        setMobileMenu(false);
+        setMobileProfileOpen(false);
+        setShowProfile(false);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
   return (
-    <div className="w-full border-b border-amber-50 bg-[#1b2e31]">
-      <div className="max-w-full px-[40px] h-[12vh] flex flex-wrap md:flex-nowrap justify-between items-center">
-        {/* Left Nav Links */}
-        <ul className="flex flex-wrap text-base md:text-lg gap-2">
-          <Link to="/">
-            <li className="list-none px-4 py-2 cursor-pointer rounded hover:bg-[#53818aaf] text-[#dbf8fa] duration-200">
+    <header className="w-full border-b bg-[#1b2e31] text-[#dbf8fa] sticky top-0 z-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16 gap-15">
+          {/* LEFT: Logo + links (links hidden on xs) */}
+          <div className="flex items-center gap-4">
+            <Link to="/" className="text-xl font-semibold">
+              MyBookStore
+            </Link>
+
+            <nav className="hidden sm:flex items-center gap-2">
+              <Link
+                to="/books"
+                className="px-3 py-1.5 rounded hover:bg-[#122125]"
+              >
+                Books
+              </Link>
+              <Link
+                to="/authors"
+                className="px-3 py-1.5 rounded hover:bg-[#122125]"
+              >
+                Authors
+              </Link>
+            </nav>
+          </div>
+
+          {/* CENTER: Search (hidden on small screens) */}
+          <div className="flex-1 flex items-center justify-center">
+            <div className="w-full max-w-xl flex ">
+              {/* Search hidden on screens smaller than md */}
+              <div className="hidden md:flex items-center bg-[#234046] rounded-sm border border-gray-600 px-2 py-1 w-full">
+                <CiSearch size={20} />
+                <input
+                  type="text"
+                  placeholder="Search books, authors..."
+                  className="bg-transparent w-full ml-2 outline-none placeholder:text-[#bfecec]"
+                  aria-label="Search"
+                />
+              </div>
+              {/* Bell icon: hidden on small screens */}
+              <Link
+                to="/notification"
+                className="hidden md:inline-flex px-2 py-1.5 rounded hover:bg-[#122125] ml-2"
+              >
+                <GoBell size={20} />
+              </Link>
+            </div>
+          </div>
+
+          {/* RIGHT: Icons + Profile */}
+          <div className="flex items-center gap-3">
+            {/* Cart: visible on sm and up */}
+            <Link
+              to="/cart"
+              className="hidden sm:inline-flex items-center gap-2 px-2 py-1.5 rounded hover:bg-[#122125]"
+            >
+              <IoCartOutline size={20} />
+              <span className="hidden md:inline">Cart</span>
+            </Link>
+
+            {/* Profile: hover shows (desktop), click toggles (mobile) */}
+            <div
+              className="relative"
+              onMouseEnter={() => setShowProfile(true)}
+              onMouseLeave={() => setShowProfile(false)}
+            >
+              <button className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-[#122125]">
+                <CgProfile size={22} />
+                <span className="hidden sm:inline">Deepak</span>
+                <IoIosArrowDown
+                  className={`transition-transform ${
+                    showProfile ? "rotate-180" : ""
+                  }`}
+                />
+              </button>
+
+              {/* Desktop dropdown (visible on hover/click on wider screens) */}
+              {showProfile && (
+                <div className="absolute right-0 mt-0 w-44 bg-[#1b2e31] text-[#dbf8fa] rounded shadow-lg border overflow-hidden z-40">
+                  <Link
+                    to="/profile"
+                    className="block px-4 py-2 hover:bg-[#122125]"
+                  >
+                    My Profile
+                  </Link>
+                  <Link
+                    to="/orders"
+                    className="block px-4 py-2 hover:bg-[#122125]"
+                  >
+                    Orders
+                  </Link>
+                  <Link
+                    to="/notification"
+                    className="block px-4 py-2 hover:bg-[#122125]"
+                  >
+                    Notifications
+                  </Link>
+                  <button className="w-full text-left px-4 py-2 hover:bg-[#122125] text-red-500">
+                    Logout
+                  </button>
+                </div>
+              )}
+
+              {/* Mobile profile dropdown (inside mobile drawer or as floating under button) */}
+              {mobileProfileOpen && (
+                <div className="absolute right-0 top-12 w-44 bg-[#0f2223]  rounded shadow-lg border border-gray-700 overflow-hidden z-40">
+                  <Link
+                    to="/profile"
+                    className="block px-4 py-2 hover:bg-[#13474a]"
+                  >
+                    My Profile
+                  </Link>
+                  <Link
+                    to="/orders"
+                    className="block px-4 py-2 hover:bg-[#13474a]"
+                  >
+                    Orders
+                  </Link>
+                  <Link
+                    to="/notification"
+                    className="block px-4 py-2 hover:bg-[#13474a]"
+                  >
+                    Notifications
+                  </Link>
+                  <button className="w-full text-left px-4 py-2 hover:bg-[#13474a] text-red-400">
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Mobile menu toggle */}
+            <button
+              className="sm:hidden p-2 rounded hover:bg-[#122125]"
+              onClick={() => setMobileMenu((prev) => !prev)}
+              aria-label="Toggle menu"
+            >
+              {mobileMenu ? <HiX size={24} /> : <HiMenu size={24} />}
+            </button>
+          </div>
+        </div>
+
+        {/* MOBILE DRAWER: slides in from right */}
+        {/* Backdrop */}
+        <div
+          className={`fixed inset-0 bg-black/40 z-30 transition-opacity ${
+            mobileMenu
+              ? "opacity-100 pointer-events-auto"
+              : "opacity-0 pointer-events-none"
+          }`}
+          onClick={() => setMobileMenu(false)}
+          aria-hidden={!mobileMenu}
+        />
+
+        {/* Drawer panel */}
+        <aside
+          className={`fixed top-0 right-0 h-full w-80 max-w-[85vw] bg-[#102324] z-40 transform transition-transform duration-300 ease-in-out
+            ${mobileMenu ? "translate-x-0" : "translate-x-full"}`}
+          aria-hidden={!mobileMenu}
+        >
+          <div className="h-16 flex items-center justify-between px-4 border-b border-gray-800">
+            <div className="text-lg font-semibold">Menu</div>
+            <button
+              onClick={() => setMobileMenu(false)}
+              aria-label="Close menu"
+              className="p-2 rounded hover:bg-[#162b31]"
+            >
+              <HiX size={22} />
+            </button>
+          </div>
+
+          <nav className="px-4 py-4 space-y-2">
+            <Link
+              to="/"
+              onClick={() => setMobileMenu(false)}
+              className="block px-3 py-2 rounded hover:bg-[#162b31]"
+            >
               Library
-            </li>
-          </Link>
-          <Link to="/books">
-            <li className="list-none px-4 py-2 cursor-pointer rounded text-[#dbf8fa] hover:bg-[#53818aaf] duration-200">
+            </Link>
+            <Link
+              to="/books"
+              onClick={() => setMobileMenu(false)}
+              className="block px-3 py-2 rounded hover:bg-[#162b31]"
+            >
               Books
-            </li>
-          </Link>
-          <Link to="/authors">
-            <li className="list-none px-4 py-2 cursor-pointer rounded text-[#dbf8fa] hover:bg-[#53818aaf] duration-200">
+            </Link>
+            <Link
+              to="/authors"
+              onClick={() => setMobileMenu(false)}
+              className="block px-3 py-2 rounded hover:bg-[#162b31]"
+            >
               Authors
-            </li>
-          </Link>
-        </ul>
+            </Link>
 
-        {/* Search + Icons */}
-        <div className="flex flex-wrap md:flex-nowrap items-center justify-center gap-4 mt-4 md:mt-0">
-          {/* Hide search input on small screens, show icon instead */}
-          <div className="block md:hidden">
-            <CiSearch className="text-[#dbf8fa] cursor-pointer" size={24} />
-          </div>
+            <div className="pt-2 border-t border-gray-800">
+              {/* <div className="flex items-center justify-between px-3 py-2">
+                <div className="flex items-center gap-2">
+                  <CgProfile size={18} />
+                  <span>Deepak</span>
+                </div>
+                <button
+                  onClick={() => setMobileProfileOpen((prev) => !prev)}
+                  className="p-1 rounded hover:bg-[#13474a]"
+                >
+                  <IoIosArrowDown />
+                </button>
+              </div> */}
 
-          <div className="hidden md:block relative w-full md:w-[300px] lg:w-[380px]">
-            <CiSearch
-              className="absolute left-4 top-3.5 text-[#dbf8fa]"
-              size={22}
-            />
-            <input
-              type="text"
-              placeholder="Search..."
-              className="w-full bg-[#234046] text-[#dbf8fa] outline-none pl-12 pr-4 py-2 rounded-sm border border-gray-400 text-base"
-            />
-          </div>
-
-          <div className="flex items-center gap-2">
-            <li className="list-none p-2 rounded hover:bg-[#53818aaf] cursor-pointer duration-200">
-              <GoBell className="text-[#dbf8fa]" size={22} />
-            </li>
-            <li className="list-none p-2 rounded hover:bg-[#53818aaf] cursor-pointer duration-200">
-              <CiMail className="text-[#dbf8fa]" size={22} />
-            </li>
-          </div>
-        </div>
-
-        {/* Profile */}
-        <div className="flex items-center gap-3 mt-4 md:mt-0 pr-[10px]">
-          <p className="text-base md:text-lg text-[#dbf8fa]">Deepak</p>
-          <Link to="/signup">
-            <img
-              src=""
-              alt="Profile"
-              className="w-[40px] h-[40px] md:w-[50px] md:h-[50px] border-2 rounded-full object-cover"
-            />
-          </Link>
-        </div>
+              {/* Expandable mobile profile section */}
+              {/* {mobileProfileOpen && (
+                <div className="flex flex-col px-3 gap-1">
+                  <Link
+                    to="/profile"
+                    onClick={() => setMobileMenu(false)}
+                    className="px-2 py-2 rounded hover:bg-[#13474a]"
+                  >
+                    My Profile
+                  </Link>
+                  <Link
+                    to="/message"
+                    onClick={() => setMobileMenu(false)}
+                    className="px-2 py-2 rounded hover:bg-[#13474a]"
+                  >
+                    Messages
+                  </Link>
+                  <Link
+                    to="/notification"
+                    onClick={() => setMobileMenu(false)}
+                    className="px-2 py-2 rounded hover:bg-[#13474a]"
+                  >
+                    Notifications
+                  </Link>
+                  <button className="text-left px-2 py-2 rounded hover:bg-[#13474a] text-red-400">
+                    Logout
+                  </button>
+                </div>
+              )} */}
+            </div>
+          </nav>
+        </aside>
       </div>
-    </div>
+    </header>
   );
 };
 

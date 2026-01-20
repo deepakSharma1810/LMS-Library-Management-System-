@@ -30,18 +30,13 @@ const bookSchema = new mongoose.Schema(
     ],
     author: [
       {
-        id: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "author",
-        },
-        name: {
-          type: String,
-        },
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "author",
       },
     ],
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
-const Book = mongoose.model("books", bookSchema);
+const Book = mongoose.model("book", bookSchema);
 module.exports = Book;

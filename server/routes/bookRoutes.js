@@ -5,13 +5,14 @@ const {
   updateBook,
   deleteBook,
   readBookByAuthor,
+  readAllBook,
 } = require("../controllers/bookController");
 
 const router = express.Router();
 
-router.route("/").post(createBook);
+router.route("/").post(createBook).get(readAllBook);
 router
-  .route("/:book")
+  .route("/:id")
   .get(readBook)
   .patch(updateBook)
   .delete(deleteBook)
