@@ -1,3 +1,4 @@
+const Author = require("../model/Author");
 const Book = require("../model/Book");
 const Category = require("../model/Category");
 
@@ -15,6 +16,12 @@ const createBook = async (req, res) => {
       return res.status(400).json({ message: "Book Already Exists" });
     }
 
+    const authorObj = await Author.findById(author);
+
+    if (!authorObj) {
+      return res.status(404).json({ Message: "author not found" });
+    }
+
     const newBook = new Book({
       name,
       author,
@@ -24,6 +31,10 @@ const createBook = async (req, res) => {
     });
 
     await newBook.save();
+
+    authorObj.books.push(newBook._id);
+
+    await authorObj.save();
 
     res.status(201).json({ message: "Book Successfully Created" });
   } catch (error) {
@@ -65,7 +76,7 @@ const readBookByAuthor = async (req, res) => {
   try {
     const { name } = req.body;
 
-    const books = await Book.findOne({ "author.name": name });
+    const books = await Book.findOne({ authorName: name });
 
     if (!books) {
       return res.status(404).json({ message: "Book not found" });

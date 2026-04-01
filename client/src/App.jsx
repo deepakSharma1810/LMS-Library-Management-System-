@@ -13,12 +13,14 @@ import NotificationPage from "./components/NotificationPage/NotificationPage";
 import ProfilePage from "./components/ProfilePage/ProfilePage";
 import CartPage from "./components/CartPage/CartPage";
 import OrderPage from "./components/OrderPage/OrderPage";
+import ScrollOnTop from "./components/ScrollOnTop";
 // import SingleProductPage from "./components/SingleProductPage/SingleProductPage";
 
 const App = () => {
   return (
     <div>
       <Router>
+        <ScrollOnTop />
         <Navbar />
         <Routes>
           <Route path="/" element={<MainPage />} />

@@ -2,6 +2,8 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+const MAZ_IMAGE_SIZE = 1024 * 1024 * 5;
+
 const AddBooks = () => {
   const navigate = useNavigate();
 
@@ -40,10 +42,20 @@ const AddBooks = () => {
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
-    if (file) {
-      setImage(file);
-      setPreview(URL.createObjectURL(file));
+    setError("");
+
+    if (!file) return;
+
+    if (file.size > MAZ_IMAGE_SIZE) {
+      setError("Image size must be less than 5 MB");
+      e.target.value = "";
+      setImage(null);
+      setPreview(null);
+      return;
     }
+
+    setImage(file);
+    setPreview(URL.createObjectURL(file));
   };
 
   const handleSubmit = async (e) => {
@@ -69,7 +81,7 @@ const AddBooks = () => {
 
         const uploadImage = await axios.post(
           "http://localhost:5000/uploadmulter",
-          formData
+          formData,
         );
 
         console.log(uploadImage);
@@ -95,11 +107,18 @@ const AddBooks = () => {
       });
       setImage(null);
       setPreview(null);
+      setLoading(false);
 
       navigate("/books");
     } catch (err) {
       console.error(err);
-      setError("Failed to add book. Please try again.");
+      setLoading(false);
+
+      if (err.response && err.response.data && err.response.data.message) {
+        setError(err.response.data.message);
+      } else {
+        setError("Failed to add book. Please try again.");
+      }
     }
   };
 

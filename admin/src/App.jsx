@@ -15,12 +15,14 @@ import ConfirmPassword from "./components/ConfirmPassword/ConfirmPassword";
 import AdminSettings from "./components/AdminSettings/AdminSettings";
 import Profile from "./components/Profile/Profile";
 import Navbar from "./components/Navbar/Navbar";
+import ScrollOnTop from "./components/ScrollOnTop";
 
 const App = () => {
   const [isOpen, setIsOpen] = useState(true);
 
   return (
     <Router>
+      <ScrollOnTop />
       <Sidebar isOpen={isOpen} setIsOpen={setIsOpen} />
       <Navbar isOpen={isOpen} setIsOpen={setIsOpen} />
       <main

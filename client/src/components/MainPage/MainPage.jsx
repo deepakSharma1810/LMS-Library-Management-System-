@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { IoMdHeart } from "react-icons/io";
 import { RiEqualizerFill } from "react-icons/ri";
+import axios from "axios";
 import { TbSend2 } from "react-icons/tb";
 import { Link } from "react-router-dom";
 
@@ -77,13 +78,40 @@ const settings = {
 };
 
 const MainPage = () => {
+  const [books, setBooks] = useState([]);
+  const [authors, setAuthors] = useState([]);
+
+  const fetchbooks = async () => {
+    try {
+      const res = await axios.get("http://localhost:5000/book");
+      setBooks(res.data);
+      console.log(res.data);
+    } catch (error) {
+      console.log("Error fetching books:", error);
+    }
+  };
+
+  const fetchAuthors = async () => {
+    try {
+      const res = await axios.get("http://localhost:5000/author");
+      setAuthors(res.data);
+    } catch (error) {
+      console.log("Error fetching authors:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchbooks();
+    fetchAuthors();
+  }, []);
+
   return (
     <div className="w-full min-h-screen">
       <div className="w-full h-[50vh]">
         <img src="" alt="" className="w-full h-full object-cover" />
       </div>
 
-      <div className="w-full flex flex-col lg:flex-row gap-5 px-4 md:px-8 py-6">
+      <div className="w-full flex flex-col lg:flex-row gap-8 px-4 md:px-8 py-6">
         {/* Left Section */}
         <div className="w-full lg:w-3/5 flex flex-col gap-6">
           {/* Previous Reading */}
@@ -98,32 +126,72 @@ const MainPage = () => {
               </div>
             </div>
             <Slider {...settings}>
-              {items.map((item, index) => (
-                <div key={index} className="px-2">
-                  <div className=" rounded-lg overflow-hidden shadow-xl/40 max-w-xs mx-auto">
-                    <img
-                      src={item.image}
-                      alt={item.imageName}
-                      className="w-full h-48 object-cover border rounded-xl"
-                    />
-                    <div className="p-4 flex flex-col gap-2">
-                      <div className="flex justify-between items-center">
-                        <p className="text-sm font-semibold text-amber-50 truncate">
-                          {item.imageName}
-                        </p>
-                        <IoMdHeart className="text-xl text-gray-400" />
+              {books.map((book, i) => (
+                <Link to={`/book/${i + 1}`} key={i}>
+                  <div key={book._id} className="px-0 pb-3">
+                    <div className="bg-[#122125] rounded-lg overflow-hidden shadow-xl/40 max-w-xs mx-auto hover:scale-101 transition duration-300">
+                      <div className="relative">
+                        <img
+                          src={`http://localhost:5000/${book.coverPhoto}`}
+                          alt={book.name}
+                          className="w-full h-48 object-cover rounded-t-lg"
+                        />
+
+                        <div className="absolute top-2 right-2 bg-black/40 p-1 rounded-full">
+                          <IoMdHeart className="text-sm text-gray-300 hover:text-red-500 cursor-pointer" />
+                        </div>
                       </div>
-                      <div className="flex justify-between items-center">
-                        <p className="text-xs text-gray-300 truncate">
-                          {item.authorName}
+
+                      <div className="p-3 flex flex-col gap-1">
+                        {/* 📚 Book Name */}
+                        <div className="flex justify-between items-center gap-2">
+                          <p className="text-sm font-semibold text-amber-50 line-clamp-2">
+                            {book.name}
+                          </p>
+                          <span className="text-sm font-bold text-white">
+                            ₹{book.price}
+                          </span>
+                        </div>
+
+                        {/* ✍️ Author */}
+                        <p className="text-xs text-gray-400">
+                          by {book.author[0].name || "Unknown"}
                         </p>
-                        <span className="text-xs text-yellow-300">
-                          {item.viewers}
-                        </span>
+
+                        {/* 📂 Category (compact) */}
+                        <div className="flex gap-1 overflow-hidden">
+                          {book.category?.length > 0 ? (
+                            book.category.slice(0, 2).map((cat, index) => (
+                              <span
+                                key={index}
+                                className="text-[9px] px-2 py-[1px] bg-[#234046] text-amber-300 rounded-full truncate"
+                              >
+                                {cat.name || cat}
+                              </span>
+                            ))
+                          ) : (
+                            <span className="text-[9px] text-gray-400">
+                              No Category
+                            </span>
+                          )}
+                        </div>
+
+                        {/* ⭐ Bottom Row */}
+                        <div className="flex justify-between items-center mt-1">
+                          {/* 🛒 Add to Cart */}
+                          <button className="text-xs text-amber-400 hover:underline">
+                            Add to cart
+                          </button>
+
+                          {/* ⭐ Rating */}
+                          <div className="flex text-orange-400 text-xs">
+                            ★★★★☆
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
+                </Link>
               ))}
             </Slider>
           </div>
@@ -174,28 +242,34 @@ const MainPage = () => {
               <p className="text-amber-300">Show all</p>
             </div>
             <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
-              {items.map((_, i) => (
-                <div
-                  key={i}
-                  className="min-w-[150px] flex-shrink-0 flex flex-col rounded-xl shadow-xl/40"
-                >
-                  <div className="w-full h-40">
-                    <img
-                      src=""
-                      alt=""
-                      className="w-full h-full object-cover border rounded-xl"
-                    />
-                  </div>
-                  <div className="p-2">
-                    <p className="text-sm font-bold text-amber-50 truncate">
-                      Book Name
-                    </p>
-                    <div className="flex justify-between items-center text-xs text-gray-300">
-                      <span>Author Name</span>
-                      <span className="text-yellow-300">234</span>
+              {books.map((book, i) => (
+                <Link to={`/book/${i + 1}`} key={i}>
+                  <div
+                    key={book._id}
+                    className="min-w-[150px] flex-shrink-0 flex flex-col rounded-xl shadow-xl/40 hover:scale-101 transition duration-300"
+                  >
+                    <div className="w-full h-40">
+                      <img
+                        src={`http://localhost:5000/${book.coverPhoto}`}
+                        alt={book.name}
+                        className="w-full h-full object-cover border rounded-xl"
+                      />
+                    </div>
+                    <div className="p-2">
+                      <div className="flex justify-between">
+                        <p className="text-sm font-bold text-amber-50 truncate">
+                          {book.name}
+                        </p>
+                        <span className="text-sm font-bold text-white">
+                          ₹{book.price}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center text-xs text-gray-300">
+                        <span>{book.author[0].name}</span>
+                      </div>
                     </div>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           </div>
@@ -210,21 +284,24 @@ const MainPage = () => {
               <p className="text-amber-300 text-sm">Show all</p>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-              {items.map((item, i) => (
+              {books.map((book, i) => (
                 <Link to={`/book/${i + 1}`} key={i}>
-                  <div key={i} className="rounded-lg shadow-xl/40">
+                  <div
+                    key={i}
+                    className="rounded-lg shadow-xl/40 hover:scale-101 transition duration-300"
+                  >
                     <img
-                      src={item.image}
+                      src={`http://localhost:5000/${book.coverPhoto}`}
                       alt=""
                       className="w-full h-32 object-cover rounded-xl border"
                     />
                     <div className="p-2">
                       <p className="text-sm font-bold text-amber-50 truncate">
-                        {item.imageName}
+                        {book.name}
                       </p>
                       <div className="flex justify-between text-xs text-gray-400">
-                        <span>{item.authorName}</span>
-                        <span className="text-yellow-300">{item.viewers}</span>
+                        <span>{book.author[0].name}</span>
+                        {/* <span className="text-yellow-300">{item.viewers}</span> */}
                       </div>
                     </div>
                   </div>
@@ -242,7 +319,7 @@ const MainPage = () => {
               <p className="text-amber-300 text-sm">Show all</p>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-              {items.map((_, i) => (
+              {authors.map((author, i) => (
                 <Link to={`/author/${i + 1}`} key={i}>
                   <div
                     key={i}
@@ -250,17 +327,17 @@ const MainPage = () => {
                   >
                     <div className="flex justify-between items-center mb-2">
                       <img
-                        src=""
+                        src={`http://localhost:5000/${author.coverPhoto}`}
                         alt=""
                         className="w-12 h-12 rounded-full border border-amber-50"
                       />
                       <div className="text-right">
-                        <p className="text-xs text-amber-300">766</p>
+                        {/* <p className="text-xs text-amber-300">766</p> */}
                         <p className="text-xs text-gray-400">Books</p>
                       </div>
                     </div>
                     <div>
-                      <p className="text-sm text-[#dbf8fa]">Writer Name</p>
+                      <p className="text-sm text-[#dbf8fa]">{author.name}</p>
                       <p className="text-xs text-gray-400">Writer & Author</p>
                       <div className="flex justify-between items-center text-amber-300 mt-1">
                         <p className="text-sm">More...</p>

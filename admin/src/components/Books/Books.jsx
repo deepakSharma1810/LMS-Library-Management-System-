@@ -40,7 +40,7 @@ const Books = () => {
 
   /* SEARCH */
   const filteredBooks = books.filter((b) =>
-    b.name.toLowerCase().includes(search.toLowerCase())
+    b.name.toLowerCase().includes(search.toLowerCase()),
   );
 
   /* DELETE */
@@ -63,8 +63,8 @@ const Books = () => {
               ...b,
               status: b.status === "Published" ? "Draft" : "Published",
             }
-          : b
-      )
+          : b,
+      ),
     );
   };
 
@@ -75,6 +75,11 @@ const Books = () => {
 
   /* START EDIT */
   const startEdit = (book) => {
+    // setShowModal(true);
+    // try {
+    // } catch (error) {
+    //   console.error(error);
+    // }
     setEditBookId(book._id);
     setForm({
       name: book.name,
@@ -95,8 +100,8 @@ const Books = () => {
               ...form,
               price: `₹${form.price}`,
             }
-          : b
-      )
+          : b,
+      ),
     );
 
     setShowModal(false);
@@ -174,7 +179,7 @@ const Books = () => {
               <tr key={book._id} className="border-b border-[#2c4449]">
                 <td className="py-2 flex items-center gap-3">
                   <img
-                    src={`http://localhost:5000`}
+                    src={`http://localhost:5000/${book.coverPhoto}`}
                     alt={book.name}
                     className="w-10 h-10 rounded object-cover border border-[#2c4449]"
                   />
@@ -244,25 +249,14 @@ const Books = () => {
             <div className="flex justify-end gap-3 mt-4">
               <button
                 onClick={() => setShowModal(false)}
-                className="
-            px-4 py-2 rounded-lg
-            border border-[#2c4449]
-            text-gray-400
-            hover:bg-[#122125]
-          "
+                className=" px-4 py-2 rounded-lg border border-[#2c4449] text-gray-400 hover:bg-[#122125]"
               >
                 Cancel
               </button>
 
               <button
                 onClick={updateBook}
-                className="
-            px-4 py-2 rounded-lg
-            bg-amber-300
-            text-[#0e1a1c]
-            font-semibold
-            hover:bg-amber-400
-          "
+                className="px-4 py-2 rounded-lg bg-amber-300 text-[#0e1a1c] font-semibold hover:bg-amber-400"
               >
                 Save
               </button>

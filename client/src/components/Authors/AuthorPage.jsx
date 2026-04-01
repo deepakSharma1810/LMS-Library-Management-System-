@@ -1,4 +1,5 @@
-import React from "react";
+import axios from "axios";
+import React, { useEffect, useState } from "react";
 import { TbSend2 } from "react-icons/tb";
 import { Link } from "react-router-dom";
 
@@ -42,6 +43,21 @@ const authors = [
 ];
 
 const AuthorPage = () => {
+  const [authors, setAuthors] = useState([]);
+
+  const fetchAuthors = async () => {
+    try {
+      const res = await axios.get("http://localhost:5000/author");
+      setAuthors(res.data);
+      console.log(res.data);
+    } catch (error) {
+      console.log("Error fetching authors:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchAuthors();
+  }, []);
   return (
     <div className="w-full min-h-screen bg-[#0e1a1c] px-4 md:px-8 py-6">
       <h2 className="text-2xl font-bold text-[#dbf8fa] mb-6 text-center">
@@ -56,12 +72,14 @@ const AuthorPage = () => {
             >
               <div className="flex justify-between items-center mb-4">
                 <img
-                  src={author.image}
+                  src={`http://localhost:5000/${author.coverPhoto}`}
                   alt={author.name}
                   className="w-14 h-14 rounded-full border border-amber-50 object-cover"
                 />
                 <div className="text-right">
-                  <p className="text-sm text-amber-300">{author.books}</p>
+                  <p className="text-sm text-amber-300">
+                    {author.books.length}
+                  </p>
                   <p className="text-xs text-gray-400">Books</p>
                 </div>
               </div>
