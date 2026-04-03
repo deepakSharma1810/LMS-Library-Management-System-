@@ -8,51 +8,6 @@ import axios from "axios";
 import { TbSend2 } from "react-icons/tb";
 import { Link } from "react-router-dom";
 
-const items = [
-  {
-    image: "https://example.com/images/image1.jpg",
-    imageName: "Sunset Over Beach",
-    favicon: "https://example.com/favicons/user1.png",
-    authorName: "John Doe",
-    viewers: 1200,
-  },
-  {
-    image: "https://example.com/images/image2.jpg",
-    imageName: "Mountain Landscape",
-    favicon: "https://example.com/favicons/user2.png",
-    authorName: "Jane Smith",
-    viewers: 875,
-  },
-  {
-    image: "https://example.com/images/image3.jpg",
-    imageName: "City Skyline at Night",
-    favicon: "https://example.com/favicons/user3.png",
-    authorName: "Alex Johnson",
-    viewers: 1520,
-  },
-  {
-    image: "https://example.com/images/image4.jpg",
-    imageName: "Forest Trail",
-    favicon: "https://example.com/favicons/user4.png",
-    authorName: "Maria Lee",
-    viewers: 960,
-  },
-  {
-    image: "https://example.com/images/image4.jpg",
-    imageName: "Forest Trail",
-    favicon: "https://example.com/favicons/user4.png",
-    authorName: "Maria Lee",
-    viewers: 960,
-  },
-  {
-    image: "https://example.com/images/image4.jpg",
-    imageName: "Forest Trail",
-    favicon: "https://example.com/favicons/user4.png",
-    authorName: "Maria Lee",
-    viewers: 960,
-  },
-];
-
 const settings = {
   dots: false,
   infinite: true,
@@ -80,6 +35,7 @@ const settings = {
 const MainPage = () => {
   const [books, setBooks] = useState([]);
   const [authors, setAuthors] = useState([]);
+  const [addedBookId, setAddedBookId] = useState(null);
 
   const fetchbooks = async () => {
     try {
@@ -105,6 +61,42 @@ const MainPage = () => {
     fetchAuthors();
   }, []);
 
+  const addToCart = (book) => {
+    const existingCart = JSON.parse(localStorage.getItem("cart")) || [];
+
+    const existingItem = existingCart.find((item) => item.id === book._id);
+
+    let updatedCart;
+
+    if (existingItem) {
+      updatedCart = existingCart.map((item) =>
+        item.id === book._id ? { ...item, qty: item.qty + 1 } : item,
+      );
+    } else {
+      updatedCart = [
+        ...existingCart,
+        {
+          id: book._id,
+          image: `http://localhost:5000/${book.coverPhoto}`,
+          title: book.name,
+          author: book.author[0]?.name || "Unknown",
+          price: book.price,
+          originalPrice: book.price + 200,
+          qty: 1,
+        },
+      ];
+    }
+
+    localStorage.setItem("cart", JSON.stringify(updatedCart));
+    console.log("Book added to Cart");
+
+    setAddedBookId(book._id);
+
+    setTimeout(() => {
+      setAddedBookId(null);
+    }, 2000);
+  };
+
   return (
     <div className="w-full min-h-screen">
       <div className="w-full h-[50vh]">
@@ -127,23 +119,22 @@ const MainPage = () => {
             </div>
             <Slider {...settings}>
               {books.map((book, i) => (
-                <Link to={`/book/${i + 1}`} key={i}>
-                  <div key={book._id} className="px-0 pb-3">
-                    <div className="bg-[#122125] rounded-lg overflow-hidden shadow-xl/40 max-w-xs mx-auto hover:scale-101 transition duration-300">
-                      <div className="relative">
-                        <img
-                          src={`http://localhost:5000/${book.coverPhoto}`}
-                          alt={book.name}
-                          className="w-full h-48 object-cover rounded-t-lg"
-                        />
+                <div key={book._id} className="px-0 pb-3">
+                  <div className="bg-[#122125] rounded-lg overflow-hidden shadow-xl/40 max-w-xs mx-auto hover:scale-101 transition duration-200">
+                    <div className="relative">
+                      <img
+                        src={`http://localhost:5000/${book.coverPhoto}`}
+                        alt={book.name}
+                        className="w-full h-48 object-cover rounded-t-lg"
+                      />
 
-                        <div className="absolute top-2 right-2 bg-black/40 p-1 rounded-full">
-                          <IoMdHeart className="text-sm text-gray-300 hover:text-red-500 cursor-pointer" />
-                        </div>
+                      <div className="absolute top-2 right-2 bg-black/40 p-1 rounded-full">
+                        <IoMdHeart className="text-sm text-gray-300 hover:text-red-500 cursor-pointer" />
                       </div>
+                    </div>
 
-                      <div className="p-3 flex flex-col gap-1">
-                        {/* 📚 Book Name */}
+                    <div className="p-3 flex flex-col gap-1">
+                      <Link to={`/book/${i + 1}`} key={i}>
                         <div className="flex justify-between items-center gap-2">
                           <p className="text-sm font-semibold text-amber-50 line-clamp-2">
                             {book.name}
@@ -152,46 +143,48 @@ const MainPage = () => {
                             ₹{book.price}
                           </span>
                         </div>
+                      </Link>
 
-                        {/* ✍️ Author */}
-                        <p className="text-xs text-gray-400">
-                          by {book.author[0].name || "Unknown"}
-                        </p>
+                      <p className="text-xs text-gray-400">
+                        by {book.author[0]?.name || "Unknown"}
+                      </p>
 
-                        {/* 📂 Category (compact) */}
-                        <div className="flex gap-1 overflow-hidden">
-                          {book.category?.length > 0 ? (
-                            book.category.slice(0, 2).map((cat, index) => (
-                              <span
-                                key={index}
-                                className="text-[9px] px-2 py-[1px] bg-[#234046] text-amber-300 rounded-full truncate"
-                              >
-                                {cat.name || cat}
-                              </span>
-                            ))
-                          ) : (
-                            <span className="text-[9px] text-gray-400">
-                              No Category
+                      {/* 📂 Category (compact) */}
+                      <div className="flex gap-1 overflow-hidden">
+                        {book.category?.length > 0 ? (
+                          book.category.slice(0, 2).map((cat, index) => (
+                            <span
+                              key={index}
+                              className="text-[9px] px-2 py-[1px] bg-[#234046] text-amber-300 rounded-full truncate"
+                            >
+                              {cat.name || cat}
                             </span>
-                          )}
-                        </div>
+                          ))
+                        ) : (
+                          <span className="text-[9px] text-gray-400">
+                            No Category
+                          </span>
+                        )}
+                      </div>
 
-                        {/* ⭐ Bottom Row */}
-                        <div className="flex justify-between items-center mt-1">
-                          {/* 🛒 Add to Cart */}
-                          <button className="text-xs text-amber-400 hover:underline">
-                            Add to cart
-                          </button>
+                      {/* ⭐ Bottom Row */}
+                      <div
+                        onClick={() => addToCart(book)}
+                        className="flex justify-between items-center mt-1"
+                      >
+                        {/* 🛒 Add to Cart */}
+                        <button className="text-xs bg-amber-300 text-black px-2 py-1 hover:bg-amber-400 rounded font-semibold">
+                          {addedBookId === book._id ? "Added" : "Add to cart"}
+                        </button>
 
-                          {/* ⭐ Rating */}
-                          <div className="flex text-orange-400 text-xs">
-                            ★★★★☆
-                          </div>
+                        {/* ⭐ Rating */}
+                        <div className="flex text-orange-400 text-xs">
+                          ★★★★☆
                         </div>
                       </div>
                     </div>
                   </div>
-                </Link>
+                </div>
               ))}
             </Slider>
           </div>

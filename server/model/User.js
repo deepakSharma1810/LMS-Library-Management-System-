@@ -14,10 +14,18 @@ const userSchema = new mongoose.Schema(
     email: {
       type: String,
       required: true,
+      unique: true,
+      lowercase: true,
+      trim: true,
     },
     password: {
       type: String,
       required: true,
+    },
+    role: {
+      type: String,
+      enum: ["user", "admin", "super_admin"],
+      default: "user",
     },
     books: [
       {
@@ -32,7 +40,7 @@ const userSchema = new mongoose.Schema(
       },
     ],
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 const User = mongoose.model("users", userSchema);

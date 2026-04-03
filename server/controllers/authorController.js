@@ -47,6 +47,7 @@ const readAuthor = async (req, res) => {
 const getAllAuthors = async (req, res) => {
   try {
     const authors = await Author.find();
+    console.log(req.user);
     // console.log(authors);
     if (!authors || authors.length === 0) {
       return res.status(404).json({ message: "Author not found" });

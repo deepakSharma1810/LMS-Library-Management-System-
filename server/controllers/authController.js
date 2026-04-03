@@ -4,7 +4,7 @@ const jwt = require("jsonwebtoken");
 
 const createUser = async (req, res) => {
   try {
-    const { uName, fName, lName, email, password } = req.body;
+    const { uName, fName, lName, email, password, role } = req.body;
 
     if (!uName || !fName || !lName || !email || !password) {
       return res.status(400).json({ error: "Please fill all the fields" });
@@ -24,12 +24,15 @@ const createUser = async (req, res) => {
       lName,
       email,
       password: hassPass,
+      role: role || "user",
     });
 
     await newUser.save();
 
     if (newUser) {
-      res.status(201).json({ error: "User Succeccfully Created" });
+      res
+        .status(201)
+        .json({ error: "User Succeccfully Created", user: newUser });
     }
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -56,9 +59,13 @@ const login = async (req, res) => {
       return res.status(400).json({ error: "Invalid Credentials" });
     }
     // console.log(uName, password);
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "1h",
-    });
+    const token = jwt.sign(
+      { id: user._id, role: user.role },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "1h",
+      },
+    );
 
     res.status(200).json({ message: "Login successful", token, user });
   } catch (error) {
