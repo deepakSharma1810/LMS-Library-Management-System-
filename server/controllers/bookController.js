@@ -4,9 +4,32 @@ const Category = require("../model/Category");
 
 const createBook = async (req, res) => {
   try {
-    const { name, author, price, coverPhoto, actualPdf } = req.body;
+    // const { name, author, price, coverPhoto, actualPdf } = req.body;
+    const {
+      name,
+      author,
+      price,
+      mrp,
+      coverPhoto,
+      actualPdf,
+      description,
+      rating,
+      reviews,
+      stock,
+      isbn,
+      pages,
+      publisher,
+      language,
+      dimensions,
+      features,
+      seller,
+      categories,
+    } = req.body;
 
-    if (!name || !author || !price || !coverPhoto || !actualPdf) {
+    // if (!name || !author || !price || !coverPhoto || !actualPdf) {
+    //   return res.status(400).json({ message: "Please fill all the feilds" });
+    // }
+    if (!name || !author || !price || !mrp || !coverPhoto || !actualPdf) {
       return res.status(400).json({ message: "Please fill all the feilds" });
     }
 
@@ -22,12 +45,45 @@ const createBook = async (req, res) => {
       return res.status(404).json({ Message: "author not found" });
     }
 
+    if (categories?.length) {
+      const validCategories = await Category.find({
+        _id: { $in: categories },
+      });
+
+      if (validCategories.length !== categories.length) {
+        return res.status(404).json({
+          message: "Some categories not found",
+        });
+      }
+    }
+
+    // const newBook = new Book({
+    //   name,
+    //   author,
+    //   price,
+    //   coverPhoto,
+    //   actualPdf,
+    // });
+
     const newBook = new Book({
       name,
       author,
       price,
+      mrp,
       coverPhoto,
       actualPdf,
+      description,
+      rating,
+      reviews,
+      stock,
+      isbn,
+      pages,
+      publisher,
+      language,
+      dimensions,
+      features,
+      seller,
+      categories,
     });
 
     await newBook.save();
@@ -45,12 +101,16 @@ const createBook = async (req, res) => {
 const readAllBook = async (req, res) => {
   try {
     const books = await Book.find().populate("author");
+    // const books = await Book.find().populate("author").populate("category");
 
     if (!books || books.length === 0) {
-      return res.status(404).json({ message: "Author not found" });
+      return res.status(404).json({ message: "Book not found" });
     }
 
-    res.status(200).json(books);
+    res.status(200).json({
+      message: "Books fetched successfully",
+      books,
+    });
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
@@ -58,9 +118,10 @@ const readAllBook = async (req, res) => {
 
 const readBook = async (req, res) => {
   try {
-    const { name } = req.body;
-
-    const getBook = await Book.findOne({ name });
+    const { id } = req.params;
+    // console.log(id);
+    // const getBook = await Book.findById(id);
+    const getBook = await Book.findById(id).populate("author");
 
     if (!getBook) {
       return res.status(404).json({ message: "Book not found" });
@@ -74,46 +135,160 @@ const readBook = async (req, res) => {
 
 const readBookByAuthor = async (req, res) => {
   try {
-    const { name } = req.body;
+    // const { name } = req.body;
+    // const books = await Book.findOne({ authorName: name });
+    // if (!books) {
+    //   return res.status(404).json({ message: "Book not found" });
+    // }
+    // res.status(200).json({ message: "Book Successfully found" });
 
-    const books = await Book.findOne({ authorName: name });
+    const { authorId } = req.params;
 
-    if (!books) {
-      return res.status(404).json({ message: "Book not found" });
+    const books = await Book.find({ author: authorId }).populate("author");
+
+    if (!books.length) {
+      return res.status(404).json({
+        message: "No books found for this author",
+      });
     }
 
-    res.status(200).json({ message: "Book Successfully found" });
+    res.status(200).json({
+      message: "Books fetched successfully",
+      books,
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
+// const updateBook = async (req, res) => {
+//   try {
+//     const { name, author, price, coverPhoto, actualPdf } = req.body;
+
+//     if (!name || !author || !price || !coverPhoto || !actualPdf) {
+//       return res.status(400).json({ message: "Please fill all the feilds" });
+//     }
+
+//     const { id } = req.params;
+
+//     const getBook = await Book.findById(id);
+
+//     if (!getBook) {
+//       return res.status(404).json({ message: "Book not found" });
+//     }
+
+//     getBook.author = author;
+//     getBook.price = price;
+//     getBook.coverPhoto = coverPhoto;
+//     getBook.actualPdf = actualPdf;
+
+//     await getBook.save();
+
+//     res.status(200).json({ message: "Book Successfully Updated" });
+//   } catch (error) {
+//     res.status(500).json({ error: error.message });
+//   }
+// };
+
 const updateBook = async (req, res) => {
   try {
-    const { name, author, price, coverPhoto, actualPdf } = req.body;
-
-    if (!name || !author || !price || !coverPhoto || !actualPdf) {
-      return res.status(400).json({ message: "Please fill all the feilds" });
-    }
-
     const { id } = req.params;
 
-    const getBook = await Book.findById(id);
+    const {
+      name,
+      author,
+      price,
+      mrp,
+      coverPhoto,
+      actualPdf,
+      description,
+      rating,
+      reviews,
+      stock,
+      isbn,
+      pages,
+      publisher,
+      language,
+      dimensions,
+      features,
+      seller,
+      categories,
+    } = req.body;
 
-    if (!getBook) {
-      return res.status(404).json({ message: "Book not found" });
+    // find existing book
+    const existingBook = await Book.findById(id);
+
+    if (!existingBook) {
+      return res.status(404).json({
+        message: "Book not found",
+      });
     }
 
-    getBook.author = author;
-    getBook.price = price;
-    getBook.coverPhoto = coverPhoto;
-    getBook.actualPdf = actualPdf;
+    // if author changed, validate new author
+    if (author) {
+      const authorObj = await Author.findById(author);
 
-    await getBook.save();
+      if (!authorObj) {
+        return res.status(404).json({
+          message: "Author not found",
+        });
+      }
 
-    res.status(200).json({ message: "Book Successfully Updated" });
+      // remove from old author
+      if (existingBook.author.toString() !== author) {
+        await Author.findByIdAndUpdate(existingBook.author, {
+          $pull: { books: existingBook._id },
+        });
+
+        // add into new author
+        authorObj.books.push(existingBook._id);
+        await authorObj.save();
+      }
+    }
+
+    // category validation
+    if (categories?.length) {
+      const validCategories = await Category.find({
+        _id: { $in: categories },
+      });
+
+      if (validCategories.length !== categories.length) {
+        return res.status(404).json({
+          message: "Some categories not found",
+        });
+      }
+    }
+
+    // update fields only if provided
+    existingBook.name = name || existingBook.name;
+    existingBook.author = author || existingBook.author;
+    existingBook.price = price || existingBook.price;
+    existingBook.mrp = mrp || existingBook.mrp;
+    existingBook.coverPhoto = coverPhoto || existingBook.coverPhoto;
+    existingBook.actualPdf = actualPdf || existingBook.actualPdf;
+    existingBook.description = description || existingBook.description;
+    existingBook.rating = rating ?? existingBook.rating;
+    existingBook.reviews = reviews ?? existingBook.reviews;
+    existingBook.stock = stock ?? existingBook.stock;
+    existingBook.isbn = isbn || existingBook.isbn;
+    existingBook.pages = pages ?? existingBook.pages;
+    existingBook.publisher = publisher || existingBook.publisher;
+    existingBook.language = language || existingBook.language;
+    existingBook.dimensions = dimensions || existingBook.dimensions;
+    existingBook.features = features || existingBook.features;
+    existingBook.seller = seller || existingBook.seller;
+    existingBook.categories = categories || existingBook.categories;
+
+    await existingBook.save();
+
+    res.status(200).json({
+      message: "Book updated successfully",
+      book: existingBook,
+    });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({
+      error: error.message,
+    });
   }
 };
 
@@ -127,6 +302,11 @@ const deleteBook = async (req, res) => {
     if (!book) {
       return res.status(404).json({ message: "Book not found" });
     }
+
+    // remove from author books array
+    await Author.findByIdAndUpdate(book.author, {
+      $pull: { books: book._id },
+    });
 
     res.status(200).json({ message: "Book Successfully deleted" });
   } catch (error) {

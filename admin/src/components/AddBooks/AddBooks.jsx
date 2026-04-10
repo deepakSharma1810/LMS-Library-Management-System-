@@ -2,7 +2,7 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-const MAZ_IMAGE_SIZE = 1024 * 1024 * 5;
+const MAX_IMAGE_SIZE = 1024 * 1024 * 5;
 
 const AddBooks = () => {
   const navigate = useNavigate();
@@ -11,7 +11,15 @@ const AddBooks = () => {
     name: "",
     author: "",
     price: "",
+    mrp: "",
     actualPdf: "",
+    description: "",
+    stock: "",
+    isbn: "",
+    pages: "",
+    publisher: "",
+    language: "English",
+    dimensions: "",
   });
 
   const [authors, setAuthors] = useState([]);
@@ -21,7 +29,7 @@ const AddBooks = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  /* FETCH AUTHORS (for dropdown) */
+  // ================= FETCH AUTHORS =================
   const fetchAuthors = async () => {
     try {
       const res = await axios.get("http://localhost:5000/author");
@@ -36,18 +44,20 @@ const AddBooks = () => {
     fetchAuthors();
   }, []);
 
+  // ================= HANDLE CHANGE =================
   const handleChange = (e) => {
     setBook({ ...book, [e.target.name]: e.target.value });
   };
 
+  // ================= IMAGE CHANGE =================
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     setError("");
 
     if (!file) return;
 
-    if (file.size > MAZ_IMAGE_SIZE) {
-      setError("Image size must be less than 5 MB");
+    if (file.size > MAX_IMAGE_SIZE) {
+      setError("Image size must be less than 5MB");
       e.target.value = "";
       setImage(null);
       setPreview(null);
@@ -58,23 +68,22 @@ const AddBooks = () => {
     setPreview(URL.createObjectURL(file));
   };
 
+  // ================= SUBMIT =================
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setLoading(true);
 
-    if (!book.name || !book.author || !book.price) {
-      setError("Please fill all the feilds");
+    if (!book.name || !book.author || !book.price || !book.mrp) {
+      setError("Please fill all required fields");
       setLoading(false);
       return;
     }
 
     try {
-      setLoading(true);
-
       let imagePath = "";
 
-      // upload image
+      // upload image first
       if (image) {
         const formData = new FormData();
         formData.append("ImageData", image);
@@ -84,17 +93,12 @@ const AddBooks = () => {
           formData,
         );
 
-        console.log(uploadImage);
-
         imagePath = uploadImage.data.file;
       }
 
       // save book
       await axios.post("http://localhost:5000/book", {
-        name: book.name,
-        author: book.author,
-        price: book.price,
-        actualPdf: book.actualPdf,
+        ...book,
         coverPhoto: imagePath,
       });
 
@@ -103,8 +107,17 @@ const AddBooks = () => {
         name: "",
         author: "",
         price: "",
+        mrp: "",
         actualPdf: "",
+        description: "",
+        stock: "",
+        isbn: "",
+        pages: "",
+        publisher: "",
+        language: "English",
+        dimensions: "",
       });
+
       setImage(null);
       setPreview(null);
       setLoading(false);
@@ -114,124 +127,160 @@ const AddBooks = () => {
       console.error(err);
       setLoading(false);
 
-      if (err.response && err.response.data && err.response.data.message) {
+      if (err.response?.data?.message) {
         setError(err.response.data.message);
       } else {
-        setError("Failed to add book. Please try again.");
+        setError("Failed to add book");
       }
     }
   };
 
+  const discount =
+    book.mrp && book.price
+      ? Math.round(((book.mrp - book.price) / book.mrp) * 100)
+      : 0;
+
   return (
     <div className="min-h-screen w-full bg-[#0e1a1c] flex mt-20">
-      {/* LEFT – FORM */}
+      {/* LEFT FORM */}
       <div className="w-full lg:w-2/3 p-6">
         <div className="max-w-2xl bg-[#1b2e31] rounded-2xl shadow-2xl p-8 border border-[#2c4449]">
           <h1 className="text-2xl font-bold text-[#dbf8fa] mb-1">
             Add New Book
           </h1>
-          <p className="text-sm text-gray-400 mb-3">
-            Enter book details to add it to the library
-          </p>
 
-          <div className="space-y-1">
-            {/* Book Name */}
-            <div>
-              <label className="text-sm text-amber-200">Book Name</label>
-              <input
-                type="text"
-                name="name"
-                value={book.name}
-                onChange={handleChange}
-                placeholder="Enter book name"
-                className="w-full mt-1 p-3 rounded-lg bg-[#122125] text-white
-                border border-[#2c4449] focus:outline-none focus:ring-2 focus:ring-amber-300"
-              />
-            </div>
+          <div className="space-y-3">
+            <input
+              type="text"
+              name="name"
+              value={book.name}
+              onChange={handleChange}
+              placeholder="Book Name"
+              className="w-full p-3 rounded-lg bg-[#122125] text-white border border-[#2c4449]"
+            />
 
-            {/* Author */}
-            <div>
-              <label className="text-sm text-amber-200">Author</label>
-              <select
-                name="author"
-                value={book.author}
-                onChange={handleChange}
-                className="w-full mt-1 p-3 rounded-lg bg-[#122125] text-white border border-[#2c4449] focus:outline-none focus:ring-2 focus:ring-amber-300"
-              >
-                <option value="" className="text-gray-400">
-                  {" "}
-                  Select Author
+            <select
+              name="author"
+              value={book.author}
+              onChange={handleChange}
+              className="w-full p-3 rounded-lg bg-[#122125] text-white border border-[#2c4449]"
+            >
+              <option value="">Select Author</option>
+              {authors.map((author) => (
+                <option key={author._id} value={author._id}>
+                  {author.name}
                 </option>
-                {authors.map((author) => (
-                  <option key={author._id} value={author._id}>
-                    {author.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+              ))}
+            </select>
 
-            {/* Price */}
-            <div>
-              <label className="text-sm text-amber-200">Price (₹)</label>
-              <input
-                type="number"
-                name="price"
-                value={book.price}
-                onChange={handleChange}
-                placeholder="Enter price"
-                className="w-full mt-1 p-3 rounded-lg bg-[#122125] text-white
-                border border-[#2c4449] focus:outline-none focus:ring-2 focus:ring-amber-300"
-              />
-            </div>
+            <input
+              type="number"
+              name="price"
+              value={book.price}
+              onChange={handleChange}
+              placeholder="Price"
+              className="w-full p-3 rounded-lg bg-[#122125] text-white border border-[#2c4449]"
+            />
 
-            {/* Image Upload */}
-            <div>
-              <label className="text-sm text-amber-200">Cover Image</label>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleImageChange}
-                className="w-full mt-1 p-2 rounded-lg bg-[#122125] text-gray-300
-                border border-[#2c4449]"
-              />
-            </div>
+            <input
+              type="number"
+              name="mrp"
+              value={book.mrp}
+              onChange={handleChange}
+              placeholder="MRP"
+              className="w-full p-3 rounded-lg bg-[#122125] text-white border border-[#2c4449]"
+            />
 
-            {/* PDF */}
-            <div>
-              <label className="text-sm text-amber-200">PDF URL</label>
-              <input
-                type="text"
-                name="actualPdf"
-                value={book.actualPdf}
-                onChange={handleChange}
-                placeholder="https://example.com/book.pdf"
-                className="w-full mt-1 p-3 rounded-lg bg-[#122125] text-white
-                border border-[#2c4449] focus:outline-none focus:ring-2 focus:ring-amber-300"
-              />
-            </div>
+            <textarea
+              name="description"
+              value={book.description}
+              onChange={handleChange}
+              placeholder="Description"
+              rows="4"
+              className="w-full p-3 rounded-lg bg-[#122125] text-white border border-[#2c4449]"
+            />
 
-            {/* Button */}
+            <input
+              type="number"
+              name="stock"
+              value={book.stock}
+              onChange={handleChange}
+              placeholder="Stock"
+              className="w-full p-3 rounded-lg bg-[#122125] text-white border border-[#2c4449]"
+            />
+
+            <input
+              type="text"
+              name="isbn"
+              value={book.isbn}
+              onChange={handleChange}
+              placeholder="ISBN"
+              className="w-full p-3 rounded-lg bg-[#122125] text-white border border-[#2c4449]"
+            />
+
+            <input
+              type="number"
+              name="pages"
+              value={book.pages}
+              onChange={handleChange}
+              placeholder="Pages"
+              className="w-full p-3 rounded-lg bg-[#122125] text-white border border-[#2c4449]"
+            />
+
+            <input
+              type="text"
+              name="publisher"
+              value={book.publisher}
+              onChange={handleChange}
+              placeholder="Publisher"
+              className="w-full p-3 rounded-lg bg-[#122125] text-white border border-[#2c4449]"
+            />
+
+            <input
+              type="text"
+              name="language"
+              value={book.language}
+              onChange={handleChange}
+              placeholder="Language"
+              className="w-full p-3 rounded-lg bg-[#122125] text-white border border-[#2c4449]"
+            />
+
+            <input
+              type="text"
+              name="actualPdf"
+              value={book.actualPdf}
+              onChange={handleChange}
+              placeholder="PDF URL"
+              className="w-full p-3 rounded-lg bg-[#122125] text-white border border-[#2c4449]"
+            />
+
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              className="w-full p-2 rounded-lg bg-[#122125] text-gray-300 border border-[#2c4449]"
+            />
+
             <button
               onClick={handleSubmit}
               disabled={loading}
-              className={`w-full mt-2 font-semibold py-3 rounded-lg transition ${
+              className={`w-full py-3 rounded-lg font-semibold ${
                 loading
-                  ? "bg-gray-500 cursor-not-allowed"
-                  : "bg-amber-300 text-[#0e1a1c] hover:bg-amber-400"
+                  ? "bg-gray-500"
+                  : "bg-amber-300 text-black hover:bg-amber-400"
               }`}
             >
               {loading ? "Saving..." : "Add Book"}
             </button>
 
-            {/* error */}
             {error && (
-              <p className="text-red-400 text-sm mt-2 text-center">{error}</p>
+              <p className="text-red-400 text-center text-sm">{error}</p>
             )}
           </div>
         </div>
       </div>
 
-      {/* RIGHT – LIVE PREVIEW */}
+      {/* RIGHT PREVIEW */}
       <div className="hidden lg:flex w-1/3 items-center justify-center">
         <div className="w-80 bg-[#1b2e31] rounded-2xl shadow-xl p-5 border border-[#2c4449]">
           <h2 className="text-lg font-bold text-center mb-4 text-[#dbf8fa]">
@@ -254,11 +303,13 @@ const AddBooks = () => {
             {book.name || "Book Name"}
           </h3>
 
-          <p className="text-sm text-gray-400">
-            Author: {book.author || "Author"}
-          </p>
+          <p className="text-sm text-gray-400">Price: ₹{book.price || 0}</p>
 
-          <p className="text-sm text-gray-400">Price: ₹{book.price || "0"}</p>
+          <p className="text-sm text-gray-400">MRP: ₹{book.mrp || 0}</p>
+
+          <p className="text-sm text-green-400">{discount}% OFF</p>
+
+          <p className="text-sm text-gray-400">Stock: {book.stock || 0}</p>
 
           {book.actualPdf && (
             <a

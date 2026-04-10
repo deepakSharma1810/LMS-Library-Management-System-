@@ -4,7 +4,6 @@ import { FiEdit, FiTrash2, FiEye } from "react-icons/fi";
 import { Link } from "react-router-dom";
 import axios from "axios";
 
-// Status styles
 const statusStyle = {
   Published: "bg-green-900/30 text-green-400",
   Draft: "bg-yellow-900/30 text-yellow-400",
@@ -12,11 +11,12 @@ const statusStyle = {
 
 const Books = () => {
   const [books, setBooks] = useState([]);
+  const [authors, setAuthors] = useState([]);
   const [search, setSearch] = useState("");
 
-  // modal + form state
   const [showModal, setShowModal] = useState(false);
   const [editBookId, setEditBookId] = useState(null);
+
   const [form, setForm] = useState({
     name: "",
     author: "",
@@ -24,41 +24,53 @@ const Books = () => {
     price: "",
   });
 
+  // ================= FETCH BOOKS =================
   const fetchBooks = async () => {
     try {
       const res = await axios.get("http://localhost:5000/book");
-      setBooks(res.data);
-      console.log(res.data);
+      setBooks(Array.isArray(res.data) ? res.data : res.data.books || []);
     } catch (error) {
       console.error(error);
+      setBooks([]);
+    }
+  };
+
+  // ================= FETCH AUTHORS =================
+  const fetchAuthors = async () => {
+    try {
+      const res = await axios.get("http://localhost:5000/author");
+      setAuthors(Array.isArray(res.data) ? res.data : res.data.authors || []);
+    } catch (error) {
+      console.error(error);
+      setAuthors([]);
     }
   };
 
   useEffect(() => {
     fetchBooks();
+    fetchAuthors();
   }, []);
 
-  /* SEARCH */
-  const filteredBooks = books.filter((b) =>
-    b.name.toLowerCase().includes(search.toLowerCase()),
-  );
+  // ================= SEARCH =================
+  const filteredBooks = Array.isArray(books)
+    ? books.filter((b) => b.name?.toLowerCase().includes(search.toLowerCase()))
+    : [];
 
-  /* DELETE */
+  // ================= DELETE =================
   const deleteBook = async (id) => {
     try {
       await axios.delete(`http://localhost:5000/book/${id}`);
       fetchBooks();
-      // setBooks((prev) => prev.filter((b) => b._id !== id));
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   };
 
-  /* TOGGLE STATUS (button click) */
+  // ================= STATUS TOGGLE =================
   const toggleStatus = (id) => {
-    setBooks(
-      books.map((b) =>
-        b.id === id
+    setBooks((prev) =>
+      prev.map((b) =>
+        b._id === id
           ? {
               ...b,
               status: b.status === "Published" ? "Draft" : "Published",
@@ -68,45 +80,51 @@ const Books = () => {
     );
   };
 
-  /* EYE → FORCE DRAFT */
+  // ================= DRAFT =================
   const moveToDraft = (id) => {
-    setBooks(books.map((b) => (b.id === id ? { ...b, status: "Draft" } : b)));
+    setBooks((prev) =>
+      prev.map((b) => (b._id === id ? { ...b, status: "Draft" } : b)),
+    );
   };
 
-  /* START EDIT */
+  // ================= START EDIT =================
   const startEdit = (book) => {
-    // setShowModal(true);
-    // try {
-    // } catch (error) {
-    //   console.error(error);
-    // }
     setEditBookId(book._id);
+
     setForm({
-      name: book.name,
-      author: book.author,
-      category: book.category,
-      price: book.price.replace("₹", ""),
+      name: book.name || "",
+      author: book.author?.length > 0 ? book.author[0]._id : "",
+      category: book.category || "",
+      price: String(book.price || "").replace("₹", ""),
     });
+
     setShowModal(true);
   };
 
-  /* SAVE EDIT */
-  const updateBook = () => {
-    setBooks(
-      books.map((b) =>
-        b.id === editBookId
-          ? {
-              ...b,
-              ...form,
-              price: `₹${form.price}`,
-            }
-          : b,
-      ),
-    );
+  // ================= UPDATE =================
+  const updateBook = async () => {
+    try {
+      await axios.patch(`http://localhost:5000/book/${editBookId}`, {
+        name: form.name,
+        author: form.author,
+        category: form.category,
+        price: form.price,
+      });
 
-    setShowModal(false);
-    setEditBookId(null);
-    setForm({ name: "", author: "", category: "", price: "" });
+      fetchBooks();
+
+      setShowModal(false);
+      setEditBookId(null);
+
+      setForm({
+        name: "",
+        author: "",
+        category: "",
+        price: "",
+      });
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (
@@ -165,12 +183,12 @@ const Books = () => {
         <table className="w-full text-left">
           <thead>
             <tr className="text-sm text-gray-400 border-b border-[#2c4449]">
-              <th className="py-2 text-[16px]">Book Name</th>
-              <th className="py-2 text-[16px]">Author</th>
-              <th className="py-2 text-[16px]">Category</th>
-              <th className="py-2 text-[16px]">Price</th>
-              <th className="py-2 text-[16px]">Status</th>
-              <th className="py-2 text-[16px] text-right">Actions</th>
+              <th className="py-2">Book Name</th>
+              <th className="py-2">Author</th>
+              <th className="py-2">Category</th>
+              <th className="py-2">Price</th>
+              <th className="py-2">Status</th>
+              <th className="py-2 text-right">Actions</th>
             </tr>
           </thead>
 
@@ -183,33 +201,39 @@ const Books = () => {
                     alt={book.name}
                     className="w-10 h-10 rounded object-cover border border-[#2c4449]"
                   />
-                  <span className="font-medium">{book.name}</span>
+                  <span>{book.name}</span>
                 </td>
+
                 <td className="text-gray-400">
                   {book.author?.length > 0 ? book.author[0].name : "N/A"}
                 </td>
-                <td className="text-gray-400">{book.category}</td>
+
+                <td>{book.category}</td>
                 <td>{book.price}</td>
+
                 <td>
                   <button
-                    onClick={() => toggleStatus(book.id)}
+                    onClick={() => toggleStatus(book._id)}
                     className={`text-xs px-2 py-1 rounded-full ${
-                      statusStyle[book.status]
+                      statusStyle[book.status] || "bg-gray-700 text-gray-300"
                     }`}
                   >
                     {book.status}
                   </button>
                 </td>
+
                 <td className="text-right">
                   <div className="flex justify-end gap-3">
                     <FiEye
                       className="text-amber-300 cursor-pointer"
-                      onClick={() => moveToDraft(book.id)}
+                      onClick={() => moveToDraft(book._id)}
                     />
+
                     <FiEdit
                       className="text-blue-400 cursor-pointer"
                       onClick={() => startEdit(book)}
                     />
+
                     <FiTrash2
                       className="text-red-400 cursor-pointer"
                       onClick={() => deleteBook(book._id)}
@@ -230,33 +254,51 @@ const Books = () => {
               Edit Book
             </h3>
 
-            {["name", "author", "category", "price"].map((field) => (
-              <input
-                key={field}
-                placeholder={field}
-                value={form[field]}
-                onChange={(e) => setForm({ ...form, [field]: e.target.value })}
-                className="w-full mb-3 px-3 py-2 rounded-lg bg-[#122125]
-            border border-[#2c4449]
-            text-[#dbf8fa]
-            placeholder-gray-400
-            outline-none
-            focus:ring-2 focus:ring-amber-300
-          "
-              />
-            ))}
+            <input
+              placeholder="Book Name"
+              value={form.name}
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
+              className="w-full mb-3 px-3 py-2 rounded-lg bg-[#122125] border border-[#2c4449] text-white"
+            />
 
-            <div className="flex justify-end gap-3 mt-4">
+            <select
+              value={form.author}
+              onChange={(e) => setForm({ ...form, author: e.target.value })}
+              className="w-full mb-3 px-3 py-2 rounded-lg bg-[#122125] border border-[#2c4449] text-white"
+            >
+              <option value="">Select Author</option>
+              {authors.map((author) => (
+                <option key={author._id} value={author._id}>
+                  {author.name}
+                </option>
+              ))}
+            </select>
+
+            <input
+              placeholder="Category"
+              value={form.category}
+              onChange={(e) => setForm({ ...form, category: e.target.value })}
+              className="w-full mb-3 px-3 py-2 rounded-lg bg-[#122125] border border-[#2c4449] text-white"
+            />
+
+            <input
+              placeholder="Price"
+              value={form.price}
+              onChange={(e) => setForm({ ...form, price: e.target.value })}
+              className="w-full mb-3 px-3 py-2 rounded-lg bg-[#122125] border border-[#2c4449] text-white"
+            />
+
+            <div className="flex justify-end gap-3">
               <button
                 onClick={() => setShowModal(false)}
-                className=" px-4 py-2 rounded-lg border border-[#2c4449] text-gray-400 hover:bg-[#122125]"
+                className="px-4 py-2 border border-[#2c4449] rounded-lg text-gray-400"
               >
                 Cancel
               </button>
 
               <button
                 onClick={updateBook}
-                className="px-4 py-2 rounded-lg bg-amber-300 text-[#0e1a1c] font-semibold hover:bg-amber-400"
+                className="px-4 py-2 bg-amber-300 text-black rounded-lg font-semibold"
               >
                 Save
               </button>

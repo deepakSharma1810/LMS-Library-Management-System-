@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { IoMdHeart } from "react-icons/io";
 import { FaStar, FaShippingFast } from "react-icons/fa";
+import axios from "axios";
 
 const items = [
   {
@@ -67,7 +68,7 @@ const items = [
 
 const formatCurrency = (n) =>
   new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" }).format(
-    n
+    n,
   );
 
 const Stars = ({ value }) => {
@@ -89,7 +90,61 @@ const Stars = ({ value }) => {
 const SingleBookPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const book = items.find((b) => b.id === Number(id));
+  // const book = items.find((b) => b.id === Number(id));
+  const [book, setBook] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [CartBtnText, setCartBtnText] = useState("Add to Cart");
+
+  const fetchSingleBook = async () => {
+    try {
+      const res = await axios.get(`http://localhost:5000/book/${id}`);
+      setBook(res.data.getBook);
+      console.log(res.data);
+    } catch (error) {
+      console.log("Error fetching book:", error);
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchSingleBook();
+  }, [id]);
+
+  const handleBuyBook = () => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+
+    navigate("/");
+  };
+
+  const handleAddToCart = () => {
+    const existingCart = JSON.parse(localStorage.getItem("cart")) || [];
+
+    const alreadyExist = existingCart.find((item) => item._id === book._id);
+
+    let updatedCart;
+
+    if (alreadyExist) {
+      updatedCart = existingCart.map((item) =>
+        item._id === book._id ? { ...item, qty: item.qty + 1 } : item,
+      );
+    } else {
+      updatedCart = [...existingCart, { ...book, qty: 1 }];
+    }
+
+    localStorage.setItem("cart", JSON.stringify(updatedCart));
+    // navigate("/cart");
+
+    setCartBtnText("Added to Cart");
+
+    setTimeout(() => {
+      setCartBtnText("Add to Cart");
+    }, 1000);
+  };
 
   if (!book) {
     return (
@@ -120,17 +175,14 @@ const SingleBookPage = () => {
             <Link to="/books" className="text-gray-300 hover:underline">
               <span>Books</span>
             </Link>{" "}
-            /{" "}
-            <span className="text-amber-50 font-semibold">
-              {book.imageName}
-            </span>
+            / <span className="text-amber-50 font-semibold">{book.name}</span>
           </nav>
 
           <div className="bg-[#1b2e31] rounded-lg p-5 shadow">
             <div className="flex flex-col md:flex-row gap-6">
               <div className="flex-1 flex items-start justify-center">
                 <img
-                  src={book.image}
+                  src={`http://localhost:5000/${book.coverPhoto}`}
                   alt={book.imageName}
                   className="w-full md:w-5/6 h-auto object-cover rounded-lg border"
                 />
@@ -138,7 +190,7 @@ const SingleBookPage = () => {
 
               <div className="flex-1">
                 <h1 className="text-2xl md:text-3xl font-bold text-[#dbf8fa] mb-2">
-                  {book.imageName}
+                  {book.name}
                 </h1>
 
                 <div className="flex items-center gap-8 mb-3">
@@ -155,9 +207,9 @@ const SingleBookPage = () => {
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <Stars value={book.rating} />
+                    <Stars value={items.rating} />
                     <span className="text-sm text-gray-300">
-                      {book.rating} • {book.reviews} reviews
+                      {items.rating} • {items.reviews} reviews
                     </span>
                   </div>
                 </div>
@@ -171,10 +223,10 @@ const SingleBookPage = () => {
                           {formatCurrency(book.price)}
                         </div>
                         <div className="text-sm line-through text-gray-500">
-                          {formatCurrency(book.mrp)}
+                          {formatCurrency(items.mrp)}
                         </div>
                         <div className="text-sm text-green-400">
-                          ({book.discountPercent}% OFF)
+                          ({items.discountPercent}% OFF)
                         </div>
                       </div>
                     </div>
@@ -186,7 +238,7 @@ const SingleBookPage = () => {
                   <div className="flex items-center gap-2 text-sm text-gray-300">
                     <FaShippingFast />
                     <div>
-                      <div>{book.deliveryEstimate}</div>
+                      <div>{items.deliveryEstimate}</div>
                       <div className="text-xs text-gray-500">
                         Free delivery above ₹499
                       </div>
@@ -197,53 +249,59 @@ const SingleBookPage = () => {
                     <div className="mb-2">
                       <span className="text-gray-400">Sold by:</span>{" "}
                       <a
-                        href={book.seller.sellerLink}
+                        href={items.seller}
                         className="text-amber-200 hover:underline"
                       >
-                        {book.seller.name}
+                        {items.seller}
                       </a>
                     </div>
                     <div className="text-xs text-gray-500">
-                      Seller rating: {book.seller.rating}/5
+                      Seller rating: {items.seller}/5
                     </div>
                   </div>
                 </div>
 
-                <p className="text-gray-300 mb-4">{book.description}</p>
+                <p className="text-gray-300 mb-4">{items.description}</p>
 
                 <div className="mb-4">
                   <h3 className="text-sm text-gray-400 mb-2">
                     Product details
                   </h3>
                   <ul className="text-sm text-gray-300 space-y-1">
-                    <li>ISBN: {book.isbn}</li>
-                    <li>Publisher: {book.publisher}</li>
-                    <li>Pages: {book.pages}</li>
-                    <li>Language: {book.language}</li>
-                    <li>Dimensions: {book.dimensions}</li>
+                    <li>ISBN: {items.isbn}</li>
+                    <li>Publisher: {items.publisher}</li>
+                    <li>Pages: {items.pages}</li>
+                    <li>Language: {items.language}</li>
+                    <li>Dimensions: {items.dimensions}</li>
                   </ul>
                 </div>
 
                 <div className="mb-3">
                   <h4 className="text-sm text-gray-400 mb-2">Key features</h4>
                   <div className="flex flex-wrap gap-2">
-                    {book.features.map((f, i) => (
+                    {/* {items.features.map((f, i) => (
                       <span
                         key={i}
                         className="text-xs bg-[#0f2a2c] px-3 py-1 rounded-full text-gray-300"
                       >
                         {f}
                       </span>
-                    ))}
+                    ))} */}
                   </div>
                 </div>
 
                 <div className="flex items-center gap-3 mt-4">
-                  <button className="px-4 py-2 bg-amber-400 text-black font-semibold rounded shadow hover:bg-amber-500 transition">
+                  <button
+                    onClick={handleBuyBook}
+                    className="px-4 py-2 bg-amber-400 text-black font-semibold rounded shadow hover:bg-amber-500 transition"
+                  >
                     Buy Now
                   </button>
-                  <button className="px-4 py-2 bg-transparent border border-gray-600 rounded text-gray-300 hover:bg-gray-800">
-                    Add to Cart
+                  <button
+                    onClick={handleAddToCart}
+                    className="px-4 py-2 bg-transparent border border-gray-600 rounded text-gray-300 hover:bg-gray-800"
+                  >
+                    {CartBtnText}
                   </button>
                   <button className="ml-auto flex items-center gap-2 text-gray-300">
                     <IoMdHeart className="text-2xl  hover:text-red-400 transition" />{" "}

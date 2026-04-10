@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import axios from "axios";
 
 const BookPage = () => {
-  const [books, setBooks] = useState([]);
+  const [books, setBooks] = useState(null);
 
   const fetchBook = async () => {
     try {
@@ -24,32 +24,33 @@ const BookPage = () => {
         All Books
       </h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {books.map((book, index) => (
-          <Link to={`/book/${index + 1}`} key={index}>
-            <div
-              key={index}
-              className="bg-[#1b2e31] rounded-xl overflow-hidden shadow-xl/40"
-            >
-              <img
-                src={`http://localhost:5000/${book.coverPhoto}`}
-                alt={book.name}
-                className="w-full h-40 object-cover rounded-t-xl border-b"
-              />
-              <div className="p-3 flex flex-col gap-2">
-                <div className="flex justify-between items-center">
-                  <p className="text-sm font-semibold text-amber-50 truncate">
-                    {book.name}
-                  </p>
-                  <IoMdHeart className="text-lg text-gray-400" />
-                </div>
-                <div className="flex justify-between items-center text-xs text-gray-400">
-                  <p>{book.author[0].name}</p>
-                  {/* <p className="text-yellow-300">{item.viewers}</p> */}
+        {books &&
+          books.books.map((book, index) => (
+            <Link to={`/book/${index + 1}`} key={index}>
+              <div
+                key={index}
+                className="bg-[#1b2e31] rounded-xl overflow-hidden shadow-xl/40"
+              >
+                <img
+                  src={`http://localhost:5000/${book.coverPhoto}`}
+                  alt={book.name}
+                  className="w-full h-40 object-cover rounded-t-xl border-b"
+                />
+                <div className="p-3 flex flex-col gap-2">
+                  <div className="flex justify-between items-center">
+                    <p className="text-sm font-semibold text-amber-50 truncate">
+                      {book.name}
+                    </p>
+                    <IoMdHeart className="text-lg text-gray-400" />
+                  </div>
+                  <div className="flex justify-between items-center text-xs text-gray-400">
+                    <p>{book.author[0].name}</p>
+                    {/* <p className="text-yellow-300">{item.viewers}</p> */}
+                  </div>
                 </div>
               </div>
-            </div>
-          </Link>
-        ))}
+            </Link>
+          ))}
       </div>
     </div>
   );

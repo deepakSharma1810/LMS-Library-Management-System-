@@ -33,8 +33,8 @@ const settings = {
 };
 
 const MainPage = () => {
-  const [books, setBooks] = useState([]);
-  const [authors, setAuthors] = useState([]);
+  const [books, setBooks] = useState(null);
+  const [authors, setAuthors] = useState(null);
   const [addedBookId, setAddedBookId] = useState(null);
 
   const fetchbooks = async () => {
@@ -51,6 +51,7 @@ const MainPage = () => {
     try {
       const res = await axios.get("http://localhost:5000/author");
       setAuthors(res.data);
+      // console.log(res.data);
     } catch (error) {
       console.log("Error fetching authors:", error);
     }
@@ -62,6 +63,12 @@ const MainPage = () => {
   }, []);
 
   const addToCart = (book) => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      navigate("/login");
+      return;
+    }
     const existingCart = JSON.parse(localStorage.getItem("cart")) || [];
 
     const existingItem = existingCart.find((item) => item.id === book._id);
@@ -118,74 +125,77 @@ const MainPage = () => {
               </div>
             </div>
             <Slider {...settings}>
-              {books.map((book, i) => (
-                <div key={book._id} className="px-0 pb-3">
-                  <div className="bg-[#122125] rounded-lg overflow-hidden shadow-xl/40 max-w-xs mx-auto hover:scale-101 transition duration-200">
-                    <div className="relative">
-                      <img
-                        src={`http://localhost:5000/${book.coverPhoto}`}
-                        alt={book.name}
-                        className="w-full h-48 object-cover rounded-t-lg"
-                      />
+              {books &&
+                books.books.map((book, i) => (
+                  <div key={book._id} className="px-0 pb-3">
+                    <div className="bg-[#122125] rounded-lg overflow-hidden shadow-xl/40 max-w-xs mx-auto hover:scale-101 transition duration-200">
+                      <Link to={`/book/${book._id}`} key={i}>
+                        <div className="relative">
+                          <img
+                            src={`http://localhost:5000/${book.coverPhoto}`}
+                            alt={book.name}
+                            className="w-full h-48 object-cover rounded-t-lg"
+                          />
 
-                      <div className="absolute top-2 right-2 bg-black/40 p-1 rounded-full">
-                        <IoMdHeart className="text-sm text-gray-300 hover:text-red-500 cursor-pointer" />
-                      </div>
-                    </div>
-
-                    <div className="p-3 flex flex-col gap-1">
-                      <Link to={`/book/${i + 1}`} key={i}>
-                        <div className="flex justify-between items-center gap-2">
-                          <p className="text-sm font-semibold text-amber-50 line-clamp-2">
-                            {book.name}
-                          </p>
-                          <span className="text-sm font-bold text-white">
-                            ₹{book.price}
-                          </span>
+                          <div className="absolute top-2 right-2 bg-black/40 p-1 rounded-full">
+                            <IoMdHeart className="text-sm text-gray-300 hover:text-red-500 cursor-pointer" />
+                          </div>
                         </div>
                       </Link>
 
-                      <p className="text-xs text-gray-400">
-                        by {book.author[0]?.name || "Unknown"}
-                      </p>
-
-                      {/* 📂 Category (compact) */}
-                      <div className="flex gap-1 overflow-hidden">
-                        {book.category?.length > 0 ? (
-                          book.category.slice(0, 2).map((cat, index) => (
-                            <span
-                              key={index}
-                              className="text-[9px] px-2 py-[1px] bg-[#234046] text-amber-300 rounded-full truncate"
-                            >
-                              {cat.name || cat}
+                      <div className="p-3 flex flex-col gap-1">
+                        <Link to={`/book/${book._id}`} key={i}>
+                          <div className="flex justify-between items-center gap-2 text-amber-50 hover:text-amber-300 duration-200">
+                            <p className="text-sm font-semibold  line-clamp-2 ">
+                              {book.name}
+                            </p>
+                            <span className="text-sm font-bold">
+                              ₹{book.price}
                             </span>
-                          ))
-                        ) : (
-                          <span className="text-[9px] text-gray-400">
-                            No Category
-                          </span>
-                        )}
-                      </div>
+                          </div>
+                        </Link>
 
-                      {/* ⭐ Bottom Row */}
-                      <div
-                        onClick={() => addToCart(book)}
-                        className="flex justify-between items-center mt-1"
-                      >
-                        {/* 🛒 Add to Cart */}
-                        <button className="text-xs bg-amber-300 text-black px-2 py-1 hover:bg-amber-400 rounded font-semibold">
-                          {addedBookId === book._id ? "Added" : "Add to cart"}
-                        </button>
+                        <p className="text-xs text-gray-400">
+                          by {book.author[0]?.name || "Unknown"}
+                        </p>
 
-                        {/* ⭐ Rating */}
-                        <div className="flex text-orange-400 text-xs">
-                          ★★★★☆
+                        {/* 📂 Category (compact) */}
+                        <div className="flex gap-1 overflow-hidden">
+                          {book.category?.length > 0 ? (
+                            book.category.slice(0, 2).map((cat, index) => (
+                              <span
+                                key={index}
+                                className="text-[9px] px-2 py-[1px] bg-[#234046] text-amber-300 rounded-full truncate"
+                              >
+                                {cat.name || cat}
+                              </span>
+                            ))
+                          ) : (
+                            <span className="text-[9px] text-gray-400">
+                              No Category
+                            </span>
+                          )}
+                        </div>
+
+                        {/* ⭐ Bottom Row */}
+                        <div
+                          onClick={() => addToCart(book)}
+                          className="flex justify-between items-center mt-1"
+                        >
+                          {/* 🛒 Add to Cart */}
+                          <button className="text-xs bg-amber-300 text-black px-2 py-1 hover:bg-amber-400 rounded font-semibold">
+                            {addedBookId === book._id ? "Added" : "Add to cart"}
+                          </button>
+
+                          {/* ⭐ Rating */}
+                          <div className="flex text-orange-400 text-xs">
+                            ★★★★☆
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
             </Slider>
           </div>
 
@@ -235,35 +245,36 @@ const MainPage = () => {
               <p className="text-amber-300">Show all</p>
             </div>
             <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
-              {books.map((book, i) => (
-                <Link to={`/book/${i + 1}`} key={i}>
-                  <div
-                    key={book._id}
-                    className="min-w-[150px] flex-shrink-0 flex flex-col rounded-xl shadow-xl/40 hover:scale-101 transition duration-300"
-                  >
-                    <div className="w-full h-40">
-                      <img
-                        src={`http://localhost:5000/${book.coverPhoto}`}
-                        alt={book.name}
-                        className="w-full h-full object-cover border rounded-xl"
-                      />
-                    </div>
-                    <div className="p-2">
-                      <div className="flex justify-between">
-                        <p className="text-sm font-bold text-amber-50 truncate">
-                          {book.name}
-                        </p>
-                        <span className="text-sm font-bold text-white">
-                          ₹{book.price}
-                        </span>
+              {books &&
+                books.books.map((book, i) => (
+                  <Link to={`/book/${book._id}`} key={i}>
+                    <div
+                      key={book._id}
+                      className="min-w-[150px] flex-shrink-0 flex flex-col rounded-xl shadow-xl/40 hover:scale-101 transition duration-300"
+                    >
+                      <div className="w-full h-40">
+                        <img
+                          src={`http://localhost:5000/${book.coverPhoto}`}
+                          alt={book.name}
+                          className="w-full h-full object-cover border rounded-xl"
+                        />
                       </div>
-                      <div className="flex justify-between items-center text-xs text-gray-300">
-                        <span>{book.author[0].name}</span>
+                      <div className="p-2">
+                        <div className="flex justify-between ">
+                          <p className="text-sm font-bold text-amber-50 truncate ">
+                            {book.name}
+                          </p>
+                          <span className="text-sm font-bold text-white">
+                            ₹{book.price}
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center text-xs text-gray-300">
+                          <span>{book.author[0].name}</span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </Link>
-              ))}
+                  </Link>
+                ))}
             </div>
           </div>
         </div>
@@ -277,29 +288,30 @@ const MainPage = () => {
               <p className="text-amber-300 text-sm">Show all</p>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-              {books.map((book, i) => (
-                <Link to={`/book/${i + 1}`} key={i}>
-                  <div
-                    key={i}
-                    className="rounded-lg shadow-xl/40 hover:scale-101 transition duration-300"
-                  >
-                    <img
-                      src={`http://localhost:5000/${book.coverPhoto}`}
-                      alt=""
-                      className="w-full h-32 object-cover rounded-xl border"
-                    />
-                    <div className="p-2">
-                      <p className="text-sm font-bold text-amber-50 truncate">
-                        {book.name}
-                      </p>
-                      <div className="flex justify-between text-xs text-gray-400">
-                        <span>{book.author[0].name}</span>
-                        {/* <span className="text-yellow-300">{item.viewers}</span> */}
+              {books &&
+                books.books.map((book, i) => (
+                  <Link to={`/book/${book._id}`} key={i}>
+                    <div
+                      key={i}
+                      className="rounded-lg shadow-xl/40 hover:scale-101 transition duration-300"
+                    >
+                      <img
+                        src={`http://localhost:5000/${book.coverPhoto}`}
+                        alt=""
+                        className="w-full h-32 object-cover rounded-xl border"
+                      />
+                      <div className="p-2">
+                        <p className="text-sm font-bold text-amber-50 truncate">
+                          {book.name}
+                        </p>
+                        <div className="flex justify-between text-xs text-gray-400">
+                          <span>{book.author[0].name}</span>
+                          {/* <span className="text-yellow-300">{item.viewers}</span> */}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </Link>
-              ))}
+                  </Link>
+                ))}
             </div>
           </div>
 
@@ -312,34 +324,35 @@ const MainPage = () => {
               <p className="text-amber-300 text-sm">Show all</p>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-              {authors.map((author, i) => (
-                <Link to={`/author/${i + 1}`} key={i}>
-                  <div
-                    key={i}
-                    className="bg-[#122125] rounded-xl p-3 flex flex-col justify-between"
-                  >
-                    <div className="flex justify-between items-center mb-2">
-                      <img
-                        src={`http://localhost:5000/${author.coverPhoto}`}
-                        alt=""
-                        className="w-12 h-12 rounded-full border border-amber-50"
-                      />
-                      <div className="text-right">
-                        {/* <p className="text-xs text-amber-300">766</p> */}
-                        <p className="text-xs text-gray-400">Books</p>
+              {authors &&
+                authors.map((author, i) => (
+                  <Link to={`/author/${i + 1}`} key={i}>
+                    <div
+                      key={i}
+                      className="bg-[#122125] rounded-xl p-3 flex flex-col justify-between"
+                    >
+                      <div className="flex justify-between items-center mb-2">
+                        <img
+                          src={`http://localhost:5000/${author.coverPhoto}`}
+                          alt=""
+                          className="w-12 h-12 rounded-full border border-amber-50"
+                        />
+                        <div className="text-right">
+                          {/* <p className="text-xs text-amber-300">766</p> */}
+                          <p className="text-xs text-gray-400">Books</p>
+                        </div>
+                      </div>
+                      <div>
+                        <p className="text-sm text-[#dbf8fa]">{author.name}</p>
+                        <p className="text-xs text-gray-400">Writer & Author</p>
+                        <div className="flex justify-between items-center text-amber-300 mt-1">
+                          <p className="text-sm">More...</p>
+                          <TbSend2 className="text-lg" />
+                        </div>
                       </div>
                     </div>
-                    <div>
-                      <p className="text-sm text-[#dbf8fa]">{author.name}</p>
-                      <p className="text-xs text-gray-400">Writer & Author</p>
-                      <div className="flex justify-between items-center text-amber-300 mt-1">
-                        <p className="text-sm">More...</p>
-                        <TbSend2 className="text-lg" />
-                      </div>
-                    </div>
-                  </div>
-                </Link>
-              ))}
+                  </Link>
+                ))}
             </div>
           </div>
         </div>

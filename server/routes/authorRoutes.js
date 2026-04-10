@@ -11,7 +11,7 @@ const verifyToken = require("../middleware/verifyJWT");
 
 const router = express.Router();
 
-router.route("/").post(createAuthor).get(verifyToken, getAllAuthors);
+router.route("/").post(createAuthor).get(getAllAuthors);
 router.route("/:id").get(readAuthor).patch(updateAuthor).delete(deleteAuthor);
 
 module.exports = router;

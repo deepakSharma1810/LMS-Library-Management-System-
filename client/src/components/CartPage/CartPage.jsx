@@ -1,35 +1,35 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { FiShoppingCart, FiTrash2, FiPlus, FiMinus } from "react-icons/fi";
 
-const initialCart = [
-  {
-    id: 1,
-    image: "https://example.com/images/image1.jpg",
-    title: "Sunset Over Beach",
-    author: "John Doe",
-    price: 499,
-    originalPrice: 799,
-    qty: 1,
-  },
-  {
-    id: 2,
-    image: "https://example.com/images/image2.jpg",
-    title: "Mountain Landscape",
-    author: "Jane Smith",
-    price: 299,
-    originalPrice: 499,
-    qty: 2,
-  },
-  {
-    id: 3,
-    image: "https://example.com/images/image3.jpg",
-    title: "City Skyline at Night",
-    author: "Alex Johnson",
-    price: 399,
-    originalPrice: 599,
-    qty: 1,
-  },
-];
+// const initialCart = [
+//   {
+//     id: 1,
+//     image: "https://example.com/images/image1.jpg",
+//     title: "Sunset Over Beach",
+//     author: "John Doe",
+//     price: 499,
+//     originalPrice: 799,
+//     qty: 1,
+//   },
+//   {
+//     id: 2,
+//     image: "https://example.com/images/image2.jpg",
+//     title: "Mountain Landscape",
+//     author: "Jane Smith",
+//     price: 299,
+//     originalPrice: 499,
+//     qty: 2,
+//   },
+//   {
+//     id: 3,
+//     image: "https://example.com/images/image3.jpg",
+//     title: "City Skyline at Night",
+//     author: "Alex Johnson",
+//     price: 399,
+//     originalPrice: 599,
+//     qty: 1,
+//   },
+// ];
 
 const formatCurrency = (n) =>
   new Intl.NumberFormat("en-IN", {
