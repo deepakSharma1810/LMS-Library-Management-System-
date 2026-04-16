@@ -26,6 +26,7 @@ app.get("/", (req, res) => {
 app.use("/auth", authRoutes);
 app.use("/category", categoryRoutes);
 app.use("/book", bookRoutes);
+app.use("/book/status", bookRoutes);
 app.use("/author", authorRoutes);
 app.use("/", ImageRouter);
 

@@ -38,7 +38,6 @@ const formatCurrency = (n) =>
   }).format(n);
 
 const CartPage = () => {
-  // const [cart, setCart] = useState(initialCart);
   const [cart, setCart] = useState([]);
 
   useEffect(() => {
@@ -53,10 +52,7 @@ const CartPage = () => {
 
   const totals = useMemo(() => {
     const subtotal = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
-    const original = cart.reduce(
-      (sum, item) => sum + item.originalPrice * item.qty,
-      0,
-    );
+    const original = cart.reduce((sum, item) => sum + item.mrp * item.qty, 0);
     const discount = original - subtotal;
     const delivery = subtotal > 699 || subtotal === 0 ? 0 : 49;
     const total = subtotal + delivery;
@@ -71,12 +67,10 @@ const CartPage = () => {
   };
 
   const removeItem = (id) => {
-    // setCart((prev) => prev.filter((item) => item.id !== id));
     const updatedCart = cart.filter((item) => item.id !== id);
     syncCart(updatedCart);
   };
 
-  // const clearCart = () => setCart([]);
   const clearCart = () => syncCart([]);
 
   return (
@@ -117,22 +111,23 @@ const CartPage = () => {
             <div className="lg:col-span-2 space-y-4">
               {cart.map((item) => (
                 <div
-                  key={item.id}
+                  key={item._id}
                   className="bg-[#122125] rounded-xl p-4 flex gap-4 shadow-md"
                 >
                   <img
-                    src={item.image}
-                    alt={item.title}
+                    src={`http://localhost:5000/${item.coverPhoto}`}
+                    alt={item.name}
                     className="w-24 h-32 object-cover rounded-lg border border-gray-700"
                   />
 
                   <div className="flex-1 flex flex-col justify-between">
                     <div>
                       <h2 className="text-sm md:text-base font-semibold text-[#dbf8fa]">
-                        {item.title}
+                        {item.name}
                       </h2>
                       <p className="text-xs text-gray-400 mb-1">
-                        by {item.author}
+                        by{" "}
+                        {item.author?.length > 0 ? item.author[0].name : "N/A"}
                       </p>
 
                       <div className="flex items-center gap-3 mt-1">
@@ -140,13 +135,12 @@ const CartPage = () => {
                           {formatCurrency(item.price)}
                         </span>
                         <span className="text-xs line-through text-gray-500">
-                          {formatCurrency(item.originalPrice)}
+                          {formatCurrency(item.mrp)}
                         </span>
                         <span className="text-xs text-green-400">
                           Save{" "}
                           {formatCurrency(
-                            item.originalPrice * item.qty -
-                              item.price * item.qty,
+                            item.mrp * item.qty - item.price * item.qty,
                           )}
                         </span>
                       </div>

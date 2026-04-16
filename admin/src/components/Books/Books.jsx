@@ -12,6 +12,7 @@ const statusStyle = {
 const Books = () => {
   const [books, setBooks] = useState([]);
   const [authors, setAuthors] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [search, setSearch] = useState("");
 
   const [showModal, setShowModal] = useState(false);
@@ -28,6 +29,8 @@ const Books = () => {
   const fetchBooks = async () => {
     try {
       const res = await axios.get("http://localhost:5000/book");
+      console.log(res.data);
+
       setBooks(Array.isArray(res.data) ? res.data : res.data.books || []);
     } catch (error) {
       console.error(error);
@@ -46,9 +49,20 @@ const Books = () => {
     }
   };
 
+  const fetchCategories = async () => {
+    try {
+      const res = await axios.get("http://localhost:5000/category");
+      setCategories(res.data.categories);
+      console.log(res.data.categories);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   useEffect(() => {
     fetchBooks();
     fetchAuthors();
+    fetchCategories();
   }, []);
 
   // ================= SEARCH =================
@@ -67,24 +81,31 @@ const Books = () => {
   };
 
   // ================= STATUS TOGGLE =================
-  const toggleStatus = (id) => {
-    setBooks((prev) =>
-      prev.map((b) =>
-        b._id === id
-          ? {
-              ...b,
-              status: b.status === "Published" ? "Draft" : "Published",
-            }
-          : b,
-      ),
-    );
+  const toggleStatus = async (book) => {
+    try {
+      const newStatus = book.status === "Published" ? "Draft" : "Published";
+
+      await axios.patch(`http://localhost:5000/book/status/${book._id}`, {
+        status: newStatus,
+      });
+
+      fetchBooks();
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   // ================= DRAFT =================
-  const moveToDraft = (id) => {
-    setBooks((prev) =>
-      prev.map((b) => (b._id === id ? { ...b, status: "Draft" } : b)),
-    );
+  const moveToDraft = async (id) => {
+    try {
+      await axios.patch(`http://localhost:5000/book/status/${id}`, {
+        status: "Draft",
+      });
+
+      fetchBooks();
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   // ================= START EDIT =================
@@ -94,7 +115,7 @@ const Books = () => {
     setForm({
       name: book.name || "",
       author: book.author?.length > 0 ? book.author[0]._id : "",
-      category: book.category || "",
+      category: book.categories?.[0] || "",
       price: String(book.price || "").replace("₹", ""),
     });
 
@@ -106,8 +127,8 @@ const Books = () => {
     try {
       await axios.patch(`http://localhost:5000/book/${editBookId}`, {
         name: form.name,
-        author: form.author,
-        category: form.category,
+        author: [form.author],
+        categories: [form.category],
         price: form.price,
       });
 
@@ -208,12 +229,16 @@ const Books = () => {
                   {book.author?.length > 0 ? book.author[0].name : "N/A"}
                 </td>
 
-                <td>{book.category}</td>
+                <td>
+                  {book.categories
+                    ?.map((id) => categories.find((c) => c._id === id)?.name)
+                    .join(", ")}
+                </td>
                 <td>{book.price}</td>
 
                 <td>
                   <button
-                    onClick={() => toggleStatus(book._id)}
+                    onClick={() => toggleStatus(book)}
                     className={`text-xs px-2 py-1 rounded-full ${
                       statusStyle[book.status] || "bg-gray-700 text-gray-300"
                     }`}
@@ -248,8 +273,8 @@ const Books = () => {
 
       {/* EDIT MODAL */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
-          <div className="bg-[#1b2e31] border border-[#2c4449] rounded-xl w-[90%] max-w-md p-6">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 transition-all duration-300">
+          <div className="bg-[#1b2e31] border border-[#2c4449] rounded-xl w-[90%] max-w-md p-6 transform transition-all duration-300 scale-100 opacity-100 animate-[fadeIn_.3s_ease]">
             <h3 className="text-lg font-semibold text-[#dbf8fa] mb-4">
               Edit Book
             </h3>
@@ -264,7 +289,7 @@ const Books = () => {
             <select
               value={form.author}
               onChange={(e) => setForm({ ...form, author: e.target.value })}
-              className="w-full mb-3 px-3 py-2 rounded-lg bg-[#122125] border border-[#2c4449] text-white"
+              className="w-full mb-3 px-3 py-2  rounded-lg bg-[#122125] border border-[#2c4449] text-white"
             >
               <option value="">Select Author</option>
               {authors.map((author) => (
@@ -274,12 +299,18 @@ const Books = () => {
               ))}
             </select>
 
-            <input
-              placeholder="Category"
+            <select
               value={form.category}
               onChange={(e) => setForm({ ...form, category: e.target.value })}
               className="w-full mb-3 px-3 py-2 rounded-lg bg-[#122125] border border-[#2c4449] text-white"
-            />
+            >
+              <option value="">Select Category</option>
+              {categories.map((category) => (
+                <option key={category._id} value={category._id}>
+                  {category.name}
+                </option>
+              ))}
+            </select>
 
             <input
               placeholder="Price"

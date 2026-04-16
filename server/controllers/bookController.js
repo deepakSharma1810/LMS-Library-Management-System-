@@ -26,9 +26,6 @@ const createBook = async (req, res) => {
       categories,
     } = req.body;
 
-    // if (!name || !author || !price || !coverPhoto || !actualPdf) {
-    //   return res.status(400).json({ message: "Please fill all the feilds" });
-    // }
     if (!name || !author || !price || !mrp || !coverPhoto || !actualPdf) {
       return res.status(400).json({ message: "Please fill all the feilds" });
     }
@@ -56,14 +53,6 @@ const createBook = async (req, res) => {
         });
       }
     }
-
-    // const newBook = new Book({
-    //   name,
-    //   author,
-    //   price,
-    //   coverPhoto,
-    //   actualPdf,
-    // });
 
     const newBook = new Book({
       name,
@@ -292,6 +281,22 @@ const updateBook = async (req, res) => {
   }
 };
 
+const updateBookStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    const book = await Book.findByIdAndUpdate(id, { status }, { new: true });
+
+    res.status(200).json({
+      message: "Book status updated",
+      book,
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 const deleteBook = async (req, res) => {
   try {
     const { id } = req.params;
@@ -320,5 +325,6 @@ module.exports = {
   readBook,
   readBookByAuthor,
   updateBook,
+  updateBookStatus,
   deleteBook,
 };

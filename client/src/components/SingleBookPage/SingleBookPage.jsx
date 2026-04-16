@@ -91,7 +91,7 @@ const SingleBookPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   // const book = items.find((b) => b.id === Number(id));
-  const [book, setBook] = useState([]);
+  const [book, setBook] = useState(null);
   const [loading, setLoading] = useState(true);
   const [CartBtnText, setCartBtnText] = useState("Add to Cart");
 
@@ -99,7 +99,7 @@ const SingleBookPage = () => {
     try {
       const res = await axios.get(`http://localhost:5000/book/${id}`);
       setBook(res.data.getBook);
-      console.log(res.data);
+      console.log(res.data.getBook);
     } catch (error) {
       console.log("Error fetching book:", error);
       setLoading(false);
@@ -184,7 +184,7 @@ const SingleBookPage = () => {
                 <img
                   src={`http://localhost:5000/${book.coverPhoto}`}
                   alt={book.imageName}
-                  className="w-full md:w-5/6 h-auto object-cover rounded-lg border"
+                  className="w-full md:w-5/6 h-full object-cover rounded-lg border"
                 />
               </div>
 
@@ -195,21 +195,26 @@ const SingleBookPage = () => {
 
                 <div className="flex items-center gap-8 mb-3">
                   <div className="flex items-center gap-2">
-                    <img
+                    {/* <img
                       src={book.favicon}
                       alt="author"
                       className="w-8 h-8 rounded-full"
-                    />
+                    /> */}
+                    <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center">
+                      A
+                    </div>
                     <div>
-                      <p className="text-sm">{book.authorName}</p>
+                      <p className="text-sm">
+                        {book.author?.length > 0 ? book.author[0].name : "N/A"}
+                      </p>
                       <p className="text-xs text-gray-400">Author</p>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <Stars value={items.rating} />
+                    <Stars value={book.rating} />
                     <span className="text-sm text-gray-300">
-                      {items.rating} • {items.reviews} reviews
+                      {book.rating} • {book.reviews} reviews
                     </span>
                   </div>
                 </div>
@@ -223,10 +228,10 @@ const SingleBookPage = () => {
                           {formatCurrency(book.price)}
                         </div>
                         <div className="text-sm line-through text-gray-500">
-                          {formatCurrency(items.mrp)}
+                          {formatCurrency(book.mrp)}
                         </div>
                         <div className="text-sm text-green-400">
-                          ({items.discountPercent}% OFF)
+                          ({book.discountPercent}% OFF)
                         </div>
                       </div>
                     </div>
@@ -238,7 +243,7 @@ const SingleBookPage = () => {
                   <div className="flex items-center gap-2 text-sm text-gray-300">
                     <FaShippingFast />
                     <div>
-                      <div>{items.deliveryEstimate}</div>
+                      <div>{book.deliveryEstimate}</div>
                       <div className="text-xs text-gray-500">
                         Free delivery above ₹499
                       </div>
@@ -248,31 +253,28 @@ const SingleBookPage = () => {
                   <div className="pt-2 border-t border-gray-700 text-sm text-gray-300">
                     <div className="mb-2">
                       <span className="text-gray-400">Sold by:</span>{" "}
-                      <a
-                        href={items.seller}
-                        className="text-amber-200 hover:underline"
-                      >
-                        {items.seller}
-                      </a>
+                      <span className="text-amber-200">
+                        {book.seller?.name}
+                      </span>
                     </div>
                     <div className="text-xs text-gray-500">
-                      Seller rating: {items.seller}/5
+                      Seller rating: {book.seller?.rating}/5
                     </div>
                   </div>
                 </div>
 
-                <p className="text-gray-300 mb-4">{items.description}</p>
+                <p className="text-gray-300 mb-4">{book.description}</p>
 
                 <div className="mb-4">
                   <h3 className="text-sm text-gray-400 mb-2">
                     Product details
                   </h3>
                   <ul className="text-sm text-gray-300 space-y-1">
-                    <li>ISBN: {items.isbn}</li>
-                    <li>Publisher: {items.publisher}</li>
-                    <li>Pages: {items.pages}</li>
-                    <li>Language: {items.language}</li>
-                    <li>Dimensions: {items.dimensions}</li>
+                    <li>ISBN: {book.isbn}</li>
+                    <li>Publisher: {book.publisher}</li>
+                    <li>Pages: {book.pages}</li>
+                    <li>Language: {book.language}</li>
+                    <li>Dimensions: {book.dimensions}</li>
                   </ul>
                 </div>
 

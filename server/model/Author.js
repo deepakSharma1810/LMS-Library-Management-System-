@@ -5,14 +5,38 @@ const authorSchema = new mongoose.Schema(
     name: {
       type: String,
       required: true,
+      trim: true,
     },
     coverPhoto: {
       type: String,
       required: true,
     },
-    info: {
+    role: {
+      type: String,
+      enum: [
+        "Author",
+        "Writer",
+        "Novelist",
+        "Poet",
+        "Story Writer",
+        "Content Writer",
+        "Editor",
+        "Researcher",
+        "Teacher",
+        "Professor",
+        "Tech Writer",
+        "Motivational Speaker",
+      ],
+      default: "Author",
+    },
+    bio: {
       type: String,
       required: true,
+    },
+
+    description: {
+      type: String,
+      default: "",
     },
     books: [
       {

@@ -2,9 +2,9 @@ const Author = require("../model/Author");
 
 const createAuthor = async (req, res) => {
   try {
-    const { name, coverPhoto, info } = req.body;
+    const { name, coverPhoto, role, bio, description, books } = req.body;
 
-    if (!name || !coverPhoto || !info) {
+    if (!name || !coverPhoto || !bio) {
       return res.status(400).json({ message: "Please fill all the fields" });
     }
 
@@ -17,12 +17,17 @@ const createAuthor = async (req, res) => {
     const newAuthor = new Author({
       name,
       coverPhoto,
-      info,
+      role,
+      bio,
+      description,
+      books: books || [],
     });
 
     await newAuthor.save();
 
-    res.status(200).json({ message: "Author Successfully Created" });
+    res
+      .status(200)
+      .json({ message: "Author Successfully Created", author: newAuthor });
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
@@ -30,9 +35,8 @@ const createAuthor = async (req, res) => {
 
 const readAuthor = async (req, res) => {
   try {
-    const { name } = req.body;
-
-    const author = await Author.findOne({ name });
+    const { id } = req.params;
+    const author = await Author.findById(id).populate("books");
 
     if (!author) {
       return res.status(404).json({ message: "Author not found" });
@@ -46,14 +50,16 @@ const readAuthor = async (req, res) => {
 
 const getAllAuthors = async (req, res) => {
   try {
-    const authors = await Author.find();
+    const authors = await Author.find().populate("books");
     console.log(req.user);
     // console.log(authors);
     if (!authors || authors.length === 0) {
       return res.status(404).json({ message: "Author not found" });
     }
 
-    res.status(200).json(authors);
+    res
+      .status(200)
+      .json({ message: "All authors fetched successfully", authors });
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
@@ -61,11 +67,11 @@ const getAllAuthors = async (req, res) => {
 
 const updateAuthor = async (req, res) => {
   try {
-    const { name, info, coverPhoto, books } = req.body;
+    const { name, coverPhoto, role, bio, description, books } = req.body;
 
-    if (!name || !info) {
-      return res.status(400).json({ message: "PLease fill all the feilds" });
-    }
+    // if (!name || !bio) {
+    //   return res.status(400).json({ message: "PLease fill all the feilds" });
+    // }
 
     const { id } = req.params;
 
@@ -75,10 +81,12 @@ const updateAuthor = async (req, res) => {
       return res.status(404).json({ message: "Author not found" });
     }
 
-    author.name = name;
-    author.coverPhoto = coverPhoto;
-    author.info = info;
-    author.books = books;
+    author.name = name || author.name;
+    author.coverPhoto = coverPhoto || author.coverPhoto;
+    author.role = role || author.role;
+    author.bio = bio || author.bio;
+    author.description = description || author.description;
+    author.books = books || author.books;
 
     await author.save();
 

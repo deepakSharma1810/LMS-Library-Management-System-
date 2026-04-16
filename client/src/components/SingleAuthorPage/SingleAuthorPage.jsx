@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { TbSend2 } from "react-icons/tb";
 import {
@@ -8,6 +8,7 @@ import {
   FaTwitter,
   FaInstagram,
 } from "react-icons/fa";
+import axios from "axios";
 
 const authors = [
   {
@@ -55,7 +56,22 @@ const authors = [
 
 const SingleAuthorPage = () => {
   const { id } = useParams();
-  const author = authors.find((a) => a.id === Number(id));
+  // const author = authors.find((a) => a.id === Number(id));
+  const [author, setAuthor] = useState(null);
+
+  const fetchSingleAuthor = async () => {
+    try {
+      const res = await axios.get(`http://localhost:5000/author/${id}`);
+      setAuthor(res.data.author);
+      console.log(res.data);
+    } catch (error) {
+      console.log("Error fetching Author:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchSingleAuthor();
+  }, []);
 
   if (!author) {
     return (
@@ -84,7 +100,7 @@ const SingleAuthorPage = () => {
         <div className="flex flex-col md:flex-row gap-6">
           {/* Author Image */}
           <img
-            src={author.image}
+            src={`http://localhost:5000/${author.coverPhoto}`}
             alt={author.name}
             className="w-32 h-32 md:w-40 md:h-40 object-cover rounded-full border-2 border-amber-200 shadow"
           />
@@ -111,7 +127,7 @@ const SingleAuthorPage = () => {
               <div className="flex items-center gap-2">
                 <FaUsers className="text-blue-300 text-xl" />
                 <p className="text-gray-200 text-sm font-medium">
-                  {author.followers.toLocaleString()} Followers
+                  {/* {author.followers.toLocaleString()} Followers */}
                 </p>
               </div>
             </div>
@@ -140,7 +156,7 @@ const SingleAuthorPage = () => {
         </h2>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {author.topBooks.map((book, i) => (
+          {/* {author.topBooks.map((book, i) => (
             <div
               key={i}
               className="bg-[#0e1a1c] p-4 rounded-lg border border-gray-700"
@@ -148,7 +164,7 @@ const SingleAuthorPage = () => {
               <p className="text-amber-200 font-medium">{book}</p>
               <p className="text-xs text-gray-400 mt-1">By {author.name}</p>
             </div>
-          ))}
+          ))} */}
         </div>
 
         {/* About / Description */}

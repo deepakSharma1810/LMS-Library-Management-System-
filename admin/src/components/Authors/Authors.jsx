@@ -6,12 +6,15 @@ import axios from "axios";
 
 const Authors = () => {
   const [authors, setAuthors] = useState([]);
+  const [books, setBooks] = useState([]);
   const [error, setError] = useState("");
   const [editAuthorId, setEditAuthorId] = useState(null);
   const [editForm, setEditForm] = useState({
     name: "",
-    info: "",
-    books: "",
+    role: "Author",
+    bio: "",
+    description: "",
+    books: [],
     coverPhoto: null,
   });
 
@@ -21,16 +24,29 @@ const Authors = () => {
   const fetchAuthors = async () => {
     try {
       const data = await axios.get("http://localhost:5000/author");
-      setAuthors(data.data);
-      console.log(data.data);
+      setAuthors(data.data.authors);
+      console.log(data.data.author);
     } catch (err) {
       console.error(err);
       setError("Failed to load authors");
     }
   };
 
+  const fetchBooks = async () => {
+    try {
+      const res = await axios.get("http://localhost:5000/book");
+      console.log(res.data);
+
+      setBooks(Array.isArray(res.data) ? res.data : res.data.books || []);
+    } catch (error) {
+      console.error(error);
+      setBooks([]);
+    }
+  };
+
   useEffect(() => {
     fetchAuthors();
+    fetchBooks();
   }, []);
 
   // Save edit
@@ -40,10 +56,13 @@ const Authors = () => {
     setEditAuthorId(author._id);
     setEditForm({
       name: author.name,
-      info: author.info,
+      role: author.role,
+      bio: author.bio,
+      description: author.description,
       books: author.books,
       coverPhoto: author.coverPhoto,
     });
+    console.log(author);
   };
 
   // change Inputs
@@ -75,7 +94,9 @@ const Authors = () => {
 
       await axios.patch(`http://localhost:5000/author/${id}`, {
         name: editForm.name,
-        info: editForm.info,
+        role: editForm.role,
+        bio: editForm.bio,
+        description: editForm.description,
         books: editForm.books,
         coverPhoto: image.data.file,
       });
@@ -174,29 +195,23 @@ const Authors = () => {
                   <span className="md:hidden text-gray-400">Info</span>
                   {editAuthorId === author._id ? (
                     <input
-                      name="info"
-                      value={editForm.info}
+                      name="bio"
+                      value={editForm.bio}
                       onChange={handleChange}
                       className="border border-[#46666d] rounded px-1 bg-transparent w-full"
                     />
                   ) : (
-                    <p className="text-gray-400">{author.info}</p>
+                    <p className="text-gray-400">{author.bio}</p>
                   )}
                 </td>
 
                 {/* BOOKS */}
-                <td className="py-2">
+                <td className="py-2 text-gray-400">
                   <span className="md:hidden text-gray-400">Books</span>
-                  {editAuthorId === author._id ? (
-                    <input
-                      name="books"
-                      value={editForm.books}
-                      onChange={handleChange}
-                      className="border border-[#46666d] rounded px-1 bg-transparent w-full"
-                    />
-                  ) : (
-                    author.books
-                  )}
+                  {author._id &&
+                    author.books?.map((book) => {
+                      return <span key={book._id}>{book.name} </span>;
+                    })}
                 </td>
 
                 {/* ACTIONS */}

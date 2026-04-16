@@ -16,6 +16,8 @@ import AdminSettings from "./components/AdminSettings/AdminSettings";
 import Profile from "./components/Profile/Profile";
 import Navbar from "./components/Navbar/Navbar";
 import ScrollOnTop from "./components/ScrollOnTop";
+import Category from "./components/Categorys/Category";
+import AddCategory from "./components/AddCategory/AddCategory";
 
 const App = () => {
   const [isOpen, setIsOpen] = useState(true);
@@ -38,6 +40,8 @@ const App = () => {
           <Route path="/add-author" element={<AddAuthor />} />
           <Route path="/users" element={<Users />} />
           <Route path="/add-user" element={<AddUser />} />
+          <Route path="/categories" element={<Category />} />
+          <Route path="/add-category" element={<AddCategory />} />
           <Route path="/admin-signin" element={<AdminSignup />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/enter-otp" element={<EnterOtp />} />

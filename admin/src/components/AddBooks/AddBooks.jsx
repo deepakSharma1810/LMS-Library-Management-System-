@@ -20,11 +20,13 @@ const AddBooks = () => {
     publisher: "",
     language: "English",
     dimensions: "",
+    categories: [],
   });
 
   const [authors, setAuthors] = useState([]);
   const [image, setImage] = useState(null);
   const [preview, setPreview] = useState(null);
+  const [categories, setCategories] = useState([]);
 
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -33,15 +35,29 @@ const AddBooks = () => {
   const fetchAuthors = async () => {
     try {
       const res = await axios.get("http://localhost:5000/author");
-      setAuthors(res.data);
+      setAuthors(res.data.authors);
+      console.log(res.data);
     } catch (error) {
       console.log(error);
       setError("Failed to load authors");
     }
   };
 
+  const fetchCategories = async () => {
+    try {
+      const res = await axios.get("http://localhost:5000/category");
+      console.log(res.data);
+
+      setCategories(res.data.categories);
+    } catch (error) {
+      console.log(error);
+      setError("Failed to load categories");
+    }
+  };
+
   useEffect(() => {
     fetchAuthors();
+    fetchCategories();
   }, []);
 
   // ================= HANDLE CHANGE =================
@@ -116,6 +132,7 @@ const AddBooks = () => {
         publisher: "",
         language: "English",
         dimensions: "",
+        categories: [],
       });
 
       setImage(null);
@@ -191,6 +208,22 @@ const AddBooks = () => {
               className="w-full p-3 rounded-lg bg-[#122125] text-white border border-[#2c4449]"
             />
 
+            <select
+              name="categories"
+              value={book.categories[0] || ""}
+              onChange={(e) =>
+                setBook({ ...book, categories: [e.target.value] })
+              }
+              className="w-full p-3 rounded-lg bg-[#122125] text-white border border-[#2c4449]"
+            >
+              <option value="">Select Category</option>
+              {categories.map((category) => (
+                <option key={category._id} value={category._id}>
+                  {category.name}
+                </option>
+              ))}
+            </select>
+
             <textarea
               name="description"
               value={book.description}
@@ -233,6 +266,15 @@ const AddBooks = () => {
               value={book.publisher}
               onChange={handleChange}
               placeholder="Publisher"
+              className="w-full p-3 rounded-lg bg-[#122125] text-white border border-[#2c4449]"
+            />
+
+            <input
+              type="text"
+              name="dimensions"
+              value={book.dimensions}
+              onChange={handleChange}
+              placeholder="Dimensions (e.g. 21.6 x 28 x 2 cm)"
               className="w-full p-3 rounded-lg bg-[#122125] text-white border border-[#2c4449]"
             />
 
@@ -310,6 +352,10 @@ const AddBooks = () => {
           <p className="text-sm text-green-400">{discount}% OFF</p>
 
           <p className="text-sm text-gray-400">Stock: {book.stock || 0}</p>
+
+          <p className="text-sm text-gray-400">
+            Size: {book.dimensions || "N/A"}
+          </p>
 
           {book.actualPdf && (
             <a

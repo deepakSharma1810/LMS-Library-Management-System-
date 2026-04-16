@@ -1,8 +1,16 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FiUsers } from "react-icons/fi";
 import { FaUserEdit } from "react-icons/fa";
-import { MdOutlineLibraryBooks } from "react-icons/md";
+import {
+  MdOutlineLibraryBooks,
+  MdPublishedWithChanges,
+  MdDrafts,
+  MdCurrencyRupee,
+  MdWarningAmber,
+} from "react-icons/md";
 import { FaArrowUp, FaArrowDown } from "react-icons/fa6";
+import { BiCategory } from "react-icons/bi";
+import axios from "axios";
 
 // Dummy Project Data
 const initialBooks = [
@@ -39,19 +47,83 @@ const statusStyle = {
 };
 
 const Dashboard = () => {
-  const [books] = useState(initialBooks);
+  // const [books] = useState(initialBooks);
+  const [books, setBooks] = useState([]);
+  const [authors, setAuthors] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [users, setUsers] = useState([]);
+
+  // ================= FETCH DATA =================
+  const fetchBooks = async () => {
+    try {
+      const res = await axios.get("http://localhost:5000/book");
+      setBooks(Array.isArray(res.data) ? res.data : res.data.books || []);
+      console.log(res.data);
+    } catch (error) {
+      console.error(error);
+      setBooks([]);
+    }
+  };
+
+  const fetchAuthors = async () => {
+    try {
+      const res = await axios.get("http://localhost:5000/author");
+      setAuthors(Array.isArray(res.data) ? res.data : res.data.authors || []);
+    } catch (error) {
+      console.error(error);
+      setAuthors([]);
+    }
+  };
+
+  const fetchCategories = async () => {
+    try {
+      const res = await axios.get("http://localhost:5000/category");
+      setCategories(res.data.categories || []);
+      console.log(res.data.categories);
+    } catch (error) {
+      console.error(error);
+      setCategories([]);
+    }
+  };
+
+  // dummy users
+  // const fetchUsers = async () => {
+  //   try {
+  //     const res = await axios.get("http://localhost:5000/user");
+  //     setUsers(res.data.users || []);
+  //   } catch (error) {
+  //     console.error(error);
+  //     setUsers([]);
+  //   }
+  // };
+
+  useEffect(() => {
+    fetchBooks();
+    fetchAuthors();
+    fetchCategories();
+    // fetchUsers();
+  }, []);
+
+  const totalSales = books.reduce(
+    (sum, book) => sum + Number(book.price || 0),
+    0,
+  );
+
+  const publishedBooks = books.filter(
+    (book) => book.status === "Published",
+  ).length;
 
   const stats = [
     {
       label: "Users",
-      value: 128,
+      // value: users.length,
       icon: <FiUsers className="text-xl text-amber-300" />,
       change: "6.4%",
       up: true,
     },
     {
       label: "Authors",
-      value: 24,
+      value: authors.length,
       icon: <FaUserEdit className="text-xl text-amber-300" />,
       change: "2.1%",
       up: true,
@@ -62,6 +134,27 @@ const Dashboard = () => {
       icon: <MdOutlineLibraryBooks className="text-xl text-amber-300" />,
       change: "3.9%",
       up: false,
+    },
+    {
+      label: "Categories",
+      value: categories.length,
+      icon: <BiCategory className="text-xl text-amber-300" />,
+      change: "1.8%",
+      up: true,
+    },
+    {
+      label: "Published",
+      value: publishedBooks,
+      icon: <MdPublishedWithChanges className="text-xl text-green-400" />,
+      change: "5.1%",
+      up: true,
+    },
+    {
+      label: "Total Sales",
+      value: `₹${totalSales}`,
+      icon: <MdCurrencyRupee className="text-xl text-amber-300" />,
+      change: "8.9%",
+      up: true,
     },
   ];
 
@@ -123,14 +216,23 @@ const Dashboard = () => {
             </thead>
 
             <tbody className="text-[#dbf8fa]">
-              {books.map((book) => (
+              {books.slice(0, 5).map((book) => (
                 <tr
-                  key={book.id}
+                  key={book._id}
                   className="border-b border-[#2c4449] last:border-none"
                 >
                   <td className="py-4 font-medium">{book.name}</td>
-                  <td className="text-gray-400">{book.author}</td>
-                  <td className="text-gray-400">{book.category}</td>
+                  <td className="text-gray-400">
+                    {book.author?.[0]?.name || "N/A"}
+                  </td>
+                  <td className="text-gray-400">
+                    {book.categories
+                      ?.map(
+                        (id) => categories.find((cat) => cat._id === id)?.name,
+                      )
+                      .filter(Boolean)
+                      .join(", ") || "N/A"}
+                  </td>
                   <td>{book.price}</td>
                   <td>
                     <span

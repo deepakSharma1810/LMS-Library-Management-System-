@@ -42,6 +42,24 @@ const readCategory = async (req, res) => {
   }
 };
 
+const getAllCategories = async (req, res) => {
+  try {
+    const categories = await Category.find();
+
+    if (!categories) {
+      return res
+        .status(404)
+        .json({ message: "Category not found", categories });
+    }
+
+    res.status(200).json({
+      categories,
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 const updateCategory = async (req, res) => {
   try {
     const { name, info } = req.body;
@@ -84,6 +102,7 @@ const deleteCategory = async (req, res) => {
 module.exports = {
   createCategory,
   readCategory,
+  getAllCategories,
   updateCategory,
   deleteCategory,
 };

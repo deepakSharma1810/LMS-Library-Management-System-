@@ -1,7 +1,7 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { TbSend2 } from "react-icons/tb";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 
 const authors = [
   {
@@ -64,38 +64,39 @@ const AuthorPage = () => {
         All Authors
       </h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-        {authors.map((author, index) => (
-          <Link to={`/author/${index + 1}`} key={index}>
-            <div
-              key={index}
-              className="bg-[#122125] rounded-xl p-4 flex flex-col justify-between shadow-xl/40"
-            >
-              <div className="flex justify-between items-center mb-4">
-                <img
-                  src={`http://localhost:5000/${author.coverPhoto}`}
-                  alt={author.name}
-                  className="w-14 h-14 rounded-full border border-amber-50 object-cover"
-                />
-                <div className="text-right">
-                  <p className="text-sm text-amber-300">
-                    {author.books.length}
+        {authors &&
+          authors.map((author, index) => (
+            <Link to={`/author/${index + 1}`} key={index}>
+              <div
+                key={index}
+                className="bg-[#122125] rounded-xl p-4 flex flex-col justify-between shadow-xl/40"
+              >
+                <div className="flex justify-between items-center mb-4">
+                  <img
+                    src={`http://localhost:5000/${author.coverPhoto}`}
+                    alt={author.name}
+                    className="w-14 h-14 rounded-full border border-amber-50 object-cover"
+                  />
+                  <div className="text-right">
+                    <p className="text-sm text-amber-300">
+                      {author.books.length}
+                    </p>
+                    <p className="text-xs text-gray-400">Books</p>
+                  </div>
+                </div>
+                <div>
+                  <p className="text-sm text-[#dbf8fa] font-semibold">
+                    {author.name}
                   </p>
-                  <p className="text-xs text-gray-400">Books</p>
+                  <p className="text-xs text-gray-400">{author.role}</p>
+                  <div className="flex justify-between items-center text-amber-300 mt-2">
+                    <p className="text-sm font-medium">More...</p>
+                    <TbSend2 className="text-lg" />
+                  </div>
                 </div>
               </div>
-              <div>
-                <p className="text-sm text-[#dbf8fa] font-semibold">
-                  {author.name}
-                </p>
-                <p className="text-xs text-gray-400">{author.role}</p>
-                <div className="flex justify-between items-center text-amber-300 mt-2">
-                  <p className="text-sm font-medium">More...</p>
-                  <TbSend2 className="text-lg" />
-                </div>
-              </div>
-            </div>
-          </Link>
-        ))}
+            </Link>
+          ))}
       </div>
     </div>
   );

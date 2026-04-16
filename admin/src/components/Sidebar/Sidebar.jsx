@@ -1,8 +1,9 @@
 import React, { useState } from "react";
-import { FiUsers } from "react-icons/fi";
+import { FaUserGroup } from "react-icons/fa6";
 import { MdOutlineLibraryBooks, MdDashboard } from "react-icons/md";
 import { FaBook, FaUserEdit } from "react-icons/fa";
 import { IoClose } from "react-icons/io5";
+import { BiSolidCategory } from "react-icons/bi";
 import { Link, NavLink } from "react-router-dom";
 
 const Sidebar = ({ isOpen, setIsOpen }) => {
@@ -15,7 +16,12 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
       path: "/books",
     },
     { name: "Authors", icon: <FaUserEdit size={20} />, path: "/authors" },
-    { name: "Users", icon: <FiUsers size={20} />, path: "/users" },
+    { name: "Users", icon: <FaUserGroup size={20} />, path: "/users" },
+    {
+      name: "Categories",
+      icon: <BiSolidCategory size={20} />,
+      path: "/categories",
+    },
   ];
 
   return (
@@ -59,8 +65,8 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
               isPending
                 ? "pending"
                 : isActive
-                ? "flex items-center gap-3 p-3 mx-4 rounded-lg bg-amber-400 text-[#0e1a1c]"
-                : "flex items-center gap-3 p-3 mx-4 rounded-lg text-gray-200 hover:bg-[#163a39] hover:text-amber-200"
+                  ? "flex items-center gap-3 p-3 mx-4 rounded-lg bg-amber-400 text-[#0e1a1c]"
+                  : "flex items-center gap-3 p-3 mx-4 rounded-lg text-gray-200 hover:bg-[#163a39] hover:text-amber-200"
             }
           >
             {item.icon}

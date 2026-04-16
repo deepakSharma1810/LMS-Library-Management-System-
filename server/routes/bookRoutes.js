@@ -4,6 +4,7 @@ const {
   readBook,
   updateBook,
   deleteBook,
+  updateBookStatus,
   readBookByAuthor,
   readAllBook,
 } = require("../controllers/bookController");
@@ -11,6 +12,7 @@ const {
 const router = express.Router();
 
 router.route("/").post(createBook).get(readAllBook);
+router.patch("/status/:id", updateBookStatus);
 router
   .route("/:id")
   .get(readBook)
