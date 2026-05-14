@@ -1,4 +1,7 @@
+// import socket from "../../socket";
+import { useNotification } from "../../context/NotificationContext";
 import React, { useMemo, useState } from "react";
+import axios from "axios";
 import {
   FiBell,
   FiBookOpen,
@@ -10,44 +13,18 @@ import {
   FiXCircle,
 } from "react-icons/fi";
 import { formatDistanceToNow } from "date-fns";
-
-const initialNotifications = [
-  {
-    id: 1,
-    type: "new_book", // new book added to catalog
-    title: "New book listed: Silent Sunrise",
-    message: "John Doe added 'Silent Sunrise' to the catalog.",
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2), // 2 hours ago
-    unread: true,
-    meta: { bookId: 101 },
-  },
-  {
-    id: 2,
-    type: "add_sell", // someone added a sell/order or posted sell request
-    title: "Sell posted: Forest Trail (Used)",
-    message: "Maria Lee posted a used copy of 'Forest Trail' for sale.",
-    createdAt: new Date(Date.now() - 1000 * 60 * 30), // 30 minutes ago
-    unread: true,
-    meta: { sellId: 501, price: 250 },
-  },
-  {
-    id: 3,
-    type: "new_book",
-    title: "New book listed: Mountain Landscape",
-    message: "Jane Smith added 'Mountain Landscape' to the catalog.",
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3), // 3 days ago
-    unread: false,
-    meta: { bookId: 102 },
-  },
-];
+import { useEffect } from "react";
+import { Link } from "react-router-dom";
 
 const typeIcon = (type) => {
   if (type === "new_book") return <FiBookOpen className="text-lg" />;
   if (type === "add_sell") return <FiTruck className="text-lg" />;
+  if (type === "update_sell") return <FiCheckCircle />;
+  if (type === "delete_book") return <FiXCircle />;
   return <FiBell className="text-lg" />;
 };
 
-const NotificationRow = ({ n, onToggleRead, onDelete, onAction }) => {
+const NotificationRow = ({ n, books, onToggleRead, onDelete, onAction }) => {
   return (
     <div
       className={`flex gap-4 p-4 rounded-lg items-start ${
@@ -67,19 +44,17 @@ const NotificationRow = ({ n, onToggleRead, onDelete, onAction }) => {
           </div>
 
           <div className="text-right text-xs text-gray-400 whitespace-nowrap">
-            <div>
-              {formatDistanceToNow(new Date(n.createdAt), { addSuffix: true })}
-            </div>
+            <div>{new Date(n.createdAt).toLocaleString()}</div>
             <div className="mt-2 flex items-center gap-2">
               <button
-                onClick={() => onToggleRead(n.id)}
+                onClick={() => onToggleRead(n._id)}
                 className="text-xs px-2 py-1 rounded bg-transparent border border-gray-700 hover:bg-gray-800"
                 // aria-label={n.unread ? "Mark as read" : "Mark as unread"}
               >
                 {n.unread ? "Mark read" : "Mark unread"}
               </button>
               <button
-                onClick={() => onDelete(n.id)}
+                onClick={() => onDelete(n._id)}
                 className="text-xs px-2 py-1 rounded bg-transparent border border-red-700 text-red-300 hover:bg-red-900/10"
                 aria-label="Delete notification"
               >
@@ -110,12 +85,14 @@ const NotificationRow = ({ n, onToggleRead, onDelete, onAction }) => {
 
           {n.type === "new_book" && (
             <>
-              <button
-                onClick={() => onAction("view_book", n)}
-                className="text-xs bg-amber-400 text-black px-3 py-1 rounded font-medium"
-              >
-                View Book
-              </button>
+              <Link to={`/book/${n.meta.bookId}`} key={n.meta.bookId}>
+                <button
+                  onClick={() => onAction("view_book", n)}
+                  className="text-xs bg-amber-400 text-black px-3 py-1 rounded font-medium"
+                >
+                  View Book
+                </button>
+              </Link>
               <button
                 onClick={() => onAction("save_book", n)}
                 className="text-xs px-3 py-1 rounded border border-gray-700 hover:bg-gray-800"
@@ -131,74 +108,157 @@ const NotificationRow = ({ n, onToggleRead, onDelete, onAction }) => {
 };
 
 const NotificationPage = () => {
-  const [notifications, setNotifications] = useState(initialNotifications);
+  const { setNotificationCount } = useNotification();
+  const [notifications, setNotifications] = useState([]);
   const [filterType, setFilterType] = useState("all");
   const [query, setQuery] = useState("");
 
-  const unreadCount = useMemo(
-    () => notifications.filter((n) => n.unread).length,
-    [notifications]
-  );
+  const [books, setBooks] = useState([]);
 
-  const filtered = notifications
-    .filter((n) => (filterType === "all" ? true : n.type === filterType))
-    .filter(
-      (n) =>
-        n.title.toLowerCase().includes(query.toLowerCase()) ||
-        n.message.toLowerCase().includes(query.toLowerCase())
-    )
-    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  const fetchbooks = async () => {
+    try {
+      const res = await axios.get("http://localhost:5000/book");
+      setBooks(res.data.books);
+      console.log(res.data.books);
+    } catch (error) {
+      console.log("Error fetching books:", error);
+    }
+  };
 
-  const markAllRead = () =>
-    setNotifications((prev) => prev.map((p) => ({ ...p, unread: false })));
+  useEffect(() => {
+    fetchbooks();
+    fetchNotifications();
+  }, []);
 
-  const clearAll = () => setNotifications([]);
+  const fetchNotifications = async () => {
+    try {
+      const res = await axios.get("http://localhost:5000/notifications");
+      setNotifications(res.data.notifications);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
-  const toggleRead = (id) =>
-    setNotifications((prev) =>
-      prev.map((p) => (p.id === id ? { ...p, unread: !p.unread } : p))
-    );
+  const filtered = useMemo(() => {
+    return notifications
+      .filter((n) => (filterType === "all" ? true : n.type === filterType))
+      .filter(
+        (n) =>
+          n.title.toLowerCase().includes(query.toLowerCase()) ||
+          n.message.toLowerCase().includes(query.toLowerCase()),
+      )
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  }, [notifications, filterType, query]);
 
-  const deleteNotification = (id) =>
-    setNotifications((prev) => prev.filter((p) => p.id !== id));
+  const unreadCount = notifications.filter((n) => n.unread).length;
+
+  // TOGGLE READ
+  // const toggleRead = async (id) => {
+  //   try {
+  //     await axios.patch(`http://localhost:5000/notifications/${id}/read`);
+
+  //     // fresh data fetch
+  //     fetchNotifications();
+
+  //     // window.location.reload();
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // };
+
+  const toggleRead = async (id) => {
+    try {
+      const res = await axios.patch(
+        `http://localhost:5000/notifications/${id}/read`,
+      );
+
+      setNotifications((prev) =>
+        prev.map((n) =>
+          n._id === id ? { ...n, unread: res.data.notification.unread } : n,
+        ),
+      );
+
+      // navbar badge update
+      setNotificationCount((prev) =>
+        res.data.notification.unread ? prev + 1 : prev - 1,
+      );
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  // Delete
+  // const deleteNotification = async (id) => {
+  //   try {
+  //     await axios.delete(`http://localhost:5000/notifications/${id}`);
+
+  //     setNotifications((prev) => prev.filter((n) => n._id !== id));
+  //   } catch (err) {
+  //     console.log(err);
+  //   }
+  // };
+
+  const deleteNotification = async (id) => {
+    try {
+      const deleted = notifications.find((n) => n._id === id);
+
+      await axios.delete(`http://localhost:5000/notifications/${id}`);
+
+      setNotifications((prev) => prev.filter((n) => n._id !== id));
+
+      // agar unread tha to navbar badge kam karo
+      if (deleted?.unread) {
+        setNotificationCount((prev) => prev - 1);
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  // const markAllRead = async () => {
+  //   try {
+  //     await axios.patch("http://localhost:5000/notifications/read-all");
+
+  //     setNotifications((prev) => prev.map((n) => ({ ...n, unread: false })));
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // };
+
+  const markAllRead = async () => {
+    try {
+      await axios.patch("http://localhost:5000/notifications/read-all");
+
+      setNotifications((prev) => prev.map((n) => ({ ...n, unread: false })));
+
+      // navbar badge 0
+      setNotificationCount(0);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  // const clearAll = () => setNotifications([]);
+  const clearAll = () => {
+    setNotifications([]);
+    setNotificationCount(0);
+  };
+
+  // const toggleRead = (id) =>
+  //   setNotifications((prev) =>
+  //     prev.map((p) => (p.id === id ? { ...p, unread: !p.unread } : p)),
+  //   );
+
+  // const deleteNotification = (id) =>
+  //   setNotifications((prev) => prev.filter((p) => p.id !== id));
 
   const handleAction = (action, payload) => {
     // handle action: navigate, open modal, call API etc.
     // For demo we just mark read and log.
     setNotifications((prev) =>
-      prev.map((p) => (p.id === payload.id ? { ...p, unread: false } : p))
+      prev.map((p) => (p._id === payload._id ? { ...p, unread: false } : p)),
     );
     console.log("Action:", action, payload);
-    // alert(`Action: ${action} — ${payload.title}`);
-  };
-
-  // Simulate new notifications (for demo/test)
-  const simulateNewBook = () => {
-    const nextId = Date.now();
-    const newN = {
-      id: nextId,
-      type: "new_book",
-      title: "New book listed: Whispering Pines",
-      message: "Ava Turner added 'Whispering Pines' to the catalog.",
-      createdAt: new Date(),
-      unread: true,
-      meta: { bookId: nextId % 1000 },
-    };
-    setNotifications((p) => [newN, ...p]);
-  };
-
-  const simulateAddSell = () => {
-    const nextId = Date.now();
-    const newN = {
-      id: nextId,
-      type: "add_sell",
-      title: "Sell posted: City Skyline (Like New)",
-      message: "Alex Johnson posted a used copy of 'City Skyline' for sale.",
-      createdAt: new Date(),
-      unread: true,
-      meta: { sellId: nextId % 1000, price: 499 },
-    };
-    setNotifications((p) => [newN, ...p]);
   };
 
   return (
@@ -247,9 +307,15 @@ const NotificationPage = () => {
                   <option value="new_book" className="text-gray-600">
                     New Book
                   </option>
-                  <option value="add_sell" className="text-gray-600">
-                    Add Sell
+                  <option value="update_book" className="text-gray-600">
+                    Update
                   </option>
+                  <option value="delete_book" className="text-gray-600">
+                    Delete
+                  </option>
+                  {/* <option value="add_sell" className="text-gray-600">
+                    Add Sell
+                  </option> */}
                 </select>
               </div>
 
@@ -271,7 +337,7 @@ const NotificationPage = () => {
         </div>
 
         {/* Demo simulate buttons */}
-        <div className="flex gap-2 mb-6">
+        {/* <div className="flex gap-2 mb-6">
           <button
             onClick={simulateNewBook}
             className="px-3 py-2 bg-amber-400 text-black rounded text-sm font-medium"
@@ -284,7 +350,7 @@ const NotificationPage = () => {
           >
             Simulate Add Sell
           </button>
-        </div>
+        </div> */}
 
         {/* List */}
         <div className="grid gap-3" role="list">
@@ -295,8 +361,9 @@ const NotificationPage = () => {
           ) : (
             filtered.map((n) => (
               <NotificationRow
-                key={n.id}
+                key={n._id}
                 n={n}
+                books={books}
                 onToggleRead={toggleRead}
                 onDelete={deleteNotification}
                 onAction={handleAction}
@@ -309,9 +376,10 @@ const NotificationPage = () => {
         {notifications.length > 0 && (
           <div className="mt-6 text-right text-sm text-gray-400">
             <button
-              onClick={() =>
-                setNotifications((p) => p.map((x) => ({ ...x, unread: true })))
-              }
+              onClick={() => {
+                setNotifications((p) => p.map((x) => ({ ...x, unread: true })));
+                setNotificationCount(notifications.length);
+              }}
               className="px-3 py-1 rounded bg-transparent border border-gray-700 mr-2"
             >
               Mark all unread

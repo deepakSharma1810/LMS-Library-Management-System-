@@ -1,16 +1,23 @@
 import React, { useState, useEffect } from "react";
+
+import { useNotification } from "../../context/NotificationContext";
+
 import { GoBell } from "react-icons/go";
 import { CiSearch } from "react-icons/ci";
 import { CgProfile } from "react-icons/cg";
 import { IoIosArrowDown } from "react-icons/io";
 import { HiMenu, HiX } from "react-icons/hi";
 import { IoCartOutline } from "react-icons/io5";
+
 import { Link } from "react-router-dom";
 
 const Navbar = () => {
   const [showProfile, setShowProfile] = useState(false);
   const [mobileMenu, setMobileMenu] = useState(false);
   const [mobileProfileOpen, setMobileProfileOpen] = useState(false);
+
+  // unread notification count
+  // const [unreadCount, setUnreadCount] = useState(0);
 
   // Close mobile menu on Escape
   useEffect(() => {
@@ -24,6 +31,32 @@ const Navbar = () => {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
+
+  // const fetchUnreadCount = async () => {
+  //   try {
+  //     const res = await axios.get(
+  //       "http://localhost:5000/notifications/unread-count",
+  //     );
+  //     console.log(res.data);
+  //     setUnreadCount(res.data.unread);
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // };
+
+  // useEffect(() => {
+  //   fetchUnreadCount();
+
+  //   socket.on("new-notification", () => {
+  //     setUnreadCount((prev) => prev + 1);
+  //   });
+
+  //   return () => {
+  //     socket.off("new-notification");
+  //   };
+  // }, []);
+
+  const { notificationCount } = useNotification();
 
   return (
     <header className="w-full border-b bg-[#1b2e31] text-[#dbf8fa] sticky top-0 z-50">
@@ -66,10 +99,19 @@ const Navbar = () => {
               </div>
               {/* Bell icon: hidden on small screens */}
               <Link
-                to="/notification"
-                className="hidden md:inline-flex px-2 py-1.5 rounded hover:bg-[#122125] ml-2"
+                to="/notifications"
+                className="hidden z-0 md:inline-flex px-2 py-1.5 rounded hover:bg-[#122125] ml-2 relative"
               >
-                <GoBell size={20} />
+                <GoBell
+                  size={22}
+                  // className={unreadCount > 0 ? "animate-bounce" : ""}
+                />
+
+                {notificationCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] min-w-[18px] h-[18px] flex items-center justify-center rounded-full px-1">
+                    {notificationCount}
+                  </span>
+                )}
               </Link>
             </div>
           </div>
@@ -106,21 +148,31 @@ const Navbar = () => {
                 <div className="absolute right-0 mt-0 w-44 bg-[#1b2e31] text-[#dbf8fa] rounded shadow-lg border overflow-hidden z-40">
                   <Link
                     to="/profile"
+                    onClick={() => setShowProfile(false)}
                     className="block px-4 py-2 hover:bg-[#122125]"
                   >
                     My Profile
                   </Link>
                   <Link
                     to="/orders"
+                    onClick={() => setShowProfile(false)}
                     className="block px-4 py-2 hover:bg-[#122125]"
                   >
                     Orders
                   </Link>
                   <Link
-                    to="/notification"
+                    to="/notifications"
+                    onClick={() => setShowProfile(false)}
                     className="block px-4 py-2 hover:bg-[#122125]"
                   >
                     Notifications
+                  </Link>
+                  <Link
+                    to="/wishlist"
+                    onClick={() => setShowProfile(false)}
+                    className="block px-4 py-2 hover:bg-[#122125]"
+                  >
+                    Wishlist
                   </Link>
                   <button className="w-full text-left px-4 py-2 hover:bg-[#122125] text-red-500">
                     Logout
@@ -144,7 +196,7 @@ const Navbar = () => {
                     Orders
                   </Link>
                   <Link
-                    to="/notification"
+                    to="/notifications"
                     className="block px-4 py-2 hover:bg-[#13474a]"
                   >
                     Notifications
@@ -176,14 +228,12 @@ const Navbar = () => {
               : "opacity-0 pointer-events-none"
           }`}
           onClick={() => setMobileMenu(false)}
-          aria-hidden={!mobileMenu}
         />
 
         {/* Drawer panel */}
         <aside
           className={`fixed top-0 right-0 h-full w-80 max-w-[85vw] bg-[#102324] z-40 transform transition-transform duration-300 ease-in-out
             ${mobileMenu ? "translate-x-0" : "translate-x-full"}`}
-          aria-hidden={!mobileMenu}
         >
           <div className="h-16 flex items-center justify-between px-4 border-b border-gray-800">
             <div className="text-lg font-semibold">Menu</div>

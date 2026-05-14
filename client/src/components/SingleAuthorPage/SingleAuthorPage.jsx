@@ -56,7 +56,6 @@ const authors = [
 
 const SingleAuthorPage = () => {
   const { id } = useParams();
-  // const author = authors.find((a) => a.id === Number(id));
   const [author, setAuthor] = useState(null);
 
   const fetchSingleAuthor = async () => {
@@ -71,7 +70,7 @@ const SingleAuthorPage = () => {
 
   useEffect(() => {
     fetchSingleAuthor();
-  }, []);
+  }, [id]);
 
   if (!author) {
     return (
@@ -120,7 +119,10 @@ const SingleAuthorPage = () => {
               <div className="flex items-center gap-2">
                 <FaBookOpen className="text-amber-300 text-xl" />
                 <p className="text-gray-200 text-sm font-medium">
-                  {author.books} Books
+                  {Array.isArray(author.books)
+                    ? author.books.length
+                    : author.books || 0}{" "}
+                  Books
                 </p>
               </div>
 
@@ -156,15 +158,17 @@ const SingleAuthorPage = () => {
         </h2>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {/* {author.topBooks.map((book, i) => (
+          {author.topBooks?.map((book, i) => (
             <div
-              key={i}
+              key={book._id || i}
               className="bg-[#0e1a1c] p-4 rounded-lg border border-gray-700"
             >
-              <p className="text-amber-200 font-medium">{book}</p>
+              <p className="text-amber-200 font-medium">
+                {typeof book === "string" ? book : book.name}
+              </p>
               <p className="text-xs text-gray-400 mt-1">By {author.name}</p>
             </div>
-          ))} */}
+          ))}
         </div>
 
         {/* About / Description */}

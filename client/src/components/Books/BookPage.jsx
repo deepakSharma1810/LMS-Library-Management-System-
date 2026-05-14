@@ -26,9 +26,9 @@ const BookPage = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {books &&
           books.books.map((book, index) => (
-            <Link to={`/book/${index + 1}`} key={index}>
+            <Link to={`/book/${book._id}`} key={index}>
               <div
-                key={index}
+                key={book._id}
                 className="bg-[#1b2e31] rounded-xl overflow-hidden shadow-xl/40"
               >
                 <img

@@ -89,11 +89,12 @@ const bookSchema = new mongoose.Schema(
     categories: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "category",
+        ref: "Category",
       },
     ],
   },
   { timestamps: true },
 );
 
-module.exports = mongoose.model("book", bookSchema);
+const Book = mongoose.model("book", bookSchema);
+module.exports = Book;

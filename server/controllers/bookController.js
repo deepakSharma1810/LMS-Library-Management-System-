@@ -1,6 +1,8 @@
+const { io } = require("../index");
 const Author = require("../model/Author");
 const Book = require("../model/Book");
 const Category = require("../model/Category");
+const Notification = require("../model/Notification");
 
 const createBook = async (req, res) => {
   try {
@@ -81,6 +83,21 @@ const createBook = async (req, res) => {
 
     await authorObj.save();
 
+    const io = req.app.get("io");
+
+    const notification = await Notification.create({
+      type: "new_book",
+      title: `New book listed: ${name}`,
+      message: `${authorObj.name} added '${name}'`,
+      meta: { bookId: newBook._id },
+      unread: true,
+    });
+
+    console.log("Done");
+
+    // EMIT REAL-TIME EVENT
+    io.emit("new-notification", notification);
+
     res.status(201).json({ message: "Book Successfully Created" });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -111,7 +128,6 @@ const readBook = async (req, res) => {
     // console.log(id);
     // const getBook = await Book.findById(id);
     const getBook = await Book.findById(id).populate("author");
-
     if (!getBook) {
       return res.status(404).json({ message: "Book not found" });
     }
@@ -270,6 +286,19 @@ const updateBook = async (req, res) => {
 
     await existingBook.save();
 
+    const io = req.app.get("io");
+
+    const notification = await Notification.create({
+      type: "update_book",
+      title: `Book updated`,
+      message: `'${existingBook.name}' has been updated`,
+      meta: { bookId: existingBook._id },
+      unread: true,
+    });
+
+    // EMIT REAL-TIME EVENT
+    io.emit("new-notification", notification);
+
     res.status(200).json({
       message: "Book updated successfully",
       book: existingBook,
@@ -312,6 +341,19 @@ const deleteBook = async (req, res) => {
     await Author.findByIdAndUpdate(book.author, {
       $pull: { books: book._id },
     });
+
+    const io = req.app.get("io");
+
+    const notification = await Notification.create({
+      type: "delete_book",
+      title: `Book deleted`,
+      message: `'${book.name}' has been removed`,
+      meta: { bookId: book._id },
+      unread: true,
+    });
+
+    // EMIT REAL-TIME EVENT
+    io.emit("new-notification", notification);
 
     res.status(200).json({ message: "Book Successfully deleted" });
   } catch (error) {

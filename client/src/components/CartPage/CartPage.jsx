@@ -1,36 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { FiShoppingCart, FiTrash2, FiPlus, FiMinus } from "react-icons/fi";
 
-// const initialCart = [
-//   {
-//     id: 1,
-//     image: "https://example.com/images/image1.jpg",
-//     title: "Sunset Over Beach",
-//     author: "John Doe",
-//     price: 499,
-//     originalPrice: 799,
-//     qty: 1,
-//   },
-//   {
-//     id: 2,
-//     image: "https://example.com/images/image2.jpg",
-//     title: "Mountain Landscape",
-//     author: "Jane Smith",
-//     price: 299,
-//     originalPrice: 499,
-//     qty: 2,
-//   },
-//   {
-//     id: 3,
-//     image: "https://example.com/images/image3.jpg",
-//     title: "City Skyline at Night",
-//     author: "Alex Johnson",
-//     price: 399,
-//     originalPrice: 599,
-//     qty: 1,
-//   },
-// ];
-
 const formatCurrency = (n) =>
   new Intl.NumberFormat("en-IN", {
     style: "currency",
@@ -44,6 +14,8 @@ const CartPage = () => {
     const savedCart = JSON.parse(localStorage.getItem("cart")) || [];
     setCart(savedCart);
   }, []);
+
+  console.log(cart);
 
   const syncCart = (updatedCart) => {
     setCart(updatedCart);
@@ -61,13 +33,13 @@ const CartPage = () => {
 
   const updateQty = (id, delta) => {
     const updatedCart = cart.map((item) =>
-      item.id === id ? { ...item, qty: Math.max(1, item.qty + delta) } : item,
+      item._id === id ? { ...item, qty: Math.max(1, item.qty + delta) } : item,
     );
     syncCart(updatedCart);
   };
 
   const removeItem = (id) => {
-    const updatedCart = cart.filter((item) => item.id !== id);
+    const updatedCart = cart.filter((item) => item._id !== id);
     syncCart(updatedCart);
   };
 
@@ -126,8 +98,7 @@ const CartPage = () => {
                         {item.name}
                       </h2>
                       <p className="text-xs text-gray-400 mb-1">
-                        by{" "}
-                        {item.author?.length > 0 ? item.author[0].name : "N/A"}
+                        by {item.author?.[0]?.name || "N/A"}
                       </p>
 
                       <div className="flex items-center gap-3 mt-1">
@@ -150,7 +121,7 @@ const CartPage = () => {
                       {/* Qty controls */}
                       <div className="flex items-center gap-2">
                         <button
-                          onClick={() => updateQty(item.id, -1)}
+                          onClick={() => updateQty(item._id, -1)}
                           className="w-8 h-8 flex items-center justify-center rounded-full border border-gray-700 hover:bg-gray-800"
                         >
                           <FiMinus />
@@ -159,7 +130,7 @@ const CartPage = () => {
                           {item.qty}
                         </span>
                         <button
-                          onClick={() => updateQty(item.id, 1)}
+                          onClick={() => updateQty(item._id, 1)}
                           className="w-8 h-8 flex items-center justify-center rounded-full border border-gray-700 hover:bg-gray-800"
                         >
                           <FiPlus />
@@ -167,7 +138,7 @@ const CartPage = () => {
                       </div>
 
                       <button
-                        onClick={() => removeItem(item.id)}
+                        onClick={() => removeItem(item._id)}
                         className="flex items-center gap-1 text-xs text-red-300 hover:text-red-400"
                       >
                         <FiTrash2 />
@@ -228,7 +199,7 @@ const CartPage = () => {
                   {totals.discount > 0 && (
                     <p className="text-xs text-green-400 mt-2">
                       You will save {formatCurrency(totals.discount)} on this
-                      order 🎉
+                      order
                     </p>
                   )}
                 </div>

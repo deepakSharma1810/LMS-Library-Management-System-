@@ -4,67 +4,67 @@ import { IoMdHeart } from "react-icons/io";
 import { FaStar, FaShippingFast } from "react-icons/fa";
 import axios from "axios";
 
-const items = [
-  {
-    id: 1,
-    image: "https://example.com/images/image1.jpg",
-    imageName: "Sunset Over Beach",
-    favicon: "https://example.com/favicons/user1.png",
-    authorName: "John Doe",
-    viewers: 1200,
-    price: 499.0,
-    mrp: 799.0,
-    discountPercent: 38,
-    rating: 4.5,
-    reviews: 1285,
-    stock: 12,
-    description:
-      "A beautiful coffee-table book featuring sunsets, beaches and serene landscapes. High-quality prints, premium paper.",
-    features: [
-      "Hardcover",
-      "200 pages",
-      "Trim size: 8.5 x 11 inches",
-      "Publisher: NatureHouse",
-      "Language: English",
-    ],
-    isbn: "978-1-23456-789-0",
-    pages: 200,
-    publisher: "NatureHouse",
-    language: "English",
-    dimensions: "21.6 x 28 x 2 cm",
-    deliveryEstimate: "Deliver by Dec 6 - Dec 8",
-    seller: { name: "BooksWorld", rating: 4.7, sellerLink: "#" },
-  },
-  {
-    id: 2,
-    image: "https://example.com/images/image2.jpg",
-    imageName: "Mountain Landscape",
-    favicon: "https://example.com/favicons/user2.png",
-    authorName: "Jane Smith",
-    viewers: 875,
-    price: 299.0,
-    mrp: 499.0,
-    discountPercent: 40,
-    rating: 4.2,
-    reviews: 540,
-    stock: 0,
-    description:
-      "Scenic mountain photography compiled into a compact, travel-friendly volume.",
-    features: [
-      "Paperback",
-      "120 pages",
-      "Publisher: PeakPress",
-      "Language: English",
-    ],
-    isbn: "978-0-98765-432-1",
-    pages: 120,
-    publisher: "PeakPress",
-    language: "English",
-    dimensions: "15 x 22 x 1.5 cm",
-    deliveryEstimate: "Deliver by Dec 7 - Dec 9",
-    seller: { name: "PeakStore", rating: 4.4, sellerLink: "#" },
-  },
-];
+// const items = [
+//   {
+//     id: 1,
+//     image: "https://example.com/images/image1.jpg",
+//     imageName: "Sunset Over Beach",
+//     favicon: "https://example.com/favicons/user1.png",
+//     authorName: "John Doe",
+//     viewers: 1200,
+//     price: 499.0,
+//     mrp: 799.0,
+//     discountPercent: 38,
+//     rating: 4.5,
+//     reviews: 1285,
+//     stock: 12,
+//     description:
+//       "A beautiful coffee-table book featuring sunsets, beaches and serene landscapes. High-quality prints, premium paper.",
+//     features: [
+//       "Hardcover",
+//       "200 pages",
+//       "Trim size: 8.5 x 11 inches",
+//       "Publisher: NatureHouse",
+//       "Language: English",
+//     ],
+//     isbn: "978-1-23456-789-0",
+//     pages: 200,
+//     publisher: "NatureHouse",
+//     language: "English",
+//     dimensions: "21.6 x 28 x 2 cm",
+//     deliveryEstimate: "Deliver by Dec 6 - Dec 8",
+//     seller: { name: "BooksWorld", rating: 4.7, sellerLink: "#" },
+//   },
+//   {
+//     id: 2,
+//     image: "https://example.com/images/image2.jpg",
+//     imageName: "Mountain Landscape",
+//     favicon: "https://example.com/favicons/user2.png",
+//     authorName: "Jane Smith",
+//     viewers: 875,
+//     price: 299.0,
+//     mrp: 499.0,
+//     discountPercent: 40,
+//     rating: 4.2,
+//     reviews: 540,
+//     stock: 0,
+//     description:
+//       "Scenic mountain photography compiled into a compact, travel-friendly volume.",
+//     features: [
+//       "Paperback",
+//       "120 pages",
+//       "Publisher: PeakPress",
+//       "Language: English",
+//     ],
+//     isbn: "978-0-98765-432-1",
+//     pages: 120,
+//     publisher: "PeakPress",
+//     language: "English",
+//     dimensions: "15 x 22 x 1.5 cm",
+//     deliveryEstimate: "Deliver by Dec 7 - Dec 9",
+//     seller: { name: "PeakStore", rating: 4.4, sellerLink: "#" },
+//   },
+// ];
 
 const formatCurrency = (n) =>
   new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" }).format(
@@ -90,10 +90,10 @@ const Stars = ({ value }) => {
 const SingleBookPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  // const book = items.find((b) => b.id === Number(id));
   const [book, setBook] = useState(null);
   const [loading, setLoading] = useState(true);
   const [CartBtnText, setCartBtnText] = useState("Add to Cart");
+  const [readMsg, setReadMsg] = useState("");
 
   const fetchSingleBook = async () => {
     try {
@@ -110,6 +110,57 @@ const SingleBookPage = () => {
     fetchSingleBook();
   }, [id]);
 
+  const [isWishlisted, setIsWishlisted] = useState(false);
+
+  useEffect(() => {
+    if (!book) return;
+
+    const wiishlist = JSON.parse(localStorage.getItem("wishlist")) || [];
+    const exist = wiishlist.find((item) => item._id === book?._id);
+
+    setIsWishlisted(!!exist);
+  }, [book]);
+
+  const handleWishlist = () => {
+    const wishlist = JSON.parse(localStorage.getItem("wishlist")) || [];
+
+    const exist = wishlist.find((item) => item._id === book._id);
+
+    let updatedWishlist;
+
+    if (exist) {
+      // Remove
+      updatedWishlist = wishlist.filter((item) => item._id !== book._id);
+      setIsWishlisted(false);
+    } else {
+      // Add
+      updatedWishlist = [...wishlist, book];
+      setIsWishlisted(true);
+    }
+
+    localStorage.setItem("wishlist", JSON.stringify(updatedWishlist));
+  };
+
+  // const handleBuyBook = () => {
+  //   const token = localStorage.getItem("token");
+
+  //   if (!token) {
+  //     navigate("/login");
+  //     return;
+  //   }
+
+  //   let purchased = JSON.parse(localStorage.getItem("purchased")) || [];
+
+  //   if (!purchased.includes(book._id)) {
+  //     purchased.push(book._id);
+  //   }
+
+  //   localStorage.setItem("purchased", JSON.stringify(purchased));
+
+  //   // 🔥 Direct read page open
+  //   navigate(`/read/${book._id}`);
+  // };
+
   const handleBuyBook = () => {
     const token = localStorage.getItem("token");
 
@@ -118,7 +169,16 @@ const SingleBookPage = () => {
       return;
     }
 
-    navigate("/");
+    const purchased = JSON.parse(localStorage.getItem("purchasedBooks")) || [];
+
+    const alreadyBought = purchased.find((item) => item._id === book._id);
+
+    if (!alreadyBought) {
+      const updated = [...purchased, book];
+      localStorage.setItem("purchasedBooks", JSON.stringify(updated));
+    }
+
+    navigate(`/read/${book._id}`);
   };
 
   const handleAddToCart = () => {
@@ -144,6 +204,24 @@ const SingleBookPage = () => {
     setTimeout(() => {
       setCartBtnText("Add to Cart");
     }, 1000);
+  };
+
+  const handleReadBook = () => {
+    const purchased = JSON.parse(localStorage.getItem("purchasedBooks")) || [];
+
+    const isBought = purchased.find((item) => item._id === book._id);
+
+    if (!isBought) {
+      setReadMsg("Please buy this book first");
+
+      setTimeout(() => {
+        setReadMsg("");
+      }, 2000);
+
+      return;
+    }
+
+    navigate(`/read/${book._id}`);
   };
 
   if (!book) {
@@ -175,7 +253,7 @@ const SingleBookPage = () => {
             <Link to="/books" className="text-gray-300 hover:underline">
               <span>Books</span>
             </Link>{" "}
-            / <span className="text-amber-50 font-semibold">{book.name}</span>
+            / <span className="text-amber-200 font-semibold">{book.name}</span>
           </nav>
 
           <div className="bg-[#1b2e31] rounded-lg p-5 shadow">
@@ -295,21 +373,49 @@ const SingleBookPage = () => {
                 <div className="flex items-center gap-3 mt-4">
                   <button
                     onClick={handleBuyBook}
-                    className="px-4 py-2 bg-amber-400 text-black font-semibold rounded shadow hover:bg-amber-500 transition"
+                    className="px-4 py-2 bg-amber-400 text-black font-semibold rounded shadow hover:bg-amber-500 transition cursor-pointer"
                   >
                     Buy Now
                   </button>
+
+                  <button
+                    onClick={handleReadBook}
+                    className="px-4 py-2 bg-green-500 text-black font-semibold rounded hover:bg-green-600 transition cursor-pointer"
+                  >
+                    Read Book
+                  </button>
+
                   <button
                     onClick={handleAddToCart}
-                    className="px-4 py-2 bg-transparent border border-gray-600 rounded text-gray-300 hover:bg-gray-800"
+                    className="px-4 py-2 bg-transparent border border-gray-600 rounded text-gray-300 hover:bg-gray-800 cursor-pointer"
                   >
                     {CartBtnText}
                   </button>
-                  <button className="ml-auto flex items-center gap-2 text-gray-300">
-                    <IoMdHeart className="text-2xl  hover:text-red-400 transition" />{" "}
-                    Wishlist
+
+                  <button
+                    onClick={handleWishlist}
+                    className="ml-auto flex items-center gap-2 text-gray-300 cursor-pointer"
+                  >
+                    <IoMdHeart
+                      className={`text-2xl transition ${
+                        isWishlisted ? "text-red-500" : "hover:text-red-400"
+                      }`}
+                    />
+                    {isWishlisted ? "Wishlisted" : "Wishlist"}
                   </button>
                 </div>
+
+                {readMsg && (
+                  <p
+                    className={`text-sm text-red-400 mt-2 transition-all duration-300 ${
+                      readMsg
+                        ? "opacity-100 translate-y-0"
+                        : "opacity-0 -translate-y-2"
+                    }`}
+                  >
+                    {readMsg}
+                  </p>
+                )}
               </div>
             </div>
           </div>

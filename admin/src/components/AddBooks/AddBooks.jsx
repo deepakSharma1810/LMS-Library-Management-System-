@@ -1,8 +1,10 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { FaFileImage, FaFilePdf } from "react-icons/fa";
 
 const MAX_IMAGE_SIZE = 1024 * 1024 * 5;
+const MAX_PDF_SIZE = 1024 * 1024 * 20;
 
 const AddBooks = () => {
   const navigate = useNavigate();
@@ -25,6 +27,7 @@ const AddBooks = () => {
 
   const [authors, setAuthors] = useState([]);
   const [image, setImage] = useState(null);
+  const [pdf, setPdf] = useState(null);
   const [preview, setPreview] = useState(null);
   const [categories, setCategories] = useState([]);
 
@@ -84,6 +87,25 @@ const AddBooks = () => {
     setPreview(URL.createObjectURL(file));
   };
 
+  // ================= PDF CHANGE =================
+  const handlePdfChange = (e) => {
+    const file = e.target.files[0];
+    setError("");
+
+    if (!file) return;
+
+    if (file.size > MAX_PDF_SIZE) {
+      setError("Pdf size must be less than 20 MB");
+      e.target.value = "";
+      setPdf(null);
+      setPreview(null);
+      return;
+    }
+
+    setPdf(file);
+    setPreview(URL.createObjectURL(file));
+  };
+
   // ================= SUBMIT =================
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -98,6 +120,20 @@ const AddBooks = () => {
 
     try {
       let imagePath = "";
+      let pdfPath = "";
+
+      // upload pdf first
+      if (pdf) {
+        const pdfData = new FormData();
+        pdfData.append("pdf", pdf);
+
+        const uploadPdf = await axios.post(
+          "http://localhost:5000/upload-pdf",
+          pdfData,
+        );
+
+        pdfPath = uploadPdf.data.file;
+      }
 
       // upload image first
       if (image) {
@@ -116,6 +152,7 @@ const AddBooks = () => {
       await axios.post("http://localhost:5000/book", {
         ...book,
         coverPhoto: imagePath,
+        actualPdf: pdfPath,
       });
 
       // reset
@@ -135,6 +172,7 @@ const AddBooks = () => {
         categories: [],
       });
 
+      setPdf(null);
       setImage(null);
       setPreview(null);
       setLoading(false);
@@ -287,21 +325,83 @@ const AddBooks = () => {
               className="w-full p-3 rounded-lg bg-[#122125] text-white border border-[#2c4449]"
             />
 
-            <input
-              type="text"
-              name="actualPdf"
-              value={book.actualPdf}
-              onChange={handleChange}
-              placeholder="PDF URL"
-              className="w-full p-3 rounded-lg bg-[#122125] text-white border border-[#2c4449]"
-            />
+            {/* ================= FILE UPLOAD SECTION ================= */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* PDF Upload */}
+              <div className="bg-[#122125] border border-dashed border-[#2c4449] rounded-xl p-4 hover:border-amber-300 transition">
+                <p className="text-sm text-gray-300 mb-2">Upload Book PDF</p>
 
-            <input
+                <label className="flex flex-col items-center justify-center h-18 cursor-pointer">
+                  <span className="text-3xl mb-2 text-gray-300">
+                    <FaFilePdf />
+                  </span>
+                  <span className="text-xs text-gray-400">
+                    Click to upload PDF (Max 20MB)
+                  </span>
+
+                  <input
+                    type="file"
+                    accept="application/pdf"
+                    onChange={handlePdfChange}
+                    className="hidden"
+                  />
+                </label>
+
+                {pdf && (
+                  <div className="mt-3 flex items-center justify-between bg-[#1b2e31] p-2 rounded">
+                    <p className="text-xs text-gray-300 truncate">{pdf.name}</p>
+                    <button
+                      onClick={() => setPdf(null)}
+                      className="text-red-400 text-xs hover:underline cursor-pointer"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* IMAGE Upload */}
+              <div className="bg-[#122125] border border-dashed border-[#2c4449] rounded-xl p-4 hover:border-amber-300 transition">
+                <p className="text-sm text-gray-300 mb-2">Upload Cover Image</p>
+
+                <label className="flex flex-col items-center justify-center h-18 cursor-pointer">
+                  <span className="text-3xl mb-2 text-gray-300">
+                    <FaFileImage />
+                  </span>
+                  <span className="text-xs text-gray-400">
+                    Click to upload Image (Max 5MB)
+                  </span>
+
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="hidden"
+                  />
+                </label>
+
+                {image && (
+                  <div className="mt-3 flex items-center justify-between bg-[#1b2e31] p-2 rounded">
+                    <p className="text-xs text-gray-300 truncate">
+                      {image.name}
+                    </p>
+                    <button
+                      onClick={() => setImage(null)}
+                      className="text-red-400 text-xs hover:underline cursor-pointer"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* <input
               type="file"
               accept="image/*"
               onChange={handleImageChange}
               className="w-full p-2 rounded-lg bg-[#122125] text-gray-300 border border-[#2c4449]"
-            />
+            /> */}
 
             <button
               onClick={handleSubmit}

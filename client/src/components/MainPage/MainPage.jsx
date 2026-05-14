@@ -12,7 +12,7 @@ const settings = {
   dots: false,
   infinite: true,
   speed: 500,
-  slidesToShow: 3,
+  slidesToShow: 4,
   slidesToScroll: 2,
   responsive: [
     {
@@ -108,53 +108,59 @@ const MainPage = () => {
 
   return (
     <div className="w-full min-h-screen">
-      <div className="w-full h-[70vh] relative overflow-hidden">
+      <div className="w-full h-[60vh] sm:h-[65vh] md:h-[60vh] lg:h-[70vh] relative overflow-hidden">
+        {/* Background Image */}
         <img
           src="./front_page_book3.png"
-          alt=""
+          alt="Book Banner"
           className="w-full h-full object-cover"
         />
 
-        <div className="absolute inset-0 flex items-center">
-          <div className="w-full lg:w-1/2 h-full bg-gradient-to-r from-black/80 via-black/45 to-transparent backdrop-blur-[1px] flex items-center">
+        {/* Overlay Content */}
+        <div className="absolute inset-0 hidden md:flex items-center">
+          <div className="w-full md:w-[70%] lg:w-1/2 h-full bg-gradient-to-r from-black/85 via-black/55 to-transparent flex items-center">
             {/* Content Container */}
-            <div className="w-full max-w-2xl mx-auto px-6 sm:px-10 md:px-14">
+            <div className="w-full max-w-2xl px-6 sm:px-8 md:px-10 lg:px-14">
               {/* Badge */}
-              <div className="mb-6">
-                <span className="inline-flex items-center gap-2 border border-amber-300/40 text-amber-300 px-2 py-1 rounded-full text-sm font-semibold">
+              <div className="mb-4 md:mb-6">
+                <span className="inline-flex items-center gap-2 border border-amber-300/40 text-amber-300 px-3 py-1 rounded-full text-sm font-semibold">
                   📖 MYBOOKSTORE
                 </span>
               </div>
 
               {/* Heading */}
-              <h1 className="text-2xl sm:text-5xl lg:text-3xl font-bold leading-tight text-white">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-3xl font-bold leading-tight text-white">
                 Discover Your <br />
                 <span className="text-amber-300">Next Great Read</span>
               </h1>
 
               {/* Sub Text */}
-              <p className="text-gray-300  text-sm sm:text-base max-w-xl leading-7">
+              <p className="text-gray-300 text-sm sm:text-base md:text-sm lg:text-base max-w-lg leading-6 sm:leading-7 mt-3">
                 Explore thousands of books, find inspiring authors, and build
                 your perfect collection.
               </p>
 
               {/* Feature Cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-2">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4">
                 <div className="bg-black/40 rounded-2xl p-3 border border-white/10">
                   <p className="text-amber-300 text-xl mb-1">📚</p>
-                  <h3 className="text-white font-semibold">
+                  <h3 className="text-white font-semibold text-sm">
                     Thousands of Books
                   </h3>
                 </div>
 
                 <div className="bg-black/40 rounded-2xl p-3 border border-white/10">
                   <p className="text-amber-300 text-xl mb-1">⭐</p>
-                  <h3 className="text-white font-semibold">Top Authors</h3>
+                  <h3 className="text-white font-semibold text-sm">
+                    Top Authors
+                  </h3>
                 </div>
 
                 <div className="bg-black/40 rounded-2xl p-3 border border-white/10">
                   <p className="text-amber-300 text-xl mb-1">⚡</p>
-                  <h3 className="text-white font-semibold">Fast & Easy</h3>
+                  <h3 className="text-white font-semibold text-sm">
+                    Fast & Easy
+                  </h3>
                 </div>
               </div>
 
@@ -167,12 +173,12 @@ const MainPage = () => {
         </div>
       </div>
 
-      <div className="w-full flex flex-col lg:flex-row gap-8 px-4 md:px-8 py-6">
+      <div className="w-full flex flex-col lg:flex-row gap-13 px-4 md:px-8 py-6">
         {/* Left Section */}
         <div className="w-full lg:w-3/5 flex flex-col gap-6">
           {/* Previous Reading */}
           <div className="w-full">
-            <div className="flex justify-between items-center mb-3">
+            <div className="flex justify-between items-center mb-6">
               <p className="text-xl sm:text-2xl font-bold text-[#dbf8fa]">
                 Previous Reading
               </p>
@@ -185,7 +191,7 @@ const MainPage = () => {
               {books &&
                 books.books.map((book, i) => (
                   <div key={book._id} className="px-0 pb-3">
-                    <div className="bg-[#122125] rounded-lg overflow-hidden shadow-xl/40 max-w-[280px] sm:max-w-[300px] md:max-w-[320px] mx-auto hover:scale-101 transition duration-200">
+                    <div className="bg-[#122125] rounded-md overflow-hidden shadow-xl/40 max-w-[280px] sm:max-w-[300px] md:max-w-[320px] mx-auto hover:scale-101 transition duration-200">
                       <Link to={`/book/${book._id}`} key={book._id}>
                         <div className="relative">
                           <img
@@ -194,14 +200,12 @@ const MainPage = () => {
                             className="w-full h-48 object-cover rounded-t-lg"
                           />
 
-                          <div className="absolute top-2 right-2 bg-black/40 p-1 rounded-full">
+                          {/* <div className="absolute top-2 right-2 bg-black/40 p-1 rounded-full">
                             <IoMdHeart className="text-sm text-gray-300 hover:text-red-500 cursor-pointer" />
-                          </div>
+                          </div> */}
                         </div>
-                      </Link>
 
-                      <div className="p-3 flex flex-col gap-1">
-                        <Link to={`/book/${book._id}`} key={book._id}>
+                        <div className="px-3 py-2 flex flex-col gap-1">
                           <div className="flex justify-between items-center gap-2 text-amber-50 hover:text-amber-300 duration-200">
                             <p className="text-sm font-semibold  line-clamp-2 ">
                               {book.name}
@@ -210,34 +214,33 @@ const MainPage = () => {
                               ₹{book.price}
                             </span>
                           </div>
-                        </Link>
 
-                        <p className="text-xs text-gray-400">
-                          by {book.author?.[0]?.name || "Unknown"}
-                        </p>
+                          <p className="text-xs text-gray-400">
+                            by {book.author?.[0]?.name || "Unknown"}
+                          </p>
 
-                        {/* 📂 Category (compact) */}
-                        <div className="flex gap-1 overflow-hidden">
-                          {book.category?.length > 0 ? (
-                            book.category.slice(0, 2).map((cat, index) => (
-                              <span
-                                key={index}
-                                className="text-[9px] px-2 py-[1px] bg-[#234046] text-amber-300 rounded-full truncate"
-                              >
-                                {cat.name || cat}
+                          {/* 📂 Category (compact) */}
+                          <div className="flex gap-1 overflow-hidden">
+                            {book.categories?.length > 0 ? (
+                              book.categories.slice(0, 2).map((cat, index) => (
+                                <span
+                                  key={index}
+                                  className="text-[9px] px-2 py-[1px] bg-[#234046] text-amber-300 rounded-full truncate"
+                                >
+                                  {cat.name || cat}
+                                </span>
+                              ))
+                            ) : (
+                              <span className="text-[9px] text-gray-400">
+                                No Category
                               </span>
-                            ))
-                          ) : (
-                            <span className="text-[9px] text-gray-400">
-                              No Category
-                            </span>
-                          )}
-                        </div>
+                            )}
+                          </div>
 
-                        {/* ⭐ Bottom Row */}
-                        <div className="flex justify-between items-center mt-1">
+                          {/* ⭐ Bottom Row */}
+                          {/* <div className="flex justify-between items-center mt-1"> */}
                           {/* 🛒 Add to Cart */}
-                          <button
+                          {/* <button
                             onClick={() => addToCart(book)}
                             className={`text-xs px-2 py-1 rounded font-semibold cursor-pointer ${
                               addedBookId === book._id
@@ -246,14 +249,15 @@ const MainPage = () => {
                             }`}
                           >
                             {addedBookId === book._id ? "Added" : "Add to cart"}
-                          </button>
+                          </button> */}
 
                           {/* ⭐ Rating */}
-                          <div className="flex text-orange-400 text-xs">
+                          {/* <div className="flex text-orange-400 text-xs">
                             ★★★★☆
-                          </div>
+                          </div> */}
+                          {/* </div> */}
                         </div>
-                      </div>
+                      </Link>
                     </div>
                   </div>
                 ))}
@@ -262,7 +266,7 @@ const MainPage = () => {
 
           {/* Subjects Section */}
           <div className="w-full">
-            <p className="text-xl font-bold text-[#dbf8fa] mb-3">
+            <p className="text-xl font-bold text-[#dbf8fa] mb-6">
               Subjects section
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
@@ -276,7 +280,7 @@ const MainPage = () => {
               ].map((subject, i) => (
                 <div
                   key={subject}
-                  className={`flex justify-between items-center px-4 py-2 rounded-xl ${
+                  className={`flex justify-between items-center px-4 py-2 rounded-md ${
                     subject === "Cooking" ? "bg-amber-300" : "bg-[#234046]"
                   }`}
                 >
@@ -301,20 +305,22 @@ const MainPage = () => {
 
           {/* New Books */}
           <div className="w-full">
-            <div className="flex justify-between items-center mb-3">
+            <div className="flex justify-between items-center mb-6">
               <p className="text-xl font-bold text-[#dbf8fa]">New books</p>
-              <p className="text-amber-300">Show all</p>
+              <Link to="/books">
+                <p className="text-amber-300 hover:text-amber-500">Show all</p>
+              </Link>
             </div>
             <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
               {books &&
                 books?.books?.map((book) => (
                   <Link to={`/book/${book._id}`} key={book._id}>
-                    <div className="min-w-[155px] sm:min-w-[180px] md:min-w-[200px] lg:min-w-[180px] flex-shrink-0 flex flex-col rounded-xl shadow-xl/40 hover:scale-101 transition duration-300">
-                      <div className="w-full h-40">
+                    <div className="min-w-[155px] sm:min-w-[180px] md:min-w-[200px] lg:min-w-[140px] flex-shrink-0 flex flex-col rounded-md shadow-xl/40 hover:scale-101 transition duration-300">
+                      <div className="w-full h-32">
                         <img
                           src={`http://localhost:5000/${book.coverPhoto}`}
                           alt={book.name}
-                          className="w-full h-full object-cover border rounded-xl"
+                          className="w-full h-full object-cover border rounded-md"
                         />
                       </div>
                       <div className="p-2">
@@ -338,22 +344,26 @@ const MainPage = () => {
         </div>
 
         {/* Right Section */}
-        <div className="w-full lg:w-2/5 flex flex-col gap-6">
+        <div className="w-full lg:w-2/5 flex flex-col gap-8">
           {/* Popular Books */}
           <div className="w-full">
-            <div className="flex justify-between items-center mb-[18px]">
+            <div className="flex justify-between items-center mb-7">
               <p className="text-xl font-bold text-[#dbf8fa]">Popular books</p>
-              <p className="text-amber-300 text-sm">Show all</p>
+              <Link to="/books">
+                <p className="text-amber-300 text-sm hover:text-amber-500">
+                  Show all
+                </p>
+              </Link>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-3 sm:gap-4">
               {books &&
                 books?.books?.slice(0, 6).map((book) => (
                   <Link to={`/book/${book._id}`} key={book._id}>
-                    <div className="rounded-xl shadow-xl/40 hover:scale-101 transition duration-300 bg-[#122125] overflow-hidden">
+                    <div className="rounded-md shadow-xl/40 hover:scale-101 transition duration-300 bg-[#122125] overflow-hidden">
                       <img
                         src={`http://localhost:5000/${book.coverPhoto}`}
                         alt=""
-                        className="w-full h-32 object-cover rounded-xl border"
+                        className="w-full h-32 object-cover rounded-md border"
                       />
                       <div className="p-2">
                         <p className="text-sm font-bold text-amber-50 truncate">
@@ -372,25 +382,29 @@ const MainPage = () => {
 
           {/* Writers and Authors */}
           <div className="w-full">
-            <div className="flex justify-between items-center mb-3">
+            <div className="flex justify-between items-center mb-6">
               <p className="text-xl font-bold text-[#dbf8fa]">
                 Writers and Authors
               </p>
-              <p className="text-amber-300 text-sm">Show all</p>
+              <Link to="/authors">
+                <p className="text-amber-300 text-sm hover:text-amber-500">
+                  Show all
+                </p>
+              </Link>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {authors &&
                 authors?.slice(0, 6).map((author, i) => (
                   <Link to={`/author/${author._id}`} key={author._id}>
-                    <div className="bg-[#122125] rounded-xl p-3 sm:p-4 flex flex-col justify-between min-h-[160px] hover:scale-101 transition duration-300">
-                      <div className="flex justify-between items-center mb-2">
+                    <div className="bg-[#122125] rounded-md p-3 flex flex-col justify-between min-h-[142px] hover:scale-101 transition duration-300">
+                      <div className="flex justify-between items-center">
                         <img
                           src={`http://localhost:5000/${author.coverPhoto}`}
                           alt=""
                           className="w-12 h-12 rounded-full border border-amber-50"
                         />
                         <div className="text-right">
-                          {/* <p className="text-xs text-amber-300">766</p> */}
+                          <p className="text-xs text-amber-300">766</p>
                           <p className="text-xs text-gray-400">Books</p>
                         </div>
                       </div>
