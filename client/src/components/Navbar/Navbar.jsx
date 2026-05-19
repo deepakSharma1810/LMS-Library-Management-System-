@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
 
 import { useNotification } from "../../context/NotificationContext";
+import { useTheme } from "../../context/ThemeContext";
+
+import { MdDarkMode, MdLightMode } from "react-icons/md";
 
 import { GoBell } from "react-icons/go";
 import { CiSearch } from "react-icons/ci";
@@ -12,12 +15,11 @@ import { IoCartOutline } from "react-icons/io5";
 import { Link } from "react-router-dom";
 
 const Navbar = () => {
+  const { theme, toggleTheme } = useTheme();
+
   const [showProfile, setShowProfile] = useState(false);
   const [mobileMenu, setMobileMenu] = useState(false);
   const [mobileProfileOpen, setMobileProfileOpen] = useState(false);
-
-  // unread notification count
-  // const [unreadCount, setUnreadCount] = useState(0);
 
   // Close mobile menu on Escape
   useEffect(() => {
@@ -31,30 +33,6 @@ const Navbar = () => {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
-
-  // const fetchUnreadCount = async () => {
-  //   try {
-  //     const res = await axios.get(
-  //       "http://localhost:5000/notifications/unread-count",
-  //     );
-  //     console.log(res.data);
-  //     setUnreadCount(res.data.unread);
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  // };
-
-  // useEffect(() => {
-  //   fetchUnreadCount();
-
-  //   socket.on("new-notification", () => {
-  //     setUnreadCount((prev) => prev + 1);
-  //   });
-
-  //   return () => {
-  //     socket.off("new-notification");
-  //   };
-  // }, []);
 
   const { notificationCount } = useNotification();
 
@@ -126,6 +104,17 @@ const Navbar = () => {
               <IoCartOutline size={20} />
               <span className="hidden md:inline">Cart</span>
             </Link>
+
+            <button
+              onClick={toggleTheme}
+              className="p-2 rounded hover:bg-gray-700"
+            >
+              {theme === "dark" ? (
+                <MdLightMode size={20} />
+              ) : (
+                <MdDarkMode size={20} />
+              )}
+            </button>
 
             {/* Profile: hover shows (desktop), click toggles (mobile) */}
             <div

@@ -92,6 +92,15 @@ const bookSchema = new mongoose.Schema(
         ref: "Category",
       },
     ],
+    averageRating: {
+      type: Number,
+      default: 0,
+    },
+
+    totalReviews: {
+      type: Number,
+      default: 0,
+    },
   },
   { timestamps: true },
 );

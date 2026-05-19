@@ -1,70 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { IoMdHeart } from "react-icons/io";
-import { FaStar, FaShippingFast } from "react-icons/fa";
+import { FaStar, FaShippingFast, FaBook } from "react-icons/fa";
+import { BsBoxSeamFill } from "react-icons/bs";
 import axios from "axios";
-
-// const items = [
-//   {
-//     id: 1,
-//     image: "https://example.com/images/image1.jpg",
-//     imageName: "Sunset Over Beach",
-//     favicon: "https://example.com/favicons/user1.png",
-//     authorName: "John Doe",
-//     viewers: 1200,
-//     price: 499.0,
-//     mrp: 799.0,
-//     discountPercent: 38,
-//     rating: 4.5,
-//     reviews: 1285,
-//     stock: 12,
-//     description:
-//       "A beautiful coffee-table book featuring sunsets, beaches and serene landscapes. High-quality prints, premium paper.",
-//     features: [
-//       "Hardcover",
-//       "200 pages",
-//       "Trim size: 8.5 x 11 inches",
-//       "Publisher: NatureHouse",
-//       "Language: English",
-//     ],
-//     isbn: "978-1-23456-789-0",
-//     pages: 200,
-//     publisher: "NatureHouse",
-//     language: "English",
-//     dimensions: "21.6 x 28 x 2 cm",
-//     deliveryEstimate: "Deliver by Dec 6 - Dec 8",
-//     seller: { name: "BooksWorld", rating: 4.7, sellerLink: "#" },
-//   },
-//   {
-//     id: 2,
-//     image: "https://example.com/images/image2.jpg",
-//     imageName: "Mountain Landscape",
-//     favicon: "https://example.com/favicons/user2.png",
-//     authorName: "Jane Smith",
-//     viewers: 875,
-//     price: 299.0,
-//     mrp: 499.0,
-//     discountPercent: 40,
-//     rating: 4.2,
-//     reviews: 540,
-//     stock: 0,
-//     description:
-//       "Scenic mountain photography compiled into a compact, travel-friendly volume.",
-//     features: [
-//       "Paperback",
-//       "120 pages",
-//       "Publisher: PeakPress",
-//       "Language: English",
-//     ],
-//     isbn: "978-0-98765-432-1",
-//     pages: 120,
-//     publisher: "PeakPress",
-//     language: "English",
-//     dimensions: "15 x 22 x 1.5 cm",
-//     deliveryEstimate: "Deliver by Dec 7 - Dec 9",
-//     seller: { name: "PeakStore", rating: 4.4, sellerLink: "#" },
-//   },
-// ];
 
 const formatCurrency = (n) =>
   new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" }).format(
@@ -95,6 +34,11 @@ const SingleBookPage = () => {
   const [CartBtnText, setCartBtnText] = useState("Add to Cart");
   const [readMsg, setReadMsg] = useState("");
 
+  const [userRating, setUserRating] = useState(0);
+  const [reviewText, setReviewText] = useState("");
+  const [ratingsList, setRatingsList] = useState([]);
+  const [hoverRating, setHoverRating] = useState(0);
+
   const fetchSingleBook = async () => {
     try {
       const res = await axios.get(`http://localhost:5000/book/${id}`);
@@ -110,7 +54,38 @@ const SingleBookPage = () => {
     fetchSingleBook();
   }, [id]);
 
+  const fetchRatings = async () => {
+    try {
+      const res = await axios.get(`http://localhost:5000/rating/${book._id}`);
+      setRatingsList(res.data.ratings);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  useEffect(() => {
+    if (book?._id) fetchRatings();
+  }, [book]);
+
+  const submitRating = async () => {
+    try {
+      await axios.post("http://localhost:5000/rating/add", {
+        rating: userRating,
+        review: reviewText,
+        bookId: book._id,
+        userId: localStorage.getItem("userId"),
+      });
+
+      fetchRatings();
+      setUserRating(0);
+      setReviewText("");
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   const [isWishlisted, setIsWishlisted] = useState(false);
+  const [showPurchaseModal, setShowPurchaseModal] = useState(false);
 
   useEffect(() => {
     if (!book) return;
@@ -141,26 +116,6 @@ const SingleBookPage = () => {
     localStorage.setItem("wishlist", JSON.stringify(updatedWishlist));
   };
 
-  // const handleBuyBook = () => {
-  //   const token = localStorage.getItem("token");
-
-  //   if (!token) {
-  //     navigate("/login");
-  //     return;
-  //   }
-
-  //   let purchased = JSON.parse(localStorage.getItem("purchased")) || [];
-
-  //   if (!purchased.includes(book._id)) {
-  //     purchased.push(book._id);
-  //   }
-
-  //   localStorage.setItem("purchased", JSON.stringify(purchased));
-
-  //   // 🔥 Direct read page open
-  //   navigate(`/read/${book._id}`);
-  // };
-
   const handleBuyBook = () => {
     const token = localStorage.getItem("token");
 
@@ -178,7 +133,7 @@ const SingleBookPage = () => {
       localStorage.setItem("purchasedBooks", JSON.stringify(updated));
     }
 
-    navigate(`/read/${book._id}`);
+    // navigate(`/read/${book._id}`);
   };
 
   const handleAddToCart = () => {
@@ -206,22 +161,50 @@ const SingleBookPage = () => {
     }, 1000);
   };
 
-  const handleReadBook = () => {
-    const purchased = JSON.parse(localStorage.getItem("purchasedBooks")) || [];
+  const handleOnlinePurchase = () => {
+    const token = localStorage.getItem("token");
 
-    const isBought = purchased.find((item) => item._id === book._id);
-
-    if (!isBought) {
-      setReadMsg("Please buy this book first");
-
-      setTimeout(() => {
-        setReadMsg("");
-      }, 2000);
-
+    if (!token) {
+      navigate("/login");
       return;
     }
 
+    const purchased = JSON.parse(localStorage.getItem("purchasedBooks")) || [];
+
+    const alreadyBought = purchased.find((item) => item._id === book._id);
+
+    if (!alreadyBought) {
+      const updated = [...purchased, { ...book, type: "online" }];
+      localStorage.setItem("purchasedBooks", JSON.stringify(updated));
+    }
+
     navigate(`/read/${book._id}`);
+  };
+
+  const handlePhysicalPurchase = () => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+
+    const orders = JSON.parse(localStorage.getItem("orders")) || [];
+
+    const updatedOrders = [...orders, { ...book, type: "physical" }];
+
+    localStorage.setItem("orders", JSON.stringify(updatedOrders));
+
+    alert("Order placed successfully ");
+  };
+
+  const deleteReview = async (id) => {
+    try {
+      await axios.delete(`http://localhost:5000/rating/${id}`);
+      fetchRatings();
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   if (!book) {
@@ -356,35 +339,36 @@ const SingleBookPage = () => {
                   </ul>
                 </div>
 
-                <div className="mb-3">
+                {/* <div className="mb-3">
                   <h4 className="text-sm text-gray-400 mb-2">Key features</h4>
                   <div className="flex flex-wrap gap-2">
-                    {/* {items.features.map((f, i) => (
+                    {book.features.map((f, i) => (
                       <span
                         key={i}
                         className="text-xs bg-[#0f2a2c] px-3 py-1 rounded-full text-gray-300"
                       >
                         {f}
                       </span>
-                    ))} */}
+                    ))}
                   </div>
-                </div>
+                </div> */}
 
                 <div className="flex items-center gap-3 mt-4">
                   <button
-                    onClick={handleBuyBook}
+                    onClick={() => setShowPurchaseModal(true)}
                     className="px-4 py-2 bg-amber-400 text-black font-semibold rounded shadow hover:bg-amber-500 transition cursor-pointer"
                   >
                     Buy Now
                   </button>
 
-                  <button
-                    onClick={handleReadBook}
-                    className="px-4 py-2 bg-green-500 text-black font-semibold rounded hover:bg-green-600 transition cursor-pointer"
-                  >
-                    Read Book
-                  </button>
-
+                  <Link to={`/read/${id}`}>
+                    <button
+                      // onClick={handleReadBook}
+                      className="px-4 py-2 bg-green-500 text-black font-semibold rounded hover:bg-green-600 transition cursor-pointer"
+                    >
+                      Read Book
+                    </button>
+                  </Link>
                   <button
                     onClick={handleAddToCart}
                     className="px-4 py-2 bg-transparent border border-gray-600 rounded text-gray-300 hover:bg-gray-800 cursor-pointer"
@@ -405,6 +389,83 @@ const SingleBookPage = () => {
                   </button>
                 </div>
 
+                {showPurchaseModal && (
+                  <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 px-4">
+                    <div className="bg-[#0f1f23] border border-gray-700 rounded-2xl w-full max-w-lg p-6 shadow-2xl animate-fadeIn">
+                      {/* Header */}
+                      <h2 className="text-2xl font-bold text-center text-[#dbf8fa] mb-1">
+                        Choose Your Format
+                      </h2>
+                      <p className="text-center text-gray-400 text-sm mb-6">
+                        Select how you want to enjoy this book
+                      </p>
+
+                      {/* Options */}
+                      <div className="grid gap-4">
+                        {/* 📖 Online Book */}
+                        <div
+                          onClick={() => {
+                            handleOnlinePurchase();
+                            setShowPurchaseModal(false);
+                          }}
+                          className="cursor-pointer border border-gray-700 hover:border-green-400 bg-[#122a2f] hover:bg-[#16383f] rounded-xl p-4 flex items-center gap-4 transition-all duration-300 group"
+                        >
+                          <div className="text-3xl">
+                            <FaBook />
+                          </div>
+
+                          <div className="flex-1">
+                            <h3 className="text-lg font-semibold text-white group-hover:text-green-300">
+                              Online Book
+                            </h3>
+                            <p className="text-sm text-gray-400">
+                              Read instantly in our reader (PDF)
+                            </p>
+                          </div>
+
+                          <div className="text-green-400 font-semibold text-sm">
+                            Instant
+                          </div>
+                        </div>
+
+                        {/* 📦 Physical Book */}
+                        <div
+                          onClick={() => {
+                            handlePhysicalPurchase();
+                            setShowPurchaseModal(false);
+                          }}
+                          className="cursor-pointer border border-gray-700 hover:border-blue-400 bg-[#122a2f] hover:bg-[#16383f] rounded-xl p-4 flex items-center gap-4 transition-all duration-300 group"
+                        >
+                          <div className="text-3xl">
+                            <BsBoxSeamFill />
+                          </div>
+
+                          <div className="flex-1">
+                            <h3 className="text-lg font-semibold text-white group-hover:text-blue-300">
+                              Physical Book
+                            </h3>
+                            <p className="text-sm text-gray-400">
+                              Get a printed copy delivered to your home
+                            </p>
+                          </div>
+
+                          <div className="text-blue-400 font-semibold text-sm">
+                            2-5 Days
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Footer */}
+                      <button
+                        onClick={() => setShowPurchaseModal(false)}
+                        className="w-full mt-6 py-2 rounded-lg border border-gray-600 text-gray-400 hover:text-white hover:border-gray-400 transition"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                )}
+
                 {readMsg && (
                   <p
                     className={`text-sm text-red-400 mt-2 transition-all duration-300 ${
@@ -420,26 +481,71 @@ const SingleBookPage = () => {
             </div>
           </div>
 
-          {/* Reviews preview */}
-          <div className="mt-6 bg-[#1b2e31] p-5 rounded-lg shadow">
-            <h3 className="text-lg font-semibold text-[#dbf8fa] mb-3">
-              Customer reviews
-            </h3>
-            <div className="flex items-start gap-4">
-              <div className="text-4xl font-bold text-amber-300">
-                {book.rating}
-              </div>
-              <div>
-                <Stars value={book.rating} />
-                <p className="text-sm text-gray-400">
-                  {book.reviews} global ratings
-                </p>
-                <p className="mt-3 text-gray-300">
-                  Most buyers recommend this book for nature & photography
-                  lovers.
-                </p>
-              </div>
+          {/* Give Rating */}
+          <div className="mt-6 bg-[#1b2e31] p-5 rounded-lg">
+            <h3 className="text-lg font-semibold mb-3">Give Rating</h3>
+
+            {/* Stars */}
+            <div className="flex gap-2 mb-3">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <FaStar
+                  key={star}
+                  onClick={() => setUserRating(star)}
+                  onMouseEnter={() => setHoverRating(star)}
+                  onMouseLeave={() => setHoverRating(0)}
+                  className={`cursor-pointer text-2xl transition duration-200 ${
+                    star <= (hoverRating || userRating)
+                      ? "text-yellow-400 scale-110"
+                      : "text-gray-500"
+                  }`}
+                />
+              ))}
             </div>
+
+            {/* Review */}
+            <textarea
+              value={reviewText}
+              onChange={(e) => setReviewText(e.target.value)}
+              placeholder="Write review..."
+              className="w-full p-2 rounded bg-[#0f2a2c]"
+            />
+
+            <button
+              onClick={submitRating}
+              className="mt-3 px-4 py-2 bg-amber-400 hover:bg-amber-500 font-semibold transition text-black rounded cursor-pointer"
+            >
+              Submit
+            </button>
+          </div>
+
+          {/* Show all reviews */}
+          <div className="mt-6 bg-[#1b2e31] p-5 rounded-lg">
+            <h3 className="text-lg font-semibold mb-3">All Reviews</h3>
+
+            {ratingsList.map((r) => (
+              <div key={r._id} className="border-b border-gray-700 py-3">
+                <div className="flex justify-between items-center">
+                  <p className="text-sm text-amber-300">
+                    {r.user?.name || "User"}
+                  </p>
+
+                  <button
+                    onClick={() => deleteReview(r._id)}
+                    className="text-xs text-red-400 hover:text-red-500 cursor-pointer"
+                  >
+                    Delete
+                  </button>
+                </div>
+
+                <div className="flex text-yellow-400">
+                  {[...Array(r.rating)].map((_, i) => (
+                    <FaStar key={i} />
+                  ))}
+                </div>
+
+                <p className="text-gray-300 text-sm mt-1">{r.review}</p>
+              </div>
+            ))}
           </div>
         </div>
       </div>

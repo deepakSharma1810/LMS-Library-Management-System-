@@ -14,7 +14,11 @@ const app = express();
 const connection = require("./config/connection");
 
 // middleware
-app.use("/uploads", express.static("uploads"));
+app.use(
+  "/uploads",
+  cors({ origin: "http://localhost:5173" }),
+  express.static("uploads"),
+);
 app.use(bodyParser.json());
 app.use(cors());
 app.use(express.json());
@@ -25,6 +29,7 @@ const categoryRoutes = require("./routes/categoryRoutes");
 const bookRoutes = require("./routes/bookRoutes");
 const authorRoutes = require("./routes/authorRoutes");
 const notificationRoutes = require("./routes/notificationRoutes");
+const ratingRoutes = require("./routes/ratingRoutes");
 const ImageRouter = require("./middleware/multer");
 
 app.get("/", (req, res) => {
@@ -37,6 +42,7 @@ app.use("/book", bookRoutes);
 app.use("/book/status", bookRoutes);
 app.use("/author", authorRoutes);
 app.use("/notifications", notificationRoutes);
+app.use("/rating", ratingRoutes);
 app.use("/", ImageRouter);
 
 //  SOCKET SERVER

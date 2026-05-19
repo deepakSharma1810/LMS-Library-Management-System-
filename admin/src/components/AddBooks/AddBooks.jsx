@@ -68,6 +68,21 @@ const AddBooks = () => {
     setBook({ ...book, [e.target.name]: e.target.value });
   };
 
+  const handleDimensionChange = (value) => {
+    // numbers extract karo (10 20 30 etc)
+    const nums = value.match(/\d+/g);
+
+    if (!nums) {
+      setBook({ ...book, dimensions: "" });
+      return;
+    }
+
+    // format: 10 x 20 x 30 cm
+    const formatted = nums.join(" x ") + " cm";
+
+    setBook({ ...book, dimensions: formatted });
+  };
+
   // ================= IMAGE CHANGE =================
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -311,8 +326,8 @@ const AddBooks = () => {
               type="text"
               name="dimensions"
               value={book.dimensions}
-              onChange={handleChange}
-              placeholder="Dimensions (e.g. 21.6 x 28 x 2 cm)"
+              onChange={(e) => handleDimensionChange(e.target.value)}
+              placeholder="Enter dimensions (e.g. 10 10 10)"
               className="w-full p-3 rounded-lg bg-[#122125] text-white border border-[#2c4449]"
             />
 

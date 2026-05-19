@@ -152,20 +152,6 @@ const NotificationPage = () => {
 
   const unreadCount = notifications.filter((n) => n.unread).length;
 
-  // TOGGLE READ
-  // const toggleRead = async (id) => {
-  //   try {
-  //     await axios.patch(`http://localhost:5000/notifications/${id}/read`);
-
-  //     // fresh data fetch
-  //     fetchNotifications();
-
-  //     // window.location.reload();
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  // };
-
   const toggleRead = async (id) => {
     try {
       const res = await axios.patch(
@@ -187,17 +173,6 @@ const NotificationPage = () => {
     }
   };
 
-  // Delete
-  // const deleteNotification = async (id) => {
-  //   try {
-  //     await axios.delete(`http://localhost:5000/notifications/${id}`);
-
-  //     setNotifications((prev) => prev.filter((n) => n._id !== id));
-  //   } catch (err) {
-  //     console.log(err);
-  //   }
-  // };
-
   const deleteNotification = async (id) => {
     try {
       const deleted = notifications.find((n) => n._id === id);
@@ -215,16 +190,6 @@ const NotificationPage = () => {
     }
   };
 
-  // const markAllRead = async () => {
-  //   try {
-  //     await axios.patch("http://localhost:5000/notifications/read-all");
-
-  //     setNotifications((prev) => prev.map((n) => ({ ...n, unread: false })));
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  // };
-
   const markAllRead = async () => {
     try {
       await axios.patch("http://localhost:5000/notifications/read-all");
@@ -238,19 +203,10 @@ const NotificationPage = () => {
     }
   };
 
-  // const clearAll = () => setNotifications([]);
   const clearAll = () => {
     setNotifications([]);
     setNotificationCount(0);
   };
-
-  // const toggleRead = (id) =>
-  //   setNotifications((prev) =>
-  //     prev.map((p) => (p.id === id ? { ...p, unread: !p.unread } : p)),
-  //   );
-
-  // const deleteNotification = (id) =>
-  //   setNotifications((prev) => prev.filter((p) => p.id !== id));
 
   const handleAction = (action, payload) => {
     // handle action: navigate, open modal, call API etc.

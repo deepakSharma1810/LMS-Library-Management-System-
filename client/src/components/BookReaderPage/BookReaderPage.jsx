@@ -1,98 +1,19 @@
-// import React, { useState, useEffect } from "react";
-// import { Document, Page } from "react-pdf";
-// import { useParams } from "react-router-dom";
-// import axios from "axios";
-
-// const BookReaderPage = () => {
-//   const { id } = useParams();
-
-//   const [book, setBook] = useState(null);
-//   const [numPages, setNumPages] = useState(null);
-//   const [pageNumber, setPageNumber] = useState(1);
-
-//   // 🔥 Fetch book
-//   useEffect(() => {
-//     const fetchBook = async () => {
-//       const res = await axios.get(`http://localhost:5000/book/${id}`);
-//       setBook(res.data.getBook);
-
-//       // Load last page from localStorage
-//       const savedPage = localStorage.getItem(`progress-${id}`);
-//       if (savedPage) setPageNumber(Number(savedPage));
-//     };
-
-//     fetchBook();
-//   }, [id]);
-
-//   // ✅ Save progress
-//   useEffect(() => {
-//     localStorage.setItem(`progress-${id}`, pageNumber);
-//   }, [pageNumber]);
-
-//   if (!book) return <p className="text-white">Loading...</p>;
-
-//   const progress = numPages ? Math.round((pageNumber / numPages) * 100) : 0;
-
-//   return (
-//     <div className="min-h-screen bg-[#0e1a1c] text-white p-6">
-//       <h2 className="text-xl mb-3">{book.name}</h2>
-
-//       {/* Progress */}
-//       <div className="mb-4">
-//         <p className="text-sm text-gray-400">Progress: {progress}%</p>
-//         <div className="w-full bg-gray-700 h-2 rounded">
-//           <div
-//             className="bg-amber-400 h-2 rounded"
-//             style={{ width: `${progress}%` }}
-//           />
-//         </div>
-//       </div>
-
-//       {/* PDF Viewer */}
-//       <div className="flex justify-center">
-//         <Document
-//           file={`http://localhost:5000/${book.actualPdf}`}
-//           onLoadSuccess={({ numPages }) => setNumPages(numPages)}
-//         >
-//           <Page pageNumber={pageNumber} />
-//         </Document>
-//       </div>
-
-//       {/* Controls */}
-//       <div className="flex justify-center gap-4 mt-4">
-//         <button
-//           disabled={pageNumber <= 1}
-//           onClick={() => setPageNumber(pageNumber - 1)}
-//           className="px-4 py-2 bg-gray-700 rounded"
-//         >
-//           Prev
-//         </button>
-
-//         <span>
-//           Page {pageNumber} of {numPages}
-//         </span>
-
-//         <button
-//           disabled={pageNumber >= numPages}
-//           onClick={() => setPageNumber(pageNumber + 1)}
-//           className="px-4 py-2 bg-gray-700 rounded"
-//         >
-//           Next
-//         </button>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default BookReaderPage;
-
 import React, { useState, useEffect } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 
-// 👇 Required for PDF worker
-pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+import "react-pdf/dist/Page/AnnotationLayer.css";
+import "react-pdf/dist/Page/TextLayer.css";
+
+import workerSrc from "pdfjs-dist/build/pdf.worker.min?url";
+
+pdfjs.GlobalWorkerOptions.workerSrc = workerSrc;
+
+// pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+//   "pdfjs-dist/build/pdf.worker.min.js",
+//   import.meta.url,
+// ).toString();
 
 const BookReaderPage = () => {
   const { id } = useParams();
@@ -101,93 +22,184 @@ const BookReaderPage = () => {
   const [book, setBook] = useState(null);
   const [numPages, setNumPages] = useState(0);
   const [pageNumber, setPageNumber] = useState(1);
+  const [scale, setScale] = useState(1.2);
+  const [loading, setLoading] = useState(true);
 
-  // ✅ Check purchase + fetch book
-  useEffect(() => {
-    const purchased = JSON.parse(localStorage.getItem("purchased")) || [];
+  // ================= FETCH BOOK =================
+  const fetchBook = async () => {
+    try {
+      const res = await axios.get(`http://localhost:5000/book/${id}`);
 
-    if (!purchased.includes(id)) {
-      alert("Please purchase this book first 📚");
-      navigate("/");
-      return;
-    }
+      setBook(res.data.getBook);
+      console.log(res.data.getBook);
 
-    const fetchBook = async () => {
-      try {
-        const res = await axios.get(`http://localhost:5000/book/${id}`);
-        setBook(res.data.getBook);
+      // saved progress
+      const savedPage = localStorage.getItem(`progress-${id}`);
 
-        // Load saved progress
-        const savedPage = localStorage.getItem(`progress-${id}`);
-        if (savedPage) setPageNumber(Number(savedPage));
-      } catch (err) {
-        console.log(err);
+      if (savedPage) {
+        setPageNumber(Number(savedPage));
       }
-    };
 
+      setLoading(false);
+    } catch (err) {
+      console.log(err);
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchBook();
   }, [id, navigate]);
 
-  // ✅ Save progress
+  // ================= SAVE PROGRESS =================
   useEffect(() => {
     localStorage.setItem(`progress-${id}`, pageNumber);
   }, [pageNumber, id]);
 
+  // ================= KEYBOARD SUPPORT =================
+  useEffect(() => {
+    const handleKey = (e) => {
+      if (e.key === "ArrowRight" && pageNumber < numPages) {
+        setPageNumber((p) => p + 1);
+      }
+
+      if (e.key === "ArrowLeft" && pageNumber > 1) {
+        setPageNumber((p) => p - 1);
+      }
+    };
+
+    window.addEventListener("keydown", handleKey);
+
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [pageNumber, numPages]);
+
+  // ================= LOADING =================
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#081013] flex justify-center items-center text-white text-xl">
+        Loading Book...
+      </div>
+    );
+  }
+
   if (!book) {
     return (
-      <div className="min-h-screen flex justify-center items-center text-white bg-[#0e1a1c]">
-        Loading Book...
+      <div className="min-h-screen bg-[#081013] flex justify-center items-center text-red-400">
+        Book Not Found
       </div>
     );
   }
 
   const progress = numPages ? Math.round((pageNumber / numPages) * 100) : 0;
 
-  return (
-    <div className="min-h-screen bg-[#0e1a1c] text-white px-4 py-6">
-      <div className="max-w-4xl mx-auto">
-        {/* Title */}
-        <h1 className="text-2xl font-bold mb-4 text-[#dbf8fa]">{book.name}</h1>
+  const pdfUrl = `http://localhost:5000/${book.actualPdf.replace(/\\/g, "/")}`;
 
-        {/* Progress */}
-        <div className="mb-4">
-          <p className="text-sm text-gray-400 mb-1">Progress: {progress}%</p>
-          <div className="w-full bg-gray-700 h-2 rounded">
+  // console.log(pdfUrl);
+
+  return (
+    <div className="min-h-screen bg-[#081013] text-white px-3 py-5">
+      <div className="max-w-6xl mx-auto">
+        {/* HEADER */}
+        <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-5">
+          <div>
+            <h1 className="text-3xl font-bold text-[#dbf8fa]">{book.name}</h1>
+
+            <p className="text-gray-400 text-sm mt-1">
+              Page {pageNumber} of {numPages}
+            </p>
+          </div>
+
+          {/* TOOLS */}
+          <div className="flex gap-3 flex-wrap">
+            {/* Zoom Out */}
+            <button
+              onClick={() => setScale((prev) => Math.max(prev - 0.2, 0.6))}
+              className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded"
+            >
+              -
+            </button>
+
+            {/* Zoom In */}
+            <button
+              onClick={() => setScale((prev) => prev + 0.2)}
+              className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded"
+            >
+              +
+            </button>
+
+            {/* Fullscreen */}
+            <button
+              onClick={() => document.documentElement.requestFullscreen()}
+              className="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-black rounded"
+            >
+              Fullscreen
+            </button>
+          </div>
+        </div>
+
+        {/* PROGRESS BAR */}
+        <div className="mb-5">
+          <div className="flex justify-between mb-1 text-sm text-gray-400">
+            <span>Reading Progress</span>
+            <span>{progress}%</span>
+          </div>
+
+          <div className="w-full h-3 bg-gray-700 rounded-full overflow-hidden">
             <div
-              className="bg-amber-400 h-2 rounded transition-all"
+              className="h-full bg-amber-400 transition-all duration-300"
               style={{ width: `${progress}%` }}
             />
           </div>
         </div>
 
-        {/* PDF Viewer */}
-        <div className="flex justify-center bg-[#122125] p-4 rounded">
+        {/* PDF VIEWER */}
+        <div className="bg-[#122125] rounded-xl p-4 flex justify-center overflow-auto shadow-lg">
           <Document
-            file={`http://localhost:5000/${book.actualPdf}`}
+            file={pdfUrl}
             onLoadSuccess={({ numPages }) => setNumPages(numPages)}
+            loading={<p className="text-white text-lg">Loading PDF...</p>}
           >
-            <Page pageNumber={pageNumber} />
+            <Page
+              pageNumber={pageNumber}
+              scale={scale}
+              renderTextLayer={true}
+              renderAnnotationLayer={true}
+            />
           </Document>
         </div>
 
-        {/* Controls */}
-        <div className="flex justify-center items-center gap-4 mt-5">
+        {/* CONTROLS */}
+        <div className="flex flex-wrap justify-center items-center gap-4 mt-6">
+          {/* Prev */}
           <button
             disabled={pageNumber <= 1}
             onClick={() => setPageNumber((p) => p - 1)}
-            className="px-4 py-2 bg-gray-700 rounded disabled:opacity-50"
+            className="px-5 py-2 bg-gray-700 hover:bg-gray-600 rounded disabled:opacity-50"
           >
             Prev
           </button>
 
-          <span className="text-sm">
-            Page {pageNumber} / {numPages}
-          </span>
+          {/* Page Input */}
+          <input
+            type="number"
+            min={1}
+            max={numPages}
+            value={pageNumber}
+            onChange={(e) => {
+              const value = Number(e.target.value);
 
+              if (value >= 1 && value <= numPages) {
+                setPageNumber(value);
+              }
+            }}
+            className="w-20 text-center bg-[#1c2e33] border border-gray-600 rounded px-2 py-2 outline-none"
+          />
+
+          {/* Next */}
           <button
             disabled={pageNumber >= numPages}
             onClick={() => setPageNumber((p) => p + 1)}
-            className="px-4 py-2 bg-gray-700 rounded disabled:opacity-50"
+            className="px-5 py-2 bg-gray-700 hover:bg-gray-600 rounded disabled:opacity-50"
           >
             Next
           </button>
