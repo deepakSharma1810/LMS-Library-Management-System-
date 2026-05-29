@@ -39,7 +39,16 @@ const userSchema = new mongoose.Schema(
         ref: "Category",
       },
     ],
+    otp: {
+      type: String,
+      default: null,
+    },
+    otpExpire: {
+      type: Date,
+      default: null,
+    },
   },
+
   { timestamps: true },
 );
 

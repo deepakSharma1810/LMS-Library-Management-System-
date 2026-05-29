@@ -1,0 +1,67 @@
+const nodemailer = require("nodemailer");
+require("dotenv").config();
+
+// CREATE TRANSPORTER (SMTP BASED)
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST || "smtp.gmail.com",
+  port: process.env.SMTP_PORT || 587,
+  secure: false, // TLS after connect
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
+  },
+});
+
+// VERIFY SMTP CONNECTION
+const verifySMTP = async () => {
+  try {
+    await transporter.verify();
+    console.log("SMTP READY");
+  } catch (err) {
+    console.error("SMTP VERIFICATION FAILED:", err.message);
+  }
+};
+
+// SEND MAIL FUNCTION
+const sendMail = async ({ to, subject, text, html }) => {
+  try {
+    const info = await transporter.sendMail({
+      from: `"MyApp" <${process.env.SMTP_USER}>`,
+      to,
+      subject,
+      text,
+      html,
+    });
+
+    console.log("MAIL SENT:", info.messageId);
+
+    if (info.rejected.length > 0) {
+      console.log("REJECTED EMAILS:", info.rejected);
+    }
+
+    return { success: true };
+  } catch (err) {
+    // PROPER ERROR HANDLING
+    switch (err.code) {
+      case "ECONNECTION":
+      case "ETIMEDOUT":
+        console.error("NETWORK ERROR:", err.message);
+        break;
+
+      case "EAUTH":
+        console.error("AUTH ERROR (Check Email/Password):", err.message);
+        break;
+
+      case "EENVELOPE":
+        console.error("INVALID RECEIVER:", err.rejected);
+        break;
+
+      default:
+        console.error("MAIL ERROR:", err.message);
+    }
+
+    return { success: false };
+  }
+};
+
+module.exports = { transporter, verifySMTP, sendMail };

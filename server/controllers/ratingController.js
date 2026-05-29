@@ -12,7 +12,11 @@ const addRating = async (req, res) => {
       return res.status(400).json({ error: "Missing data" });
     }
 
-    const userId = req.user?.id || new mongoose.Types.ObjectId();
+    if (!req.user) {
+      return res.status(401).json({ error: "Login required" });
+    }
+
+    const userId = req.user.id;
 
     let existing = await Rating.findOne({
       user: userId,
@@ -68,14 +72,24 @@ const deleteRating = async (req, res) => {
   try {
     const { ratingId } = req.params;
 
+    if (!req.user) {
+      return res.status(401).json({ error: "Login required" });
+    }
+
     const rating = await Rating.findById(ratingId);
+
     if (!rating) {
       return res.status(404).json({ error: "Rating not found" });
     }
 
+    // Only owner can delete
+    if (rating.user.toString() !== req.user.id) {
+      return res.status(403).json({ error: "Not authorized" });
+    }
+
     await Rating.findByIdAndDelete(ratingId);
 
-    // 🔥 Recalculate rating
+    //  Recalculate rating
     const ratings = await Rating.find({ book: rating.book });
 
     const avg =

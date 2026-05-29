@@ -1,18 +1,22 @@
 import axios from "axios";
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { FiEye, FiEyeOff } from "react-icons/fi";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 
 const LoginForm = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state?.from;
 
   const [formData, setFormData] = useState({
-    email: "",
+    uName: "",
     password: "",
   });
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e) => {
     setFormData((prev) => ({
@@ -41,21 +45,33 @@ const LoginForm = () => {
 
       localStorage.setItem("user", JSON.stringify(res.data.user));
 
+      localStorage.setItem("userId", res.data.user._id);
+
       setMessage("Login Successful");
 
       const role = res.data.user.role;
 
       setTimeout(() => {
-        if (role === "super_admin") {
-          navigate("/super-admin-dashboard");
-        } else if (role === "admin") {
-          navigate("/admin-dashboard");
+        setLoading(false);
+        if (from) {
+          navigate(from, { replace: true });
         } else {
-          navigate("/");
+          if (role === "super_admin") {
+            navigate("/super-admin-dashboard");
+          } else if (role === "admin") {
+            navigate("/admin-dashboard");
+          } else {
+            navigate("/");
+          }
         }
-      }, 1000);
+      }, 500);
     } catch (error) {
+      setLoading(false);
       setError(error.response?.data?.message || "Invalid Credentials");
+
+      setTimeout(() => {
+        setError("");
+      }, 2000);
     }
   };
 
@@ -74,7 +90,7 @@ const LoginForm = () => {
               type="text"
               id="uName"
               name="uName"
-              value={formData.uName}
+              value={formData.uName || ""}
               onChange={handleChange}
               required
               className="w-full mt-1 p-2 rounded-lg bg-[#122125] text-white border border-[#2c4449] focus:outline-none focus:ring-2 focus:ring-amber-300"
@@ -86,16 +102,32 @@ const LoginForm = () => {
             <label htmlFor="password" className="text-sm text-amber-200">
               Password
             </label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-              className="w-full mt-1 p-2 rounded-lg bg-[#122125] text-white border border-[#2c4449] focus:outline-none focus:ring-2 focus:ring-amber-300"
-              placeholder="••••••••"
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                id="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                required
+                className="w-full mt-1 p-2 rounded-lg bg-[#122125] text-white border border-[#2c4449] focus:outline-none focus:ring-2 focus:ring-amber-300"
+                placeholder="••••••••"
+              />
+              <span
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-gray-400"
+              >
+                {showPassword ? <FiEyeOff /> : <FiEye />}
+              </span>
+            </div>
+          </div>
+          <div className="text-right">
+            <Link
+              to="/forgot-password"
+              className="text-sm text-amber-300 hover:underline cursor-pointer"
+            >
+              Forgot Password?
+            </Link>
           </div>
 
           {/* {message && (
@@ -107,17 +139,20 @@ const LoginForm = () => {
           <button
             type="submit"
             disabled={loading}
-            className="bg-amber-300 text-[#0e1a1c] font-bold py-2 rounded-lg hover:bg-amber-400 transition duration-300"
+            className="bg-amber-300 text-[#0e1a1c] font-bold py-2 rounded-lg hover:bg-amber-400 transition duration-300 flex items-center justify-center gap-2 disabled:opacity-70"
           >
-            {loading ? "Logging in" : "Login"}
+            {loading && (
+              <span className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin"></span>
+            )}
+            {loading ? "Logging in..." : "Login"}
           </button>
         </form>
-        <p className="mt-4 text-sm text-center flex justify-center gap-[8px] text-gray-400">
+        <div className="mt-4 text-sm text-center flex justify-center gap-[8px] text-gray-400">
           Don't have an account?{" "}
           <Link to="/signup">
-            <p className="text-amber-300 underline">Register</p>
+            <div className="text-amber-300 underline">Sign up</div>
           </Link>
-        </p>
+        </div>
       </div>
     </div>
   );

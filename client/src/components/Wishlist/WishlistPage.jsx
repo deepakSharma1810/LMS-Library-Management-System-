@@ -24,38 +24,22 @@ const WishlistPage = () => {
     syncWishlist([]);
   };
 
-  const addToCart = (item) => {
-    const cart = JSON.parse(localStorage.getItem("cart")) || [];
+  const addToCart = (book) => {
+    const existingCart = JSON.parse(localStorage.getItem("cart")) || [];
 
-    const exists = cart.find((c) => c._id === item._id);
+    const alreadyExist = existingCart.find((item) => item._id === book._id);
 
     let updatedCart;
 
-    if (exists) {
-      updatedCart = cart.map((c) =>
-        c._id === item._id ? { ...c, qty: c.qty + 1 } : c,
+    if (alreadyExist) {
+      updatedCart = existingCart.map((item) =>
+        item._id === book._id ? { ...item, qty: item.qty + 1 } : item,
       );
     } else {
-      updatedCart = [
-        ...cart,
-        {
-          id: item._id,
-          image: `http://localhost:5000/${item.coverPhoto}`,
-          title: item.name,
-          price: item.price,
-          originalPrice: item.mrp || item.price + 200,
-          qty: 1,
-        },
-      ];
+      updatedCart = [...existingCart, { ...book, qty: 1 }];
     }
 
     localStorage.setItem("cart", JSON.stringify(updatedCart));
-    // alert("Added to cart ✅");
-    setAddedId(item._id);
-
-    setTimeout(() => {
-      setAddedId(null);
-    }, 1000);
   };
 
   return (
@@ -81,7 +65,7 @@ const WishlistPage = () => {
         {/* Empty */}
         {wishlist.length === 0 ? (
           <div className="bg-[#122125] p-8 rounded-xl text-center">
-            <p className="text-lg text-[#dbf8fa]">Your wishlist is empty ❤️</p>
+            <p className="text-lg text-[#dbf8fa]">Your wishlist is empty</p>
             <p className="text-sm text-gray-400 mt-2">
               Add books to see them here.
             </p>

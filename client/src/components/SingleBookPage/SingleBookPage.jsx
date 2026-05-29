@@ -10,7 +10,7 @@ const formatCurrency = (n) =>
     n,
   );
 
-const Stars = ({ value }) => {
+const Stars = ({ value = 0 }) => {
   // show 5 stars with filled portion
   const full = Math.floor(value);
   const half = value - full >= 0.5;
@@ -19,7 +19,7 @@ const Stars = ({ value }) => {
       {Array.from({ length: 5 }).map((_, i) => {
         if (i < full) return <FaStar key={i} />;
         if (i === full && half)
-          return <FaStar key={i} style={{ opacity: 0.6 }} />;
+          return <FaStar key={i} style={{ opacity: 0.5 }} />;
         return <FaStar key={i} style={{ opacity: 0.2 }} />;
       })}
     </div>
@@ -38,6 +38,7 @@ const SingleBookPage = () => {
   const [reviewText, setReviewText] = useState("");
   const [ratingsList, setRatingsList] = useState([]);
   const [hoverRating, setHoverRating] = useState(0);
+  const [userReview, setUserReview] = useState(null);
 
   const fetchSingleBook = async () => {
     try {
@@ -58,6 +59,20 @@ const SingleBookPage = () => {
     try {
       const res = await axios.get(`http://localhost:5000/rating/${book._id}`);
       setRatingsList(res.data.ratings);
+
+      const userId = localStorage.getItem("userId");
+
+      const myReview = res.data.ratings.find((r) => r.user?._id === userId);
+
+      if (myReview) {
+        setUserReview(myReview);
+        setUserRating(myReview.rating); // auto fill
+        setReviewText(myReview.review); // auto fill
+      } else {
+        setUserReview(null);
+        setUserRating(0);
+        setReviewText("");
+      }
     } catch (err) {
       console.log(err);
     }
@@ -69,16 +84,32 @@ const SingleBookPage = () => {
 
   const submitRating = async () => {
     try {
-      await axios.post("http://localhost:5000/rating/add", {
-        rating: userRating,
-        review: reviewText,
-        bookId: book._id,
-        userId: localStorage.getItem("userId"),
-      });
+      const token = localStorage.getItem("token");
+      console.log("TOKEN:", token);
+
+      if (!token) {
+        navigate("/login");
+        return;
+      }
+
+      await axios.post(
+        "http://localhost:5000/rating/add",
+        {
+          rating: userRating,
+          review: reviewText,
+          bookId: book._id,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
 
       fetchRatings();
-      setUserRating(0);
-      setReviewText("");
+      fetchSingleBook();
+      // setUserRating(0);
+      // setReviewText("");
     } catch (err) {
       console.log(err);
     }
@@ -120,7 +151,7 @@ const SingleBookPage = () => {
     const token = localStorage.getItem("token");
 
     if (!token) {
-      navigate("/login");
+      navigate("/login", { state: { from: `/book/${book._id}` } });
       return;
     }
 
@@ -132,8 +163,6 @@ const SingleBookPage = () => {
       const updated = [...purchased, book];
       localStorage.setItem("purchasedBooks", JSON.stringify(updated));
     }
-
-    // navigate(`/read/${book._id}`);
   };
 
   const handleAddToCart = () => {
@@ -200,8 +229,20 @@ const SingleBookPage = () => {
 
   const deleteReview = async (id) => {
     try {
-      await axios.delete(`http://localhost:5000/rating/${id}`);
+      const token = localStorage.getItem("token"); // ✅ ADD THIS
+
+      if (!token) {
+        navigate("/login");
+        return;
+      }
+
+      await axios.delete(`http://localhost:5000/rating/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       fetchRatings();
+      fetchSingleBook();
     } catch (err) {
       console.log(err);
     }
@@ -273,9 +314,9 @@ const SingleBookPage = () => {
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <Stars value={book.rating} />
+                    <Stars value={book.rating || 0} />
                     <span className="text-sm text-gray-300">
-                      {book.rating} • {book.reviews} reviews
+                      {book.rating || 0} • {book.reviews || 0} reviews
                     </span>
                   </div>
                 </div>
@@ -338,20 +379,6 @@ const SingleBookPage = () => {
                     <li>Dimensions: {book.dimensions}</li>
                   </ul>
                 </div>
-
-                {/* <div className="mb-3">
-                  <h4 className="text-sm text-gray-400 mb-2">Key features</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {book.features.map((f, i) => (
-                      <span
-                        key={i}
-                        className="text-xs bg-[#0f2a2c] px-3 py-1 rounded-full text-gray-300"
-                      >
-                        {f}
-                      </span>
-                    ))}
-                  </div>
-                </div> */}
 
                 <div className="flex items-center gap-3 mt-4">
                   <button
@@ -458,7 +485,7 @@ const SingleBookPage = () => {
                       {/* Footer */}
                       <button
                         onClick={() => setShowPurchaseModal(false)}
-                        className="w-full mt-6 py-2 rounded-lg border border-gray-600 text-gray-400 hover:text-white hover:border-gray-400 transition"
+                        className="cursor-pointer w-full mt-6 py-2 rounded-lg border border-gray-600 text-gray-400 hover:text-white hover:border-gray-400 transition "
                       >
                         Cancel
                       </button>
@@ -485,37 +512,54 @@ const SingleBookPage = () => {
           <div className="mt-6 bg-[#1b2e31] p-5 rounded-lg">
             <h3 className="text-lg font-semibold mb-3">Give Rating</h3>
 
-            {/* Stars */}
-            <div className="flex gap-2 mb-3">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <FaStar
-                  key={star}
-                  onClick={() => setUserRating(star)}
-                  onMouseEnter={() => setHoverRating(star)}
-                  onMouseLeave={() => setHoverRating(0)}
-                  className={`cursor-pointer text-2xl transition duration-200 ${
-                    star <= (hoverRating || userRating)
-                      ? "text-yellow-400 scale-110"
-                      : "text-gray-500"
-                  }`}
+            {!localStorage.getItem("token") ? (
+              <p className="text-gray-400 text-sm">
+                Login required to give rating
+              </p>
+            ) : (
+              <>
+                {/* Stars */}
+                <div className="flex gap-2 mb-3">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <FaStar
+                      key={star}
+                      onClick={() => setUserRating(star)}
+                      onMouseEnter={() => setHoverRating(star)}
+                      onMouseLeave={() => setHoverRating(0)}
+                      className={`cursor-pointer text-2xl transition ${
+                        star <= (hoverRating || userRating)
+                          ? "text-yellow-400 scale-110"
+                          : "text-gray-500"
+                      }`}
+                    />
+                  ))}
+                </div>
+
+                {/* Review */}
+                <textarea
+                  value={reviewText}
+                  onChange={(e) => setReviewText(e.target.value)}
+                  placeholder="Write review..."
+                  className="w-full p-2 rounded bg-[#0f2a2c]"
                 />
-              ))}
-            </div>
 
-            {/* Review */}
-            <textarea
-              value={reviewText}
-              onChange={(e) => setReviewText(e.target.value)}
-              placeholder="Write review..."
-              className="w-full p-2 rounded bg-[#0f2a2c]"
-            />
+                <button
+                  onClick={() => {
+                    const token = localStorage.getItem("token");
 
-            <button
-              onClick={submitRating}
-              className="mt-3 px-4 py-2 bg-amber-400 hover:bg-amber-500 font-semibold transition text-black rounded cursor-pointer"
-            >
-              Submit
-            </button>
+                    if (!token) {
+                      navigate("/login");
+                      return;
+                    }
+
+                    submitRating();
+                  }}
+                  className="mt-3 px-4 py-2 bg-amber-400 hover:bg-amber-500 font-semibold text-black rounded"
+                >
+                  {userReview ? "Update Review" : "Submit Review"}
+                </button>
+              </>
+            )}
           </div>
 
           {/* Show all reviews */}
@@ -529,12 +573,15 @@ const SingleBookPage = () => {
                     {r.user?.name || "User"}
                   </p>
 
-                  <button
-                    onClick={() => deleteReview(r._id)}
-                    className="text-xs text-red-400 hover:text-red-500 cursor-pointer"
-                  >
-                    Delete
-                  </button>
+                  {String(r.user?._id) ===
+                    String(localStorage.getItem("userId")) && (
+                    <button
+                      onClick={() => deleteReview(r._id)}
+                      className="text-xs text-red-400 hover:text-red-500 cursor-pointer"
+                    >
+                      Delete
+                    </button>
+                  )}
                 </div>
 
                 <div className="flex text-yellow-400">

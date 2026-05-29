@@ -22,6 +22,11 @@ import BookReaderPage from "./components/BookReaderPage/BookReaderPage";
 import { NotificationProvider } from "./context/NotificationContext";
 import { ThemeProvider } from "./context/ThemeContext";
 
+import ProtectedRoute from "./components/ProtectedRoute";
+import ForgotPassword from "./components/ForgotPassword/ForgotPassword";
+import EnterOtp from "./components/EnterOtp/EnterOtp";
+import ConfirmPassword from "./components/ConfirmPassword/ConfirmPassword";
+
 const App = () => {
   return (
     <div>
@@ -33,6 +38,46 @@ const App = () => {
             <Navbar />
 
             <Routes>
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute>
+                    <ProfilePage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/cart"
+                element={
+                  <ProtectedRoute>
+                    <CartPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/orders"
+                element={
+                  <ProtectedRoute>
+                    <OrderPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/wishlist"
+                element={
+                  <ProtectedRoute>
+                    <WishlistPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/read/:id"
+                element={
+                  <ProtectedRoute>
+                    <BookReaderPage />
+                  </ProtectedRoute>
+                }
+              />
               <Route path="/" element={<MainPage />} />
               <Route path="/books" element={<BookPage />} />
               <Route path="/book/:id" element={<SingleBookPage />} />
@@ -41,11 +86,9 @@ const App = () => {
               <Route path="/login" element={<LoginPage />} />
               <Route path="/signup" element={<SignUpPage />} />
               <Route path="/notifications" element={<NotificationPage />} />
-              <Route path="/profile" element={<ProfilePage />} />
-              <Route path="/cart" element={<CartPage />} />
-              <Route path="/orders" element={<OrderPage />} />
-              <Route path="/wishlist" element={<WishlistPage />} />
-              <Route path="/read/:id" element={<BookReaderPage />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/enter-otp" element={<EnterOtp />} />
+              <Route path="/confirm-password" element={<ConfirmPassword />} />
             </Routes>
 
             <Footer />

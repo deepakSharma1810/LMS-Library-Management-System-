@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, use } from "react";
 
 import { useNotification } from "../../context/NotificationContext";
 import { useTheme } from "../../context/ThemeContext";
@@ -12,9 +12,12 @@ import { IoIosArrowDown } from "react-icons/io";
 import { HiMenu, HiX } from "react-icons/hi";
 import { IoCartOutline } from "react-icons/io5";
 
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 
 const Navbar = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const { theme, toggleTheme } = useTheme();
 
   const [showProfile, setShowProfile] = useState(false);
@@ -35,6 +38,30 @@ const Navbar = () => {
   }, []);
 
   const { notificationCount } = useNotification();
+
+  // Protected navigation
+  const handleProtectedNavigation = (path) => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      navigate("/login", { state: { from: path } });
+    } else {
+      navigate(path);
+    }
+  };
+
+  // Logout
+  const handleLogout = () => {
+    // remove auth data
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+
+    // redirect to login
+    navigate("/");
+  };
+
+  const user = JSON.parse(localStorage.getItem("user"));
+  const isLoggedIn = !!localStorage.getItem("token");
 
   return (
     <header className="w-full border-b bg-[#1b2e31] text-[#dbf8fa] sticky top-0 z-50">
@@ -107,7 +134,7 @@ const Navbar = () => {
 
             <button
               onClick={toggleTheme}
-              className="p-2 rounded hover:bg-gray-700"
+              className="p-2 rounded hover:bg-[#122125]"
             >
               {theme === "dark" ? (
                 <MdLightMode size={20} />
@@ -124,31 +151,37 @@ const Navbar = () => {
             >
               <button className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-[#122125]">
                 <CgProfile size={22} />
-                <span className="hidden sm:inline">Deepak</span>
-                <IoIosArrowDown
+                <span className="hidden sm:inline">
+                  {user?.fName || "Sign in"}
+                </span>
+                {/* <IoIosArrowDown
                   className={`transition-transform ${
                     showProfile ? "rotate-180" : ""
                   }`}
-                />
+                /> */}
               </button>
 
               {/* Desktop dropdown (visible on hover/click on wider screens) */}
               {showProfile && (
                 <div className="absolute right-0 mt-0 w-44 bg-[#1b2e31] text-[#dbf8fa] rounded shadow-lg border overflow-hidden z-40">
-                  <Link
-                    to="/profile"
-                    onClick={() => setShowProfile(false)}
-                    className="block px-4 py-2 hover:bg-[#122125]"
+                  <button
+                    onClick={() => {
+                      setShowProfile(false);
+                      handleProtectedNavigation("/profile");
+                    }}
+                    className="w-full text-left block px-4 py-2 hover:bg-[#122125]"
                   >
                     My Profile
-                  </Link>
-                  <Link
-                    to="/orders"
-                    onClick={() => setShowProfile(false)}
-                    className="block px-4 py-2 hover:bg-[#122125]"
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowProfile(false);
+                      handleProtectedNavigation("/orders");
+                    }}
+                    className="w-full text-left block px-4 py-2 hover:bg-[#122125]"
                   >
                     Orders
-                  </Link>
+                  </button>
                   <Link
                     to="/notifications"
                     onClick={() => setShowProfile(false)}
@@ -156,43 +189,81 @@ const Navbar = () => {
                   >
                     Notifications
                   </Link>
-                  <Link
-                    to="/wishlist"
-                    onClick={() => setShowProfile(false)}
-                    className="block px-4 py-2 hover:bg-[#122125]"
+                  <button
+                    onClick={() => {
+                      setShowProfile(false);
+                      handleProtectedNavigation("/wishlist");
+                    }}
+                    className="w-full text-left block px-4 py-2 hover:bg-[#122125]"
                   >
                     Wishlist
-                  </Link>
-                  <button className="w-full text-left px-4 py-2 hover:bg-[#122125] text-red-500">
-                    Logout
                   </button>
+                  {isLoggedIn ? (
+                    <button
+                      onClick={() => {
+                        setShowProfile(false);
+                        handleLogout();
+                      }}
+                      className="w-full text-left px-4 py-2 hover:bg-[#122125] text-red-500 cursor-pointer"
+                    >
+                      Logout
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => {
+                        setShowProfile(false);
+                        navigate("/login");
+                      }}
+                      className="w-full text-left px-4 py-2 hover:bg-[#122125] text-amber-300 cursor-pointer"
+                    >
+                      Login
+                    </button>
+                  )}
                 </div>
               )}
 
               {/* Mobile profile dropdown (inside mobile drawer or as floating under button) */}
               {mobileProfileOpen && (
                 <div className="absolute right-0 top-12 w-44 bg-[#0f2223]  rounded shadow-lg border border-gray-700 overflow-hidden z-40">
-                  <Link
-                    to="/profile"
+                  <div
+                    onClick={() => {
+                      setMobileProfileOpen(false);
+                      handleProtectedNavigation("/profile");
+                    }}
                     className="block px-4 py-2 hover:bg-[#13474a]"
                   >
                     My Profile
-                  </Link>
-                  <Link
-                    to="/orders"
+                  </div>
+                  <div
+                    onClick={() => {
+                      setMobileProfileOpen(false);
+                      handleProtectedNavigation("/orders");
+                    }}
                     className="block px-4 py-2 hover:bg-[#13474a]"
                   >
                     Orders
-                  </Link>
+                  </div>
                   <Link
                     to="/notifications"
                     className="block px-4 py-2 hover:bg-[#13474a]"
                   >
                     Notifications
                   </Link>
-                  <button className="w-full text-left px-4 py-2 hover:bg-[#13474a] text-red-400">
-                    Logout
-                  </button>
+                  {isLoggedIn ? (
+                    <button
+                      onClick={handleLogout}
+                      className="w-full text-left px-4 py-2 hover:bg-[#122125] text-red-500 cursor-pointer"
+                    >
+                      Logout
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => navigate("/login")}
+                      className="w-full text-left px-4 py-2 hover:bg-[#122125] text-amber-300 cursor-pointer"
+                    >
+                      Login
+                    </button>
+                  )}
                 </div>
               )}
             </div>
@@ -257,51 +328,6 @@ const Navbar = () => {
             >
               Authors
             </Link>
-
-            <div className="pt-2 border-t border-gray-800">
-              {/* <div className="flex items-center justify-between px-3 py-2">
-                <div className="flex items-center gap-2">
-                  <CgProfile size={18} />
-                  <span>Deepak</span>
-                </div>
-                <button
-                  onClick={() => setMobileProfileOpen((prev) => !prev)}
-                  className="p-1 rounded hover:bg-[#13474a]"
-                >
-                  <IoIosArrowDown />
-                </button>
-              </div> */}
-
-              {/* Expandable mobile profile section */}
-              {/* {mobileProfileOpen && (
-                <div className="flex flex-col px-3 gap-1">
-                  <Link
-                    to="/profile"
-                    onClick={() => setMobileMenu(false)}
-                    className="px-2 py-2 rounded hover:bg-[#13474a]"
-                  >
-                    My Profile
-                  </Link>
-                  <Link
-                    to="/message"
-                    onClick={() => setMobileMenu(false)}
-                    className="px-2 py-2 rounded hover:bg-[#13474a]"
-                  >
-                    Messages
-                  </Link>
-                  <Link
-                    to="/notification"
-                    onClick={() => setMobileMenu(false)}
-                    className="px-2 py-2 rounded hover:bg-[#13474a]"
-                  >
-                    Notifications
-                  </Link>
-                  <button className="text-left px-2 py-2 rounded hover:bg-[#13474a] text-red-400">
-                    Logout
-                  </button>
-                </div>
-              )} */}
-            </div>
           </nav>
         </aside>
       </div>

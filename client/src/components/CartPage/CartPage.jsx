@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { FiShoppingCart, FiTrash2, FiPlus, FiMinus } from "react-icons/fi";
+import { useNavigate } from "react-router-dom";
 
 const formatCurrency = (n) =>
   new Intl.NumberFormat("en-IN", {
@@ -8,6 +9,8 @@ const formatCurrency = (n) =>
   }).format(n);
 
 const CartPage = () => {
+  const navigate = useNavigate();
+
   const [cart, setCart] = useState([]);
 
   useEffect(() => {
@@ -44,6 +47,29 @@ const CartPage = () => {
   };
 
   const clearCart = () => syncCart([]);
+
+  const handlePlaceOrder = () => {
+    const token = localStorage.getItem("token");
+
+    console.log("TOKEN:", token);
+
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+
+    const orders = JSON.parse(localStorage.getItem("orders")) || [];
+
+    const updateOrders = [...orders, ...cart];
+
+    localStorage.setItem("orders", JSON.stringify(updateOrders));
+
+    // clear cart
+
+    localStorage.removeItem("cart");
+    setCart([]);
+    console.log("Order Place successfully ");
+  };
 
   return (
     <div className="w-full min-h-screen bg-[#0e1a1c] px-4 md:px-8 py-8 text-gray-100">
@@ -204,7 +230,10 @@ const CartPage = () => {
                   )}
                 </div>
 
-                <button className="w-full mt-5 py-2.5 bg-amber-400 text-black font-semibold rounded-lg hover:bg-amber-500 transition">
+                <button
+                  onClick={handlePlaceOrder}
+                  className="w-full mt-5 py-2.5 bg-amber-400 text-black font-semibold rounded-lg hover:bg-amber-500 transition"
+                >
                   Place Order
                 </button>
               </div>

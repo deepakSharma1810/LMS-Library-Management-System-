@@ -9,24 +9,16 @@ const verifyToken = async (req, res, next) => {
       return res.status(400).json({ message: "NO HEADERS SENT" });
     }
 
-    // ✅ From Authorization header
-    // if (
-    //   req.headers.authorization &&
-    //   req.headers.authorization.startsWith("Bearer")
-    // ) {
-    //   token = req.headers.authorization.split(" ")[1];
-    // }
-
     if (headers.startsWith("Bearer")) {
       token = headers.split(" ")[1];
     }
 
-    // ✅ From cookies
+    // From cookies
     if (!token && req.cookies?.token) {
       token = req.cookies.token;
     }
 
-    // ❌ No token
+    // No token
     if (!token) {
       return res.status(401).json({
         success: false,
@@ -34,10 +26,10 @@ const verifyToken = async (req, res, next) => {
       });
     }
 
-    // ✅ Verify token
+    // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // ✅ Get user from DB
+    // Get user from DB
     const user = await User.findById(decoded.id).select("-password");
 
     if (!user) {
@@ -47,7 +39,7 @@ const verifyToken = async (req, res, next) => {
       });
     }
 
-    // ✅ Attach user to request
+    // Attach user to request
     req.user = user;
 
     next();
