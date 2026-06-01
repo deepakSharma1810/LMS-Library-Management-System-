@@ -26,6 +26,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import ForgotPassword from "./components/ForgotPassword/ForgotPassword";
 import EnterOtp from "./components/EnterOtp/EnterOtp";
 import ConfirmPassword from "./components/ConfirmPassword/ConfirmPassword";
+import SearchPage from "./components/SearchPage/SearchPage";
 
 const App = () => {
   return (
@@ -46,6 +47,7 @@ const App = () => {
                   </ProtectedRoute>
                 }
               />
+              <Route path="*" element={<h1>404 Not Found</h1>} />
               <Route
                 path="/cart"
                 element={
@@ -89,6 +91,7 @@ const App = () => {
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/enter-otp" element={<EnterOtp />} />
               <Route path="/confirm-password" element={<ConfirmPassword />} />
+              <Route path="/search" element={<SearchPage />} />
             </Routes>
 
             <Footer />

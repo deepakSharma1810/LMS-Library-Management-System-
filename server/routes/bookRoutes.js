@@ -13,6 +13,7 @@ const router = express.Router();
 
 router.route("/").post(createBook).get(readAllBook);
 router.patch("/status/:id", updateBookStatus);
+// router.get("/author/:authorId", readBookByAuthor);
 router
   .route("/:id")
   .get(readBook)

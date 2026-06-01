@@ -6,7 +6,6 @@ const Notification = require("../model/Notification");
 
 const createBook = async (req, res) => {
   try {
-    // const { name, author, price, coverPhoto, actualPdf } = req.body;
     const {
       name,
       author,
@@ -26,6 +25,9 @@ const createBook = async (req, res) => {
       features,
       seller,
       categories,
+      // ---------
+      isNew,
+      isPopular,
     } = req.body;
 
     if (!name || !author || !price || !mrp || !coverPhoto || !actualPdf) {
@@ -75,6 +77,9 @@ const createBook = async (req, res) => {
       features,
       seller,
       categories,
+      // -----------
+      isNew: isNew || false,
+      isPopular: isPopular || false,
     });
 
     await newBook.save();
@@ -106,27 +111,73 @@ const createBook = async (req, res) => {
 
 const readAllBook = async (req, res) => {
   try {
-    const books = await Book.find().populate("author");
-    // const books = await Book.find().populate("author").populate("category");
+    const { type, search } = req.query;
 
-    if (!books || books.length === 0) {
-      return res.status(404).json({ message: "Book not found" });
+    let filter = {};
+
+    // SEARCH FILTER
+    if (search) {
+      filter.$or = [
+        { name: { $regex: search, $options: "i" } },
+        { description: { $regex: search, $options: "i" } },
+      ];
+    }
+
+    //  TYPE FILTER
+    if (type === "new") {
+      filter.isNew = true;
+    } else if (type === "popular") {
+      filter.isPopular = true;
+    }
+
+    // MAIN BOOKS (with search + type)
+    let booksQuery = Book.find(filter).populate("author");
+
+    if (type === "new") {
+      booksQuery = booksQuery.sort({ createdAt: -1 }).limit(10);
+    } else if (type === "popular") {
+      booksQuery = booksQuery.sort({ rating: -1 }).limit(10);
+    } else if (type === "previous") {
+      booksQuery = booksQuery.sort({ updatedAt: -1 }).limit(10);
+    }
+
+    const books = await booksQuery;
+
+    // EXTRA SECTIONS (ONLY WHEN SEARCH EXISTS)
+    let popular = [];
+    let latest = [];
+
+    if (search) {
+      popular = await Book.find({
+        ...filter,
+        isPopular: true,
+      })
+        .populate("author")
+        .limit(6);
+
+      latest = await Book.find({
+        ...filter,
+        isNew: true,
+      })
+        .sort({ createdAt: -1 })
+        .populate("author")
+        .limit(6);
     }
 
     res.status(200).json({
       message: "Books fetched successfully",
       books,
+      popular,
+      latest,
     });
   } catch (error) {
-    return res.status(500).json({ error: error.message });
+    res.status(500).json({ error: error.message });
   }
 };
 
 const readBook = async (req, res) => {
   try {
     const { id } = req.params;
-    // console.log(id);
-    // const getBook = await Book.findById(id);
     const getBook = await Book.findById(id).populate("author");
     if (!getBook) {
       return res.status(404).json({ message: "Book not found" });
@@ -166,35 +217,6 @@ const readBookByAuthor = async (req, res) => {
   }
 };
 
-// const updateBook = async (req, res) => {
-//   try {
-//     const { name, author, price, coverPhoto, actualPdf } = req.body;
-
-//     if (!name || !author || !price || !coverPhoto || !actualPdf) {
-//       return res.status(400).json({ message: "Please fill all the feilds" });
-//     }
-
-//     const { id } = req.params;
-
-//     const getBook = await Book.findById(id);
-
-//     if (!getBook) {
-//       return res.status(404).json({ message: "Book not found" });
-//     }
-
-//     getBook.author = author;
-//     getBook.price = price;
-//     getBook.coverPhoto = coverPhoto;
-//     getBook.actualPdf = actualPdf;
-
-//     await getBook.save();
-
-//     res.status(200).json({ message: "Book Successfully Updated" });
-//   } catch (error) {
-//     res.status(500).json({ error: error.message });
-//   }
-// };
-
 const updateBook = async (req, res) => {
   try {
     const { id } = req.params;
@@ -218,6 +240,9 @@ const updateBook = async (req, res) => {
       features,
       seller,
       categories,
+      // --------
+      isNew,
+      isPopular,
     } = req.body;
 
     // find existing book
@@ -283,6 +308,8 @@ const updateBook = async (req, res) => {
     existingBook.features = features || existingBook.features;
     existingBook.seller = seller || existingBook.seller;
     existingBook.categories = categories || existingBook.categories;
+    existingBook.isNew = isNew ?? existingBook.isNew;
+    existingBook.isPopular = isPopular ?? existingBook.isPopular;
 
     await existingBook.save();
 

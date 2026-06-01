@@ -48,14 +48,14 @@ const NotificationRow = ({ n, books, onToggleRead, onDelete, onAction }) => {
             <div className="mt-2 flex items-center gap-2">
               <button
                 onClick={() => onToggleRead(n._id)}
-                className="text-xs px-2 py-1 rounded bg-transparent border border-gray-700 hover:bg-gray-800"
+                className="cursor-pointer text-xs px-2 py-1 rounded bg-transparent border border-gray-700 hover:bg-gray-800"
                 // aria-label={n.unread ? "Mark as read" : "Mark as unread"}
               >
                 {n.unread ? "Mark read" : "Mark unread"}
               </button>
               <button
                 onClick={() => onDelete(n._id)}
-                className="text-xs px-2 py-1 rounded bg-transparent border border-red-700 text-red-300 hover:bg-red-900/10"
+                className="cursor-pointer text-xs px-2 py-1 rounded bg-transparent border border-red-700 text-red-300 hover:bg-red-900/10"
                 aria-label="Delete notification"
               >
                 <FiTrash2 />
@@ -88,7 +88,7 @@ const NotificationRow = ({ n, books, onToggleRead, onDelete, onAction }) => {
               <Link to={`/book/${n.meta.bookId}`} key={n.meta.bookId}>
                 <button
                   onClick={() => onAction("view_book", n)}
-                  className="text-xs bg-amber-400 text-black px-3 py-1 rounded font-medium"
+                  className="cursor-pointer text-xs bg-amber-400 text-black px-3 py-1 rounded font-medium"
                 >
                   View Book
                 </button>
@@ -255,7 +255,7 @@ const NotificationPage = () => {
                 <select
                   value={filterType}
                   onChange={(e) => setFilterType(e.target.value)}
-                  className="bg-transparent outline-none text-sm text-gray-300 "
+                  className="cursor-pointer bg-transparent outline-none text-sm text-gray-300 "
                 >
                   <option value="all" className="text-gray-600">
                     All
@@ -277,14 +277,14 @@ const NotificationPage = () => {
 
               <button
                 onClick={markAllRead}
-                className="px-3 py-2 bg-gray-700 rounded text-sm text-gray-200 hover:bg-gray-600"
+                className="cursor-pointer px-3 py-2 bg-gray-700 rounded text-sm text-gray-200 hover:bg-gray-600"
               >
                 Mark all read
               </button>
 
               <button
                 onClick={clearAll}
-                className="px-3 py-2 bg-transparent border border-red-700 text-red-300 rounded text-sm hover:bg-red-900/10"
+                className="cursor-pointer px-3 py-2 bg-transparent border border-red-700 text-red-300 rounded text-sm hover:bg-red-900/10"
               >
                 Clear all
               </button>
@@ -336,13 +336,13 @@ const NotificationPage = () => {
                 setNotifications((p) => p.map((x) => ({ ...x, unread: true })));
                 setNotificationCount(notifications.length);
               }}
-              className="px-3 py-1 rounded bg-transparent border border-gray-700 mr-2"
+              className="cursor-pointer px-3 py-1 rounded bg-transparent border border-gray-700 mr-2"
             >
               Mark all unread
             </button>
             <button
               onClick={() => setNotifications([])}
-              className="px-3 py-1 rounded bg-red-900/5"
+              className="px-3 py-1 cursor-pointer rounded bg-red-900/5"
             >
               Clear notifications
             </button>

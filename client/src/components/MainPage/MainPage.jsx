@@ -12,40 +12,39 @@ const settings = {
   dots: false,
   infinite: true,
   speed: 500,
-  slidesToShow: 4,
+  slidesToShow: 3,
   slidesToScroll: 2,
   responsive: [
     {
       breakpoint: 1024,
-      settings: {
-        slidesToShow: 2,
-        slidesToScroll: 1,
-      },
+      settings: { slidesToShow: 2, slidesToScroll: 1 },
     },
     {
       breakpoint: 640,
-      settings: {
-        slidesToShow: 1,
-        slidesToScroll: 1,
-      },
+      settings: { slidesToShow: 1, slidesToScroll: 1 },
     },
   ],
 };
 
 const MainPage = () => {
   const navigate = useNavigate();
+  const [newBooks, setNewBooks] = useState([]);
+  const [popularBooks, setPopularBooks] = useState([]);
+  const [previousBooks, setPreviousBooks] = useState([]);
+  const [authors, setAuthors] = useState([]);
 
-  const [books, setBooks] = useState(null);
-  const [authors, setAuthors] = useState(null);
-  const [addedBookId, setAddedBookId] = useState(null);
-
-  const fetchbooks = async () => {
+  const fetchBooks = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/book");
-      setBooks(res.data);
-      console.log(res.data);
+      const [newRes, popularRes, prevRes] = await Promise.all([
+        axios.get("http://localhost:5000/book?type=new"),
+        axios.get("http://localhost:5000/book?type=popular"),
+        axios.get("http://localhost:5000/book?type=previous"),
+      ]);
+      setNewBooks(newRes.data.books);
+      setPopularBooks(popularRes.data.books);
+      setPreviousBooks(prevRes.data.books);
     } catch (error) {
-      console.log("Error fetching books:", error);
+      console.log(error);
     }
   };
 
@@ -53,30 +52,25 @@ const MainPage = () => {
     try {
       const res = await axios.get("http://localhost:5000/author");
       setAuthors(Array.isArray(res.data) ? res.data : res.data.authors || []);
-      console.log(res.data);
     } catch (error) {
       console.log("Error fetching authors:", error);
     }
   };
 
   useEffect(() => {
-    fetchbooks();
+    fetchBooks();
     fetchAuthors();
   }, []);
 
   const addToCart = (book) => {
     const token = localStorage.getItem("token");
-
     if (!token) {
       navigate("/login");
       return;
     }
     const existingCart = JSON.parse(localStorage.getItem("cart")) || [];
-
     const existingItem = existingCart.find((item) => item.id === book._id);
-
     let updatedCart;
-
     if (existingItem) {
       updatedCart = existingCart.map((item) =>
         item.id === book._id ? { ...item, qty: item.qty + 1 } : item,
@@ -95,209 +89,172 @@ const MainPage = () => {
         },
       ];
     }
-
     localStorage.setItem("cart", JSON.stringify(updatedCart));
-    console.log("Book added to Cart");
-
-    setAddedBookId(book._id);
-
-    setTimeout(() => {
-      setAddedBookId((prev) => (prev === book._id ? null : prev));
-    }, 2000);
   };
 
   return (
-    <div className="w-full min-h-screen">
+    <div className="w-full min-h-screen bg-[#0d1c20]">
+      {/* ── HERO ── */}
       <div className="w-full h-[60vh] sm:h-[65vh] md:h-[60vh] lg:h-[70vh] relative overflow-hidden">
-        {/* Background Image */}
         <img
           src="./front_page_book3.png"
           alt="Book Banner"
           className="w-full h-full object-cover"
         />
+        {/* always-visible gradient so mobile also looks good */}
+        <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent" />
 
-        {/* Overlay Content */}
-        <div className="absolute inset-0 hidden md:flex items-center">
-          <div className="w-full md:w-[70%] lg:w-1/2 h-full bg-gradient-to-r from-black/85 via-black/55 to-transparent flex items-center">
-            {/* Content Container */}
-            <div className="w-full max-w-2xl px-6 sm:px-8 md:px-10 lg:px-14">
-              {/* Badge */}
-              <div className="mb-4 md:mb-6">
-                <span className="inline-flex items-center gap-2 border border-amber-300/40 text-amber-300 px-3 py-1 rounded-full text-sm font-semibold">
-                  📖 MYBOOKSTORE
-                </span>
-              </div>
+        <div className="absolute inset-0 flex items-center">
+          <div className="w-full md:w-[65%] lg:w-[50%] px-6 sm:px-10 md:px-12 lg:px-16">
+            {/* Badge */}
+            <span className="inline-flex items-center gap-2 border border-amber-300/40 text-amber-300 px-3 py-1 rounded-full text-xs font-semibold mb-4 tracking-wide">
+              MYBOOKSTORE
+            </span>
 
-              {/* Heading */}
-              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-3xl font-bold leading-tight text-white">
-                Discover Your <br />
-                <span className="text-amber-300">Next Great Read</span>
-              </h1>
+            {/* Heading */}
+            <h1 className="text-3xl sm:text-4xl md:text-4xl lg:text-5xl font-extrabold leading-tight text-white mb-3">
+              Discover Your{" "}
+              <span className="text-amber-300 block sm:inline">
+                Next Great Read
+              </span>
+            </h1>
 
-              {/* Sub Text */}
-              <p className="text-gray-300 text-sm sm:text-base md:text-sm lg:text-base max-w-lg leading-6 sm:leading-7 mt-3">
-                Explore thousands of books, find inspiring authors, and build
-                your perfect collection.
-              </p>
+            {/* Sub */}
+            <p className="text-gray-300 text-sm sm:text-base max-w-md leading-relaxed mb-5 hidden sm:block">
+              Explore thousands of books, find inspiring authors, and build your
+              perfect collection.
+            </p>
 
-              {/* Feature Cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4">
-                <div className="bg-black/40 rounded-2xl p-3 border border-white/10">
-                  <p className="text-amber-300 text-xl mb-1">📚</p>
-                  <h3 className="text-white font-semibold text-sm">
-                    Thousands of Books
-                  </h3>
+            {/* Feature pills */}
+            <div className="flex flex-wrap gap-2 mb-5">
+              {[
+                { icon: "📚", label: "Thousands of Books" },
+                { icon: "⭐", label: "Top Authors" },
+                { icon: "⚡", label: "Fast & Easy" },
+              ].map(({ icon, label }) => (
+                <div
+                  key={label}
+                  className="flex items-center gap-1.5 bg-black/40 border border-white/15 rounded-full px-3 py-1.5"
+                >
+                  <span className="text-sm">{icon}</span>
+                  <p className="text-white text-xs font-medium">{label}</p>
                 </div>
-
-                <div className="bg-black/40 rounded-2xl p-3 border border-white/10">
-                  <p className="text-amber-300 text-xl mb-1">⭐</p>
-                  <h3 className="text-white font-semibold text-sm">
-                    Top Authors
-                  </h3>
-                </div>
-
-                <div className="bg-black/40 rounded-2xl p-3 border border-white/10">
-                  <p className="text-amber-300 text-xl mb-1">⚡</p>
-                  <h3 className="text-white font-semibold text-sm">
-                    Fast & Easy
-                  </h3>
-                </div>
-              </div>
-
-              {/* Button */}
-              <button className="mt-5 bg-amber-300 hover:bg-amber-400 text-black font-bold px-6 py-2 rounded-xl w-fit transition">
-                Browse Books →
-              </button>
+              ))}
             </div>
+
+            <Link to="/books">
+              <button className="bg-amber-300 hover:bg-amber-400 active:scale-95 text-black font-bold px-6 py-2.5 rounded-xl text-sm transition-all duration-200 shadow-lg shadow-amber-300/20 flex items-center gap-2 group">
+                Browse Books
+                <span className="transition-transform duration-300 group-hover:translate-x-1">
+                  →
+                </span>
+              </button>
+            </Link>
           </div>
         </div>
       </div>
 
-      <div className="w-full flex flex-col lg:flex-row gap-13 px-4 md:px-8 py-6">
-        {/* Left Section */}
-        <div className="w-full lg:w-3/5 flex flex-col gap-6">
+      {/* ── BODY ── */}
+      <div className="w-full flex flex-col lg:flex-row gap-8 px-4 md:px-8 py-8">
+        {/* ── LEFT ── */}
+        <div className="w-full lg:w-3/5 flex flex-col gap-10">
           {/* Previous Reading */}
           <div className="w-full">
-            <div className="flex justify-between items-center mb-6">
+            <div className="flex justify-between items-center mb-5">
               <p className="text-xl sm:text-2xl font-bold text-[#dbf8fa]">
                 Previous Reading
               </p>
-              <div className="flex items-center gap-2">
-                <p className="text-sm text-yellow-300">Filter</p>
-                <RiEqualizerFill className="text-yellow-300 rotate-90" />
+              <div className="flex items-center gap-2 cursor-pointer group">
+                <p className="text-sm text-yellow-300 group-hover:text-yellow-400 transition-colors">
+                  Filter
+                </p>
+                <RiEqualizerFill className="text-yellow-300 group-hover:text-yellow-400 rotate-90 transition-colors" />
               </div>
             </div>
             <Slider {...settings}>
-              {books &&
-                books.books.map((book, i) => (
-                  <div key={book._id} className="px-0 pb-3">
-                    <div className="bg-[#122125] rounded-md overflow-hidden shadow-xl/40 max-w-[280px] sm:max-w-[300px] md:max-w-[320px] mx-auto hover:scale-101 transition duration-200">
-                      <Link to={`/book/${book._id}`} key={book._id}>
-                        <div className="relative">
-                          <img
-                            src={`http://localhost:5000/${book.coverPhoto}`}
-                            alt={book.name}
-                            className="w-full h-48 object-cover rounded-t-lg"
-                          />
-
-                          {/* <div className="absolute top-2 right-2 bg-black/40 p-1 rounded-full">
-                            <IoMdHeart className="text-sm text-gray-300 hover:text-red-500 cursor-pointer" />
-                          </div> */}
-                        </div>
-
-                        <div className="px-3 py-2 flex flex-col gap-1">
-                          <div className="flex justify-between items-center gap-2 text-amber-50 hover:text-amber-300 duration-200">
-                            <p className="text-sm font-semibold  line-clamp-2 ">
-                              {book.name}
-                            </p>
-                            <span className="text-sm font-bold">
-                              ₹{book.price}
-                            </span>
-                          </div>
-
-                          <p className="text-xs text-gray-400">
-                            by {book.author?.[0]?.name || "Unknown"}
+              {previousBooks.map((book) => (
+                <div key={book._id} className="px-1.5 pb-3">
+                  <div className=" bg-[#122125] border border-white/5 hover:border-amber-300/20 rounded-xl overflow-hidden shadow-lg  hover:shadow-amber-300/10 transition-all duration-300 group mx-auto">
+                    <Link to={`/book/${book._id}`}>
+                      <div className="relative overflow-hidden">
+                        <img
+                          src={`http://localhost:5000/${book.coverPhoto}`}
+                          alt={book.name}
+                          className="w-full h-44 object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                      </div>
+                      <div className="px-3 py-2.5 flex flex-col gap-1.5">
+                        <div className="flex justify-between items-start gap-2 text-amber-50">
+                          <p className="text-sm font-semibold line-clamp-2 leading-snug group-hover:text-amber-300 transition-colors duration-200">
+                            {book.name}
                           </p>
-
-                          {/* 📂 Category (compact) */}
-                          <div className="flex gap-1 overflow-hidden">
-                            {book.categories?.length > 0 ? (
-                              book.categories.slice(0, 2).map((cat, index) => (
-                                <span
-                                  key={index}
-                                  className="text-[9px] px-2 py-[1px] bg-[#234046] text-amber-300 rounded-full truncate"
-                                >
-                                  {cat.name || cat}
-                                </span>
-                              ))
-                            ) : (
-                              <span className="text-[9px] text-gray-400">
-                                No Category
-                              </span>
-                            )}
-                          </div>
-
-                          {/* ⭐ Bottom Row */}
-                          {/* <div className="flex justify-between items-center mt-1"> */}
-                          {/* 🛒 Add to Cart */}
-                          {/* <button
-                            onClick={() => addToCart(book)}
-                            className={`text-xs px-2 py-1 rounded font-semibold cursor-pointer ${
-                              addedBookId === book._id
-                                ? "bg-green-500 text-white"
-                                : "bg-amber-300 text-black hover:bg-amber-400"
-                            }`}
-                          >
-                            {addedBookId === book._id ? "Added" : "Add to cart"}
-                          </button> */}
-
-                          {/* ⭐ Rating */}
-                          {/* <div className="flex text-orange-400 text-xs">
-                            ★★★★☆
-                          </div> */}
-                          {/* </div> */}
+                          <span className="text-xs font-bold text-amber-300 whitespace-nowrap mt-0.5 bg-amber-300/10 px-2 py-0.5 rounded-full">
+                            ₹{book.price}
+                          </span>
                         </div>
-                      </Link>
-                    </div>
+                        <p className="text-xs text-gray-400">
+                          by {book.author?.[0]?.name || "Unknown"}
+                        </p>
+                        <div className="flex gap-1 flex-wrap">
+                          {book.categories?.length > 0 ? (
+                            book.categories.slice(0, 2).map((cat, index) => (
+                              <span
+                                key={index}
+                                className="text-[9px] px-2 py-0.5 bg-[#1e3840] text-amber-300 rounded-full border border-amber-300/15"
+                              >
+                                {cat.name || cat}
+                              </span>
+                            ))
+                          ) : (
+                            <span className="text-[9px] text-gray-500">
+                              No Category
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </Link>
                   </div>
-                ))}
+                </div>
+              ))}
             </Slider>
           </div>
 
           {/* Subjects Section */}
           <div className="w-full">
-            <p className="text-xl font-bold text-[#dbf8fa] mb-6">
+            <p className="text-xl font-bold text-[#dbf8fa] mb-5">
               Subjects section
             </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {[
-                "Science",
-                "Arts",
-                "Commerce",
-                "Design",
-                "Cooking",
-                "Others",
-              ].map((subject, i) => (
+                { name: "Science", count: "1.2k" },
+                { name: "Arts", count: "1.8k" },
+                { name: "Commerce", count: "230" },
+                { name: "Design", count: "80" },
+                { name: "Cooking", count: "180", highlight: true },
+                { name: "Others", count: "900" },
+              ].map(({ name, count, highlight }) => (
                 <div
-                  key={subject}
-                  className={`flex justify-between items-center px-4 py-2 rounded-md ${
-                    subject === "Cooking" ? "bg-amber-300" : "bg-[#234046]"
+                  key={name}
+                  className={`flex justify-between items-center px-4 py-3 rounded-xl cursor-pointer transition-all duration-200 ${
+                    highlight
+                      ? "bg-amber-300 hover:bg-amber-400 shadow-md shadow-amber-300/20"
+                      : "bg-[#1a2e34] border border-white/5 hover:border-amber-300/30 hover:bg-[#1e3840]"
                   }`}
                 >
                   <p
-                    className={`text-lg font-bold ${
-                      subject === "Cooking" ? "" : "text-amber-300"
+                    className={`text-sm font-bold ${highlight ? "text-black" : "text-amber-300"}`}
+                  >
+                    {name}
+                  </p>
+                  <span
+                    className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
+                      highlight
+                        ? "bg-black/10 text-black"
+                        : "bg-amber-300/10 text-amber-300"
                     }`}
                   >
-                    {subject}
-                  </p>
-                  <p
-                    className={`text-lg font-bold ${
-                      subject === "Cooking" ? "" : "text-amber-300"
-                    }`}
-                  >
-                    {["1.2k", "1.8k", "230", "80", "180", "900"][i]}
-                  </p>
+                    {count}
+                  </span>
                 </div>
               ))}
             </div>
@@ -305,120 +262,130 @@ const MainPage = () => {
 
           {/* New Books */}
           <div className="w-full">
-            <div className="flex justify-between items-center mb-6">
+            <div className="flex justify-between items-center mb-5">
               <p className="text-xl font-bold text-[#dbf8fa]">New books</p>
               <Link to="/books">
-                <p className="text-amber-300 hover:text-amber-500">Show all</p>
+                <p className="text-amber-300 hover:text-amber-400 text-sm border border-amber-300/30 hover:border-amber-400/50 px-3 py-1 rounded-full transition-all duration-200">
+                  Show all →
+                </p>
               </Link>
             </div>
-            <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
-              {books &&
-                books?.books?.map((book) => (
-                  <Link to={`/book/${book._id}`} key={book._id}>
-                    <div className="min-w-[155px] sm:min-w-[180px] md:min-w-[200px] lg:min-w-[140px] flex-shrink-0 flex flex-col rounded-md shadow-xl/40 hover:scale-101 transition duration-300">
-                      <div className="w-full h-32">
-                        <img
-                          src={`http://localhost:5000/${book.coverPhoto}`}
-                          alt={book.name}
-                          className="w-full h-full object-cover border rounded-md"
-                        />
-                      </div>
-                      <div className="p-2">
-                        <div className="flex justify-between ">
-                          <p className="text-sm font-bold text-amber-50 truncate ">
-                            {book.name}
-                          </p>
-                          <span className="text-sm font-bold text-white">
-                            ₹{book.price}
-                          </span>
-                        </div>
-                        <div className="flex justify-between items-center text-xs text-gray-300">
-                          <span>{book.author?.[0]?.name || "Unknown"}</span>
-                        </div>
-                      </div>
+            <div className="flex gap-3.5 overflow-x-auto pb-3 scrollbar-hide">
+              {newBooks?.map((book) => (
+                <Link to={`/book/${book._id}`} key={book._id}>
+                  <div className="min-w-[140px] sm:min-w-[158px] lg:min-w-[138px] flex-shrink-0 group hover:border-amber-300/20 rounded-xl hover:shadow-md hover:shadow-amber-300/8 transition-all duration-300 group cursor-pointer border border-white/5 overflow-hidden">
+                    <div className="relative overflow-hidden">
+                      <img
+                        src={`http://localhost:5000/${book.coverPhoto}`}
+                        alt={book.name}
+                        className="w-full h-[140px] object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
                     </div>
-                  </Link>
-                ))}
+                    <div className="p-1 px-2">
+                      <div className="flex justify-between items-center gap-1">
+                        <p className="text-xs font-semibold text-amber-50 truncate group-hover:text-amber-300 transition-colors duration-200">
+                          {book.name}
+                        </p>
+                        <span className="text-xs font-bold text-amber-300 whitespace-nowrap">
+                          ₹{book.price}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-gray-400 mt-0.5 truncate">
+                        {book.author?.[0]?.name || "Unknown"}
+                      </p>
+                    </div>
+                  </div>
+                </Link>
+              ))}
             </div>
           </div>
         </div>
 
-        {/* Right Section */}
-        <div className="w-full lg:w-2/5 flex flex-col gap-8">
+        {/* ── RIGHT ── */}
+        <div className="w-full lg:w-2/5 flex flex-col gap-9">
           {/* Popular Books */}
           <div className="w-full">
-            <div className="flex justify-between items-center mb-7">
+            <div className="flex justify-between items-center mb-5">
               <p className="text-xl font-bold text-[#dbf8fa]">Popular books</p>
               <Link to="/books">
-                <p className="text-amber-300 text-sm hover:text-amber-500">
-                  Show all
+                <p className="text-amber-300 hover:text-amber-400 text-sm border border-amber-300/30 hover:border-amber-400/50 px-3 py-1 rounded-full transition-all duration-200">
+                  Show all →
                 </p>
               </Link>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-3 sm:gap-4">
-              {books &&
-                books?.books?.slice(0, 6).map((book) => (
-                  <Link to={`/book/${book._id}`} key={book._id}>
-                    <div className="rounded-md shadow-xl/40 hover:scale-101 transition duration-300 bg-[#122125] overflow-hidden">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-3">
+              {popularBooks?.slice(0, 6).map((book) => (
+                <Link to={`/book/${book._id}`} key={book._id}>
+                  <div className=" bg-[#122125] border border-white/5 hover:border-amber-300/20 rounded-xl overflow-hidden hover:-translate-y-1 hover:shadow-md hover:shadow-amber-300/10 transition-all duration-300 group cursor-pointer">
+                    <div className="relative overflow-hidden">
                       <img
                         src={`http://localhost:5000/${book.coverPhoto}`}
-                        alt=""
-                        className="w-full h-32 object-cover rounded-md border"
+                        alt={book.name}
+                        className="w-full h-28 md:h-28 object-cover group-hover:scale-105 transition-transform duration-300"
                       />
-                      <div className="p-2">
-                        <p className="text-sm font-bold text-amber-50 truncate">
-                          {book.name}
-                        </p>
-                        <div className="flex justify-between text-xs text-gray-400">
-                          <span>{book.author?.[0]?.name || "Unknown"}</span>
-                          {/* <span className="text-yellow-300">{item.viewers}</span> */}
-                        </div>
-                      </div>
                     </div>
-                  </Link>
-                ))}
+                    <div className="p-2.5">
+                      <p className="text-xs font-semibold text-amber-50 truncate group-hover:text-amber-300 transition-colors duration-200">
+                        {book.name}
+                      </p>
+                      <p className="text-[11px] text-gray-400 mt-0.5 truncate">
+                        {book.author?.[0]?.name || "Unknown"}
+                      </p>
+                    </div>
+                  </div>
+                </Link>
+              ))}
             </div>
           </div>
 
           {/* Writers and Authors */}
           <div className="w-full">
-            <div className="flex justify-between items-center mb-6">
+            <div className="flex justify-between items-center mb-5">
               <p className="text-xl font-bold text-[#dbf8fa]">
                 Writers and Authors
               </p>
               <Link to="/authors">
-                <p className="text-amber-300 text-sm hover:text-amber-500">
-                  Show all
+                <p className="text-amber-300 hover:text-amber-400 text-sm border border-amber-300/30 hover:border-amber-400/50 px-3 py-1 rounded-full transition-all duration-200">
+                  Show all →
                 </p>
               </Link>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {authors &&
-                authors?.slice(0, 6).map((author, i) => (
-                  <Link to={`/author/${author._id}`} key={author._id}>
-                    <div className="bg-[#122125] rounded-md p-3 flex flex-col justify-between min-h-[142px] hover:scale-101 transition duration-300">
-                      <div className="flex justify-between items-center">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              {authors?.slice(0, 6).map((author) => (
+                <Link to={`/author/${author._id}`} key={author._id}>
+                  <div className="bg-[#122125] border border-white/5 hover:border-amber-300/20 rounded-xl p-3.5 flex flex-col justify-between min-h-[148px] hover:-translate-y-1 hover:shadow-md hover:shadow-amber-300/8 transition-all duration-300 group cursor-pointer">
+                    <div className="flex justify-between items-start">
+                      <div className="relative ">
                         <img
                           src={`http://localhost:5000/${author.coverPhoto}`}
-                          alt=""
-                          className="w-12 h-12 rounded-full border border-amber-50"
+                          alt={author.name}
+                          className="w-12 h-12 rounded-full object-cover border-2 border-amber-300/30 group-hover:border-amber-300/60 transition-colors duration-200"
                         />
-                        <div className="text-right">
-                          <p className="text-xs text-amber-300">766</p>
-                          <p className="text-xs text-gray-400">Books</p>
-                        </div>
                       </div>
-                      <div>
-                        <p className="text-sm text-[#dbf8fa]">{author.name}</p>
-                        <p className="text-xs text-gray-400">Writer & Author</p>
-                        <div className="flex justify-between items-center text-amber-300 mt-1">
-                          <p className="text-sm">More...</p>
-                          <TbSend2 className="text-lg" />
-                        </div>
+                      <div className="text-right">
+                        <p className="text-sm font-bold text-amber-300">
+                          {author.books.length}
+                        </p>
+                        <p className="text-[10px] text-gray-500 uppercase tracking-wider">
+                          Books
+                        </p>
                       </div>
                     </div>
-                  </Link>
-                ))}
+                    <div className="mt-2">
+                      <p className="text-sm font-medium text-[#dbf8fa] truncate group-hover:text-amber-300 transition-colors duration-200">
+                        {author.name}
+                      </p>
+                      <p className="text-[11px] text-gray-500 mt-0.5">
+                        Writer & Author
+                      </p>
+                      <div className="flex justify-between items-center text-amber-300 mt-2">
+                        <p className="text-xs group-hover:underline">More...</p>
+                        <TbSend2 className="text-base group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform duration-200" />
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              ))}
             </div>
           </div>
         </div>
