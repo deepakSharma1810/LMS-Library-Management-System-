@@ -306,6 +306,63 @@ const resetPassword = async (req, res) => {
   }
 };
 
+const changePassword = async (req, res) => {
+  try {
+    const { uName, currentPassword, newPassword } = req.body;
+
+    // Validation
+    if (!uName || !currentPassword || !newPassword) {
+      return res.status(400).json({
+        message: "Please fill all fields",
+      });
+    }
+
+    // User Find
+    const user = await User.findOne({ uName });
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    // Current Password Check
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+
+    if (!isMatch) {
+      return res.status(400).json({
+        message: "Current password is incorrect",
+      });
+    }
+
+    // Same Password Check
+    if (currentPassword === newPassword) {
+      return res.status(400).json({
+        message: "New password must be different",
+      });
+    }
+
+    // Hash New Password
+    const hashPass = await bcrypt.hash(newPassword, 10);
+
+    // Update Password
+    user.password = hashPass;
+
+    await user.save();
+
+    return res.status(200).json({
+      message: "Password changed successfully",
+    });
+  } catch (error) {
+    console.log(error);
+
+    return res.status(500).json({
+      message: "Server error",
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   createUser,
   login,
@@ -316,4 +373,5 @@ module.exports = {
   forgotPassword,
   verifyOtp,
   resetPassword,
+  changePassword,
 };

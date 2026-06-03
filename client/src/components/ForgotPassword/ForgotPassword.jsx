@@ -1,6 +1,114 @@
+// import React, { useState } from "react";
+// import { useNavigate } from "react-router-dom";
+// import { FiMail } from "react-icons/fi";
+// import axios from "axios";
+
+// const ForgotPassword = () => {
+//   const navigate = useNavigate();
+
+//   const [email, setEmail] = useState("");
+//   const [loading, setLoading] = useState(false);
+//   const [error, setError] = useState("");
+
+//   const handleSubmit = async (e) => {
+//     e.preventDefault();
+
+//     if (!email) {
+//       setError("Email is required");
+//       return;
+//     }
+
+//     if (!email.includes("@")) {
+//       setError("Invalid email format");
+//       return;
+//     }
+
+//     try {
+//       setLoading(true);
+//       setError("");
+
+//       const res = await axios.post(
+//         "http://localhost:5000/auth/forgot-password",
+//         {
+//           email: email.trim(),
+//         },
+//       );
+//       console.log(res);
+
+//       // save email for next step
+//       setLoading(false);
+
+//       if (res.status === 200) {
+//         localStorage.setItem("resetEmail", email.trim());
+//         navigate("/enter-otp");
+//       }
+//     } catch (err) {
+//       setLoading(false);
+
+//       (console.log("ERROR:", err),
+//         setError(
+//           err.response?.data?.message || err.message || "Failed to send OTP",
+//         ));
+
+//       setTimeout(() => {
+//         setError("");
+//       }, 2000);
+//     }
+//   };
+
+//   return (
+//     <div className="min-h-screen bg-[#0e1a1c] flex items-center justify-center px-4">
+//       <div className="w-full max-w-md bg-[#1b2e31] border border-[#2c4449] rounded-2xl p-8">
+//         <h2 className="text-2xl font-bold text-center text-[#dbf8fa] mb-2">
+//           Forgot Password
+//         </h2>
+
+//         <p className="text-center text-gray-400 text-sm mb-6">
+//           Enter your email to receive OTP
+//         </p>
+
+//         <form onSubmit={handleSubmit} className="space-y-5">
+//           <div>
+//             <label className="text-sm text-amber-200">Email</label>
+
+//             <div className="flex items-center bg-[#122125] border border-[#2c4449] rounded-lg px-3 mt-1">
+//               <FiMail className="text-gray-400" />
+
+//               <input
+//                 type="email"
+//                 placeholder="admin@email.com"
+//                 value={email}
+//                 onChange={(e) => {
+//                   setEmail(e.target.value);
+//                   setError("");
+//                 }}
+//                 className="w-full bg-transparent outline-none text-white px-2 py-2"
+//               />
+//             </div>
+//           </div>
+
+//           {error && <p className="text-sm text-red-400 text-center">{error}</p>}
+
+//           <button
+//             type="submit"
+//             disabled={loading}
+//             className="w-full flex items-center justify-center gap-2 bg-amber-300 text-[#0e1a1c] py-2 rounded-lg font-semibold hover:bg-amber-400 disabled:opacity-60"
+//           >
+//             {loading && (
+//               <span className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin"></span>
+//             )}
+//             {loading ? "Sending..." : "Send OTP"}
+//           </button>
+//         </form>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default ForgotPassword;
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { FiMail } from "react-icons/fi";
+import { useNavigate, Link } from "react-router-dom";
+import { FiMail, FiArrowLeft } from "react-icons/fi";
 import axios from "axios";
 
 const ForgotPassword = () => {
@@ -9,6 +117,7 @@ const ForgotPassword = () => {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [sent, setSent] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -29,77 +138,101 @@ const ForgotPassword = () => {
 
       const res = await axios.post(
         "http://localhost:5000/auth/forgot-password",
-        {
-          email: email.trim(),
-        },
+        { email: email.trim() },
       );
-      console.log(res);
 
-      // save email for next step
       setLoading(false);
 
       if (res.status === 200) {
+        setSent(true);
         localStorage.setItem("resetEmail", email.trim());
-        navigate("/enter-otp");
+        setTimeout(() => navigate("/enter-otp"), 1200);
       }
     } catch (err) {
       setLoading(false);
 
-      (console.log("ERROR:", err),
-        setError(
-          err.response?.data?.message || err.message || "Failed to send OTP",
-        ));
+      setError(
+        err.response?.data?.message || err.message || "Failed to send OTP",
+      );
 
-      setTimeout(() => {
-        setError("");
-      }, 2000);
+      setTimeout(() => setError(""), 3000);
     }
   };
 
   return (
     <div className="min-h-screen bg-[#0e1a1c] flex items-center justify-center px-4">
-      <div className="w-full max-w-md bg-[#1b2e31] border border-[#2c4449] rounded-2xl p-8">
-        <h2 className="text-2xl font-bold text-center text-[#dbf8fa] mb-2">
-          Forgot Password
-        </h2>
-
-        <p className="text-center text-gray-400 text-sm mb-6">
-          Enter your email to receive OTP
-        </p>
-
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div>
-            <label className="text-sm text-amber-200">Email</label>
-
-            <div className="flex items-center bg-[#122125] border border-[#2c4449] rounded-lg px-3 mt-1">
-              <FiMail className="text-gray-400" />
-
-              <input
-                type="email"
-                placeholder="admin@email.com"
-                value={email}
-                onChange={(e) => {
-                  setEmail(e.target.value);
-                  setError("");
-                }}
-                className="w-full bg-transparent outline-none text-white px-2 py-2"
-              />
+      <div className="w-full max-w-md">
+        <div className="bg-[#162428] border border-[#1f3a3e] rounded-2xl shadow-xl p-8">
+          <div className="text-center mb-7">
+            <div className="w-12 h-12 rounded-2xl bg-amber-300/10 border border-amber-300/20 flex items-center justify-center mx-auto mb-3">
+              <FiMail className="text-xl text-amber-300" />
             </div>
+
+            <h2 className="text-2xl font-bold text-[#dbf8fa] tracking-tight">
+              Forgot Password
+            </h2>
+
+            <p className="text-xs text-[#4a8a92] mt-1">
+              Enter your email to receive an OTP
+            </p>
           </div>
 
-          {error && <p className="text-sm text-red-400 text-center">{error}</p>}
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            <div className="flex flex-col gap-1">
+              <label className="text-[10px] text-[#4a8a92] uppercase tracking-wider">
+                Email
+              </label>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full flex items-center justify-center gap-2 bg-amber-300 text-[#0e1a1c] py-2 rounded-lg font-semibold hover:bg-amber-400 disabled:opacity-60"
-          >
-            {loading && (
-              <span className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin"></span>
+              <div className="relative">
+                <FiMail className="absolute left-3 top-1/2 -translate-y-1/2 text-[#4a8a92] text-sm" />
+
+                <input
+                  type="email"
+                  placeholder="you@example.com"
+                  value={email}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    setError("");
+                  }}
+                  className="w-full bg-[#0e1a1c] border border-[#1f3a3e] rounded-xl text-sm text-[#dbf8fa] placeholder-[#2a5a62] outline-none focus:border-amber-300/40 focus:ring-1 focus:ring-amber-300/20 transition py-2.5 pl-9 pr-3"
+                />
+              </div>
+            </div>
+
+            {error && (
+              <div className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded-xl px-3 py-2 text-center">
+                {error}
+              </div>
             )}
-            {loading ? "Sending..." : "Send OTP"}
-          </button>
-        </form>
+
+            {sent && (
+              <div className="text-xs text-emerald-400 bg-emerald-400/10 border border-emerald-400/20 rounded-xl px-3 py-2 text-center">
+                OTP sent! Redirecting...
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={loading || sent}
+              className="w-full flex items-center justify-center gap-2 bg-amber-400 text-black font-bold text-sm py-2.5 rounded-xl hover:bg-amber-500 transition disabled:opacity-60 cursor-pointer"
+            >
+              {loading && (
+                <span className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
+              )}
+
+              {loading ? "Sending..." : sent ? "OTP Sent ✓" : "Send OTP"}
+            </button>
+          </form>
+
+          <div className="mt-5 text-center">
+            <Link
+              to="/login"
+              className="inline-flex items-center gap-1.5 text-xs text-[#4a8a92] hover:text-amber-300 transition"
+            >
+              <FiArrowLeft className="text-xs" /> Back to Login
+            </Link>
+          </div>
+        </div>
       </div>
     </div>
   );

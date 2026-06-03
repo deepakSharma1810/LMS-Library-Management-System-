@@ -6,6 +6,7 @@ import { IoMdHeart } from "react-icons/io";
 import { RiEqualizerFill } from "react-icons/ri";
 import axios from "axios";
 import { TbSend2 } from "react-icons/tb";
+import { FaArrowRightLong } from "react-icons/fa6";
 import { Link, useNavigate } from "react-router-dom";
 
 const settings = {
@@ -33,6 +34,8 @@ const MainPage = () => {
   const [previousBooks, setPreviousBooks] = useState([]);
   const [authors, setAuthors] = useState([]);
 
+  const [loading, setLoading] = useState(true);
+
   const fetchBooks = async () => {
     try {
       const [newRes, popularRes, prevRes] = await Promise.all([
@@ -58,8 +61,13 @@ const MainPage = () => {
   };
 
   useEffect(() => {
-    fetchBooks();
-    fetchAuthors();
+    const loadData = async () => {
+      setLoading(true);
+      await Promise.all([fetchBooks(), fetchAuthors()]);
+      setLoading(false);
+    };
+
+    loadData();
   }, []);
 
   const addToCart = (book) => {
@@ -91,6 +99,162 @@ const MainPage = () => {
     }
     localStorage.setItem("cart", JSON.stringify(updatedCart));
   };
+
+  const PageSkeleton = () => {
+    return (
+      <div className="w-full min-h-screen bg-[#0d1c20] animate-pulse">
+        {/* Hero Skeleton */}
+        <div className="w-full h-[60vh] sm:h-[65vh] md:h-[60vh] lg:h-[70vh] bg-[#122125] relative">
+          <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent" />
+
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full md:w-[65%] lg:w-[50%] px-6 sm:px-10 md:px-12 lg:px-16">
+              <div className="w-28 h-7 bg-white/10 rounded-full mb-5" />
+              <div className="w-full h-12 bg-white/10 rounded mb-4" />
+              <div className="w-3/4 h-12 bg-white/10 rounded mb-5" />
+              <div className="w-[85%] h-4 bg-white/10 rounded mb-3 hidden sm:block" />
+              <div className="w-[65%] h-4 bg-white/10 rounded mb-6 hidden sm:block" />
+
+              <div className="flex flex-wrap gap-2 mb-6">
+                <div className="w-36 h-8 bg-white/10 rounded-full" />
+                <div className="w-28 h-8 bg-white/10 rounded-full" />
+                <div className="w-24 h-8 bg-white/10 rounded-full" />
+              </div>
+
+              <div className="w-36 h-11 bg-amber-300/20 rounded-xl" />
+            </div>
+          </div>
+        </div>
+
+        {/* Body Skeleton */}
+        <div className="w-full flex flex-col lg:flex-row gap-8 px-4 md:px-8 py-8">
+          {/* Left */}
+          <div className="w-full lg:w-3/5 flex flex-col gap-10">
+            {/* Previous Reading */}
+            <section>
+              <div className="flex justify-between items-center mb-5">
+                <div className="w-48 h-7 bg-white/10 rounded" />
+                <div className="w-20 h-7 bg-white/10 rounded-full" />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="bg-[#122125] border border-white/5 rounded-xl overflow-hidden"
+                  >
+                    <div className="w-full h-44 bg-white/10" />
+                    <div className="p-3 space-y-3">
+                      <div className="h-4 bg-white/10 rounded w-3/4" />
+                      <div className="h-3 bg-white/10 rounded w-1/2" />
+                      <div className="flex gap-2">
+                        <div className="h-5 bg-white/10 rounded-full w-16" />
+                        <div className="h-5 bg-white/10 rounded-full w-20" />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {/* Subjects */}
+            <section>
+              <div className="w-44 h-7 bg-white/10 rounded mb-5" />
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="h-12 bg-[#1a2e34] border border-white/5 rounded-xl"
+                  />
+                ))}
+              </div>
+            </section>
+
+            {/* New Books */}
+            <section>
+              <div className="flex justify-between items-center mb-5">
+                <div className="w-32 h-7 bg-white/10 rounded" />
+                <div className="w-24 h-7 bg-white/10 rounded-full" />
+              </div>
+
+              <div className="flex gap-3.5 overflow-hidden">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="min-w-[140px] sm:min-w-[158px] lg:min-w-[138px] bg-[#122125] border border-white/5 rounded-xl overflow-hidden"
+                  >
+                    <div className="w-full h-[140px] bg-white/10" />
+                    <div className="p-2 space-y-2">
+                      <div className="h-3 bg-white/10 rounded w-3/4" />
+                      <div className="h-3 bg-white/10 rounded w-1/2" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          </div>
+
+          {/* Right */}
+          <div className="w-full lg:w-2/5 flex flex-col gap-9">
+            {/* Popular Books */}
+            <section>
+              <div className="flex justify-between items-center mb-5">
+                <div className="w-40 h-7 bg-white/10 rounded" />
+                <div className="w-24 h-7 bg-white/10 rounded-full" />
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-3">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="bg-[#122125] border border-white/5 rounded-xl overflow-hidden"
+                  >
+                    <div className="w-full h-28 bg-white/10" />
+                    <div className="p-2.5 space-y-2">
+                      <div className="h-3 bg-white/10 rounded w-3/4" />
+                      <div className="h-3 bg-white/10 rounded w-1/2" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {/* Authors */}
+            <section>
+              <div className="flex justify-between items-center mb-5">
+                <div className="w-52 h-7 bg-white/10 rounded" />
+                <div className="w-24 h-7 bg-white/10 rounded-full" />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="bg-[#122125] border border-white/5 rounded-xl p-3.5 min-h-[148px]"
+                  >
+                    <div className="flex justify-between items-start">
+                      <div className="w-12 h-12 rounded-full bg-white/10" />
+                      <div className="w-10 h-5 bg-white/10 rounded" />
+                    </div>
+
+                    <div className="mt-6 space-y-2">
+                      <div className="h-3 bg-white/10 rounded w-3/4" />
+                      <div className="h-3 bg-white/10 rounded w-1/2" />
+                      <div className="h-3 bg-white/10 rounded w-16" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  if (loading) {
+    return <PageSkeleton />;
+  }
 
   return (
     <div className="w-full min-h-screen bg-[#0d1c20]">
@@ -128,9 +292,9 @@ const MainPage = () => {
             {/* Feature pills */}
             <div className="flex flex-wrap gap-2 mb-5">
               {[
-                { icon: "📚", label: "Thousands of Books" },
-                { icon: "⭐", label: "Top Authors" },
-                { icon: "⚡", label: "Fast & Easy" },
+                { icon: "", label: "Thousands of Books" },
+                { icon: "", label: "Top Authors" },
+                { icon: "", label: "Fast & Easy" },
               ].map(({ icon, label }) => (
                 <div
                   key={label}
@@ -146,7 +310,7 @@ const MainPage = () => {
               <button className="bg-amber-300 hover:bg-amber-400 active:scale-95 text-black font-bold px-6 py-2.5 rounded-xl text-sm transition-all duration-200 shadow-lg shadow-amber-300/20 flex items-center gap-2 group">
                 Browse Books
                 <span className="transition-transform duration-300 group-hover:translate-x-1">
-                  →
+                  <FaArrowRightLong />
                 </span>
               </button>
             </Link>
@@ -171,6 +335,7 @@ const MainPage = () => {
                 <RiEqualizerFill className="text-yellow-300 group-hover:text-yellow-400 rotate-90 transition-colors" />
               </div>
             </div>
+
             <Slider {...settings}>
               {previousBooks.map((book) => (
                 <div key={book._id} className="px-1.5 pb-3">
@@ -265,8 +430,11 @@ const MainPage = () => {
             <div className="flex justify-between items-center mb-5">
               <p className="text-xl font-bold text-[#dbf8fa]">New books</p>
               <Link to="/books">
-                <p className="text-amber-300 hover:text-amber-400 text-sm border border-amber-300/30 hover:border-amber-400/50 px-3 py-1 rounded-full transition-all duration-200">
-                  Show all →
+                <p className="text-amber-300 hover:text-amber-400 text-sm border border-amber-300/30 hover:border-amber-400/50 px-3 py-1 rounded-full transition-all duration-200 group flex gap-2 items-center">
+                  Show all{" "}
+                  <span className="transition-transform duration-300 group-hover:translate-x-1">
+                    <FaArrowRightLong />
+                  </span>
                 </p>
               </Link>
             </div>
@@ -308,8 +476,11 @@ const MainPage = () => {
             <div className="flex justify-between items-center mb-5">
               <p className="text-xl font-bold text-[#dbf8fa]">Popular books</p>
               <Link to="/books">
-                <p className="text-amber-300 hover:text-amber-400 text-sm border border-amber-300/30 hover:border-amber-400/50 px-3 py-1 rounded-full transition-all duration-200">
-                  Show all →
+                <p className="text-amber-300 hover:text-amber-400 text-sm flex gap-2 items-center border border-amber-300/30 hover:border-amber-400/50 px-3 py-1 rounded-full transition-all duration-200 group">
+                  Show all{" "}
+                  <span className="transition-transform duration-300 group-hover:translate-x-1">
+                    <FaArrowRightLong />
+                  </span>
                 </p>
               </Link>
             </div>
