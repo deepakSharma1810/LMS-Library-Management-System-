@@ -75,7 +75,9 @@ io.on("connection", (socket) => {
 // EXPORT IO
 module.exports.io = io;
 
-// ✅ FINAL LISTEN
-server.listen(process.env.PORT, () => {
-  console.log("SERVER IS RUNNING AT PORT NO " + process.env.PORT);
+const PORT = process.env.PORT || 5000;
+
+//  FINAL LISTEN
+server.listen(PORT, () => {
+  console.log(`SERVER IS RUNNING AT PORT NO ${PORT}`);
 });
