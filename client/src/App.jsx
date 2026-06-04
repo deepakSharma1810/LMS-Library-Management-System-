@@ -22,11 +22,12 @@ import BookReaderPage from "./components/BookReaderPage/BookReaderPage";
 import { NotificationProvider } from "./context/NotificationContext";
 import { ThemeProvider } from "./context/ThemeContext";
 
-import ProtectedRoute from "./components/ProtectedRoute";
 import ForgotPassword from "./components/ForgotPassword/ForgotPassword";
 import EnterOtp from "./components/EnterOtp/EnterOtp";
 import ConfirmPassword from "./components/ConfirmPassword/ConfirmPassword";
 import SearchPage from "./components/SearchPage/SearchPage";
+
+import ProtectedRoute from "./components/ProtectedRoute";
 
 const App = () => {
   return (
