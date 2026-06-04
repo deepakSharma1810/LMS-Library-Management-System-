@@ -26,7 +26,7 @@ const verifySMTP = async () => {
 const sendMail = async ({ to, subject, text, html }) => {
   try {
     const info = await transporter.sendMail({
-      from: `"MyApp" <${process.env.SMTP_USER}>`,
+      from: `"MyBookStore" <${process.env.SMTP_USER}>`,
       to,
       subject,
       text,
