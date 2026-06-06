@@ -132,40 +132,6 @@ const SingleAuthorPage = () => {
                   </div>
                 )}
               </div>
-
-              {/* Social Icons */}
-              <div className="flex gap-3">
-                {author.social?.facebook && (
-                  <a
-                    href={author.social.facebook}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="w-8 h-8 rounded-xl bg-blue-400/10 border border-blue-400/20 flex items-center justify-center text-blue-400 hover:bg-blue-400/20 transition"
-                  >
-                    <FaFacebook className="text-sm" />
-                  </a>
-                )}
-                {author.social?.twitter && (
-                  <a
-                    href={author.social.twitter}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="w-8 h-8 rounded-xl bg-sky-400/10 border border-sky-400/20 flex items-center justify-center text-sky-400 hover:bg-sky-400/20 transition"
-                  >
-                    <FaTwitter className="text-sm" />
-                  </a>
-                )}
-                {author.social?.instagram && (
-                  <a
-                    href={author.social.instagram}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="w-8 h-8 rounded-xl bg-pink-400/10 border border-pink-400/20 flex items-center justify-center text-pink-400 hover:bg-pink-400/20 transition"
-                  >
-                    <FaInstagram className="text-sm" />
-                  </a>
-                )}
-              </div>
             </div>
 
             {/* Info */}
@@ -204,11 +170,6 @@ const SingleAuthorPage = () => {
                   </div>
                 )}
               </div>
-
-              {/* Message Button */}
-              <button className="self-start mt-2 px-5 py-2 flex items-center gap-2 bg-amber-400 text-black font-semibold text-sm rounded-xl hover:bg-amber-500 transition">
-                <TbSend2 /> Message Author
-              </button>
             </div>
           </div>
         </div>

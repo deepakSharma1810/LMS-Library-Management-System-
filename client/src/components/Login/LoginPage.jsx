@@ -80,12 +80,12 @@ const LoginForm = () => {
       setError(
         error.response?.data?.error ||
           error.response?.data?.message ||
-          "Invalid Credentials",
+          "Incorrect username or password",
       );
 
-      setTimeout(() => {
-        setError("");
-      }, 5000);
+      // setTimeout(() => {
+      //   setError("");
+      // }, 5000);
     }
   };
 
@@ -126,7 +126,7 @@ const LoginForm = () => {
                   value={formData.loginId}
                   onChange={handleChange}
                   required
-                  className="w-full bg-[#0e1a1c] border border-[#1f3a3e] rounded-xl text-sm text-[#dbf8fa] placeholder-[#2a5a62] outline-none focus:border-amber-300/40 focus:ring-1 focus:ring-amber-300/20 transition py-2.5 pl-9 pr-3"
+                  className={`w-full bg-[#0e1a1c] border border-[#1f3a3e] rounded-xl text-sm text-[#dbf8fa] placeholder-[#2a5a62] outline-none focus:border-amber-300/40 focus:ring-1 focus:ring-amber-300/20 transition py-2.5 pl-9 pr-3 ${error ? "border-red-500" : ""}`}
                   placeholder="Enter username or email"
                 />
               </div>
@@ -150,7 +150,7 @@ const LoginForm = () => {
                   value={formData.password}
                   onChange={handleChange}
                   required
-                  className="w-full bg-[#0e1a1c] border border-[#1f3a3e] rounded-xl text-sm text-[#dbf8fa] placeholder-[#2a5a62] outline-none focus:border-amber-300/40 focus:ring-1 focus:ring-amber-300/20 transition py-2.5 pl-9 pr-10"
+                  className={`w-full bg-[#0e1a1c] border border-[#1f3a3e] rounded-xl text-sm text-[#dbf8fa] placeholder-[#2a5a62] outline-none focus:border-amber-300/40 focus:ring-1 focus:ring-amber-300/20 transition py-2.5 pl-9 pr-10 ${error ? "border-red-500" : ""}`}
                   placeholder="••••••••"
                 />
 
@@ -162,6 +162,9 @@ const LoginForm = () => {
                   {showPassword ? <FiEyeOff /> : <FiEye />}
                 </button>
               </div>
+              {error && (
+                <div className="text-xs text-red-400 mt-1">{error}</div>
+              )}
             </div>
 
             <div className="text-right">
@@ -173,11 +176,11 @@ const LoginForm = () => {
               </Link>
             </div>
 
-            {error && (
+            {/* {error && (
               <div className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded-xl px-3 py-2 text-center">
                 {error}
               </div>
-            )}
+            )} */}
 
             <button
               type="submit"
