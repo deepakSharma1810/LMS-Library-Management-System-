@@ -11,6 +11,25 @@ const createUser = async (req, res) => {
       return res.status(400).json({ error: "Please fill all the fields" });
     }
 
+    // Username Validation
+    const usernameRegex = /^[a-zA-Z][a-zA-Z0-9._]{2,19}$/;
+
+    if (!usernameRegex.test(uName)) {
+      return res.status(400).json({
+        error:
+          "Username must start with a letter and contain only letters, numbers, underscore (_) or dot (.)",
+      });
+    }
+
+    // Email Validation
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({
+        error: "Please enter a valid Gmail address",
+      });
+    }
+
     const duplicate = await User.findOne({ uName });
 
     if (duplicate) {
@@ -42,35 +61,52 @@ const createUser = async (req, res) => {
 
 const login = async (req, res) => {
   try {
-    const { uName, password } = req.body;
+    const { loginId, password } = req.body;
 
-    if (!uName || !password) {
-      return res.status(400).json({ message: "Please fill all the fields" });
+    if (!loginId || !password) {
+      return res.status(400).json({
+        message: "Please fill all the fields",
+      });
     }
 
-    const user = await User.findOne({ uName });
+    const user = await User.findOne({
+      $or: [{ uName: loginId }, { email: loginId }],
+    });
 
     if (!user) {
-      return res.status(400).json({ error: "Invalid Credentials" });
+      return res.status(400).json({
+        error: "Invalid Credentials",
+      });
     }
 
     const isMatchPass = await bcrypt.compare(password, user.password);
 
     if (!isMatchPass) {
-      return res.status(400).json({ error: "Invalid Credentials" });
+      return res.status(400).json({
+        error: "Invalid Credentials",
+      });
     }
-    // console.log(uName, password);
+
     const token = jwt.sign(
-      { id: user._id, role: user.role },
+      {
+        id: user._id,
+        role: user.role,
+      },
       process.env.JWT_SECRET,
       {
         expiresIn: "1h",
       },
     );
 
-    res.status(200).json({ message: "Login successful", token, user });
+    return res.status(200).json({
+      message: "Login successful",
+      token,
+      user,
+    });
   } catch (error) {
-    return res.status(500).json({ error: error.message });
+    return res.status(500).json({
+      error: error.message,
+    });
   }
 };
 

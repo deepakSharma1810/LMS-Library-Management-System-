@@ -34,6 +34,22 @@ const SignUpPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    const usernameRegex = /^[a-zA-Z][a-zA-Z0-9._]{2,19}$/;
+
+    if (!usernameRegex.test(formData.uName.trim())) {
+      setErrorMsg(
+        "Username must start with a letter and contain only letters, numbers, underscore (_) or dot (.)",
+      );
+      return;
+    }
+
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+
+    if (!emailRegex.test(formData.email.trim())) {
+      setErrorMsg("Please enter a valid Gmail address");
+      return;
+    }
+
     if (formData.password !== formData.confirmPassword) {
       setErrorMsg("Passwords do not match");
       return;

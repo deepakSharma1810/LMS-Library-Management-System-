@@ -9,9 +9,11 @@ const LoginForm = () => {
   const from = location.state?.from;
 
   const [formData, setFormData] = useState({
-    uName: "",
+    loginId: "",
     password: "",
   });
+
+  console.log(formData);
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
@@ -31,14 +33,24 @@ const LoginForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (!formData.loginId.trim() || !formData.password.trim()) {
+      setError("Please fill all the fields");
+      return;
+    }
+
     try {
       setLoading(true);
       setMessage("");
       setError("");
 
+      const payload = {
+        loginId: formData.loginId.trim(),
+        password: formData.password,
+      };
+
       const res = await axios.post(
         "https://lms-library-management-system-9nhw.onrender.com/auth/login",
-        formData,
+        payload,
       );
 
       localStorage.setItem("token", res.data.token);
@@ -54,23 +66,28 @@ const LoginForm = () => {
 
         if (from) {
           navigate(from, { replace: true });
+        } else if (role === "super_admin") {
+          navigate("/super-admin-dashboard");
+        } else if (role === "admin") {
+          navigate("/dashboard");
         } else {
-          if (role === "super_admin") {
-            navigate("/super-admin-dashboard");
-          } else if (role === "admin") {
-            navigate("/dashboard");
-          } else {
-            navigate("/");
-          }
+          navigate("/");
         }
       }, 500);
     } catch (error) {
+      console.log("FULL ERROR:", error.response?.data);
+
       setLoading(false);
-      setError(error.response?.data?.message || "Invalid Credentials");
+
+      setError(
+        error.response?.data?.error ||
+          error.response?.data?.message ||
+          "Invalid Credentials",
+      );
 
       setTimeout(() => {
         setError("");
-      }, 2000);
+      }, 5000);
     }
   };
 
@@ -95,10 +112,10 @@ const LoginForm = () => {
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <div className="flex flex-col gap-1">
               <label
-                htmlFor="uName"
+                htmlFor="loginId"
                 className="text-[10px] text-[#4a8a92] uppercase tracking-wider"
               >
-                Username
+                Username or Email
               </label>
 
               <div className="relative">
@@ -106,13 +123,13 @@ const LoginForm = () => {
 
                 <input
                   type="text"
-                  id="uName"
-                  name="uName"
-                  value={formData.uName || ""}
+                  id="loginId"
+                  name="loginId"
+                  value={formData.loginId}
                   onChange={handleChange}
                   required
                   className="w-full bg-[#0e1a1c] border border-[#1f3a3e] rounded-xl text-sm text-[#dbf8fa] placeholder-[#2a5a62] outline-none focus:border-amber-300/40 focus:ring-1 focus:ring-amber-300/20 transition py-2.5 pl-9 pr-3"
-                  placeholder="Enter username"
+                  placeholder="Enter username or email"
                 />
               </div>
             </div>
@@ -157,12 +174,6 @@ const LoginForm = () => {
                 Forgot Password?
               </Link>
             </div>
-
-            {/* {message && (
-              <div className="text-xs text-emerald-400 bg-emerald-400/10 border border-emerald-400/20 rounded-xl px-3 py-2 text-center">
-                {message}
-              </div>
-            )} */}
 
             {error && (
               <div className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded-xl px-3 py-2 text-center">
