@@ -9,65 +9,6 @@ const EnterOtp = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-
-  //   const email = localStorage.getItem("resetEmail");
-
-  //   if (!email) {
-  //     setError("Session expired. Try again");
-  //     return;
-  //   }
-
-  //   if (!otp) {
-  //     setError("OTP is required");
-  //     return;
-  //   }
-
-  //   if (otp.length !== 6) {
-  //     setError("Invalid OTP");
-  //     return;
-  //   }
-
-  //   try {
-  //     setLoading(true);
-  //     setError("");
-
-  //     const res = await axios.post("http://localhost:5000/auth/verify-otp", {
-  //       email: email.trim(),
-  //       otp: otp.trim(),
-  //     });
-
-  //     console.log("API:", res.data);
-
-  //     setLoading(false);
-
-  //     if (res.status === 200) {
-  //       navigate("/confirm-password");
-  //     } else {
-  //       setError("Invalid OTP");
-  //     }
-  //   } catch (err) {
-  //     console.log("ERROR:", err.response?.data);
-  //     setLoading(false);
-
-  //     setError(err.response?.data?.message || "OTP verification failed");
-  //     if (msg === "Invalid OTP") {
-  //       setError("Invalid OTP");
-
-  //       setTimeout(() => {
-  //         setError("");
-  //       }, 2000);
-  //     } else {
-  //       // other errors (expired etc.)
-  //       setError(msg || "OTP verification failed");
-  //     }
-  //     // setTimeout(() => {
-  //     //   setError("");
-  //     // }, 2000);
-  //   }
-  // };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -98,10 +39,13 @@ const EnterOtp = () => {
       setLoading(true);
       setError("");
 
-      const res = await axios.post("http://localhost:5000/auth/verify-otp", {
-        email: email.trim(),
-        otp: otp.trim(),
-      });
+      const res = await axios.post(
+        "https://lms-library-management-system-9nhw.onrender.com/auth/verify-otp",
+        {
+          email: email.trim(),
+          otp: otp.trim(),
+        },
+      );
 
       console.log("API:", res.data);
 

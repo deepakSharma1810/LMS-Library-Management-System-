@@ -48,7 +48,7 @@ const ConfirmPassword = () => {
       setLoading(true);
 
       const res = await axios.post(
-        "http://localhost:5000/auth/reset-password",
+        "https://lms-library-management-system-9nhw.onrender.com/auth/reset-password",
         {
           email,
           password: passwords.password,

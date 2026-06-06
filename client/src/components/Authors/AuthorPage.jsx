@@ -36,7 +36,7 @@ const AuthorCard = ({ author }) => {
             )}
 
             <img
-              src={`http://localhost:5000/${author.coverPhoto}`}
+              src={`https://lms-library-management-system-9nhw.onrender.com/${author.coverPhoto}`}
               alt={author.name}
               onLoad={() => setImgLoaded(true)}
               className={`w-14 h-14 rounded-full object-cover ring-2 ring-amber-300/30 group-hover:ring-amber-300/60 transition-all duration-300 ${
@@ -93,7 +93,9 @@ const AuthorPage = () => {
       setLoading(true);
       setError(false);
 
-      const res = await axios.get("http://localhost:5000/author");
+      const res = await axios.get(
+        "https://lms-library-management-system-9nhw.onrender.com/author",
+      );
 
       setAuthors(Array.isArray(res.data) ? res.data : res.data.authors || []);
     } catch (error) {

@@ -50,7 +50,10 @@ const SignUpPage = () => {
         password: formData.password,
       };
 
-      await axios.post("http://localhost:5000/auth/", payload);
+      await axios.post(
+        "https://lms-library-management-system-9nhw.onrender.com/auth/",
+        payload,
+      );
 
       setSuccessMsg("Account created successfully");
 

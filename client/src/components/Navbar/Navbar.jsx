@@ -158,7 +158,7 @@ const Navbar = () => {
               <span className="hidden md:inline">Cart</span>
             </Link>
 
-            {/* Theme toggle */}
+            {/* Theme toggle
             <button
               onClick={toggleTheme}
               className="p-2 rounded-lg hover:bg-[#1e3840] transition-colors duration-200"
@@ -169,7 +169,7 @@ const Navbar = () => {
               ) : (
                 <MdDarkMode size={20} />
               )}
-            </button>
+            </button> */}
 
             {/* Profile dropdown */}
             <div

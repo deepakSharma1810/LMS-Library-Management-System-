@@ -29,7 +29,7 @@ const BookCard = ({ book }) => {
           )}
 
           <img
-            src={`http://localhost:5000/${book.coverPhoto}`}
+            src={`https://lms-library-management-system-9nhw.onrender.com/${book.coverPhoto}`}
             alt={book.name}
             onLoad={() => setImgLoaded(true)}
             className={`w-full h-full object-cover transition-all duration-500 group-hover:scale-105 ${
@@ -71,7 +71,9 @@ const BookPage = () => {
       setLoading(true);
       setError(false);
 
-      const res = await axios.get(`http://localhost:5000/book`);
+      const res = await axios.get(
+        `https://lms-library-management-system-9nhw.onrender.com/book`,
+      );
       setBooks(res.data);
     } catch (error) {
       console.log("Error fetch book", error);

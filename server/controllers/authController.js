@@ -189,62 +189,62 @@ const forgotPassword = async (req, res) => {
       subject: "Password Reset Verification Code",
       text: `Your password reset OTP is ${otp}. This OTP is valid for 5 minutes. Do not share it with anyone.`,
       html: `
-    <div style="font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 30px;">
-      <div style="max-width: 600px; margin: auto; background: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+      <div style="font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 30px;">
+        <div style="max-width: 600px; margin: auto; background: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
 
-        <div style="padding: 30px;">
-          <h2 style="color: #333333; margin-bottom: 15px;">
-            Password Reset Request
-          </h2>
+          <div style="padding: 30px;">
+            <h2 style="color: #333333; margin-bottom: 15px;">
+              Password Reset Request
+            </h2>
 
-          <p style="color: #555555; font-size: 16px; line-height: 1.6;">
-            Hello,
-          </p>
+            <p style="color: #555555; font-size: 16px; line-height: 1.6;">
+              Hello,
+            </p>
 
-          <p style="color: #555555; font-size: 16px; line-height: 1.6;">
-            We received a request to reset the password associated with your account.
-            Please use the verification code below to proceed:
-          </p>
+            <p style="color: #555555; font-size: 16px; line-height: 1.6;">
+              We received a request to reset the password associated with your account.
+              Please use the verification code below to proceed:
+            </p>
 
-          <div style="text-align: center; margin: 30px 0;">
-            <span style="
-              display: inline-block;
-              background: #eff6ff;
-              color: #2563eb;
-              font-size: 32px;
-              font-weight: bold;
-              letter-spacing: 8px;
-              padding: 15px 30px;
-              border-radius: 8px;
-              border: 2px dashed #2563eb;
-            ">
-              ${otp}
-            </span>
+            <div style="text-align: center; margin: 30px 0;">
+              <span style="
+                display: inline-block;
+                background: #eff6ff;
+                color: #2563eb;
+                font-size: 32px;
+                font-weight: bold;
+                letter-spacing: 8px;
+                padding: 15px 30px;
+                border-radius: 8px;
+                border: 2px dashed #2563eb;
+              ">
+                ${otp}
+              </span>
+            </div>
+
+            <p style="color: #555555; font-size: 16px; line-height: 1.6;">
+              <strong>Important:</strong>
+            </p>
+
+            <ul style="color: #555555; font-size: 15px; line-height: 1.8;">
+              <li>This OTP is valid for <strong>5 minutes</strong>.</li>
+              <li>Do not share this code with anyone.</li>
+              <li>If you did not request a password reset, please ignore this email.</li>
+            </ul>
+
+            <p style="color: #555555; font-size: 16px; line-height: 1.6;">
+              Thank you,<br>
+              <strong>MyBookStore Team</strong>
+            </p>
           </div>
 
-          <p style="color: #555555; font-size: 16px; line-height: 1.6;">
-            <strong>Important:</strong>
-          </p>
+          <div style="background: #f8fafc; padding: 20px; text-align: center; color: #6b7280; font-size: 13px;">
+            © ${new Date().getFullYear()} MyBookStore. All Rights Reserved.
+          </div>
 
-          <ul style="color: #555555; font-size: 15px; line-height: 1.8;">
-            <li>This OTP is valid for <strong>5 minutes</strong>.</li>
-            <li>Do not share this code with anyone.</li>
-            <li>If you did not request a password reset, please ignore this email.</li>
-          </ul>
-
-          <p style="color: #555555; font-size: 16px; line-height: 1.6;">
-            Thank you,<br>
-            <strong>BIIT Classes Team</strong>
-          </p>
         </div>
-
-        <div style="background: #f8fafc; padding: 20px; text-align: center; color: #6b7280; font-size: 13px;">
-          © ${new Date().getFullYear()} BIIT Classes. All Rights Reserved.
-        </div>
-
       </div>
-    </div>
-  `,
+    `,
     });
 
     if (!mailRes.success) {

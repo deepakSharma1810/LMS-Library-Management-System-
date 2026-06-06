@@ -10,11 +10,6 @@ import workerSrc from "pdfjs-dist/build/pdf.worker.min?url";
 
 pdfjs.GlobalWorkerOptions.workerSrc = workerSrc;
 
-// pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-//   "pdfjs-dist/build/pdf.worker.min.js",
-//   import.meta.url,
-// ).toString();
-
 const BookReaderPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -28,7 +23,9 @@ const BookReaderPage = () => {
   // ================= FETCH BOOK =================
   const fetchBook = async () => {
     try {
-      const res = await axios.get(`http://localhost:5000/book/${id}`);
+      const res = await axios.get(
+        `https://lms-library-management-system-9nhw.onrender.com/book/${id}`,
+      );
 
       setBook(res.data.getBook);
       console.log(res.data.getBook);
@@ -92,7 +89,7 @@ const BookReaderPage = () => {
 
   const progress = numPages ? Math.round((pageNumber / numPages) * 100) : 0;
 
-  const pdfUrl = `http://localhost:5000/${book.actualPdf.replace(/\\/g, "/")}`;
+  const pdfUrl = `https://lms-library-management-system-9nhw.onrender.com/${book.actualPdf.replace(/\\/g, "/")}`;
 
   // console.log(pdfUrl);
 

@@ -88,16 +88,6 @@ const ProfilePage = () => {
 
   const fullName = `${user?.fName || ""} ${user?.lName || ""}`.trim();
 
-  // const onFileChange = (e) => {
-  //   const file = e.target.files?.[0];
-  //   if (!file) return;
-
-  //   const url = URL.createObjectURL(file);
-  //   setAvatarPreview(url);
-  //   setAvatarError(false);
-  //   setForm((prev) => ({ ...prev, avatar: file }));
-  // };
-
   const onFileChange = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -216,7 +206,7 @@ const ProfilePage = () => {
       }
 
       const res = await axios.post(
-        "http://localhost:5000/auth/change-password",
+        "https://lms-library-management-system-9nhw.onrender.com/auth/change-password",
         {
           uName: user.uName,
           currentPassword: pwdState.current,
