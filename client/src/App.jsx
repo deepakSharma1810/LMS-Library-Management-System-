@@ -3,7 +3,14 @@ import React, { useEffect, useState } from "react";
 import Navbar from "./components/Navbar/Navbar";
 import MainPage from "./components/MainPage/MainPage";
 import Footer from "./components/Footer/Footer";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  useLocation,
+} from "react-router-dom";
+
+import TopLoader from "./components/TopLoader/TopLoader";
 
 import BookPage from "./components/Books/BookPage";
 import AuthorPage from "./components/Authors/AuthorPage";
@@ -29,77 +36,103 @@ import SearchPage from "./components/SearchPage/SearchPage";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 
+const AppContent = () => {
+  const location = useLocation();
+  const [pageLoading, setPageLoading] = useState(false);
+
+  useEffect(() => {
+    setPageLoading(true);
+
+    const timer = setTimeout(() => {
+      setPageLoading(false);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [location.pathname]);
+
+  return (
+    <>
+      <TopLoader loading={pageLoading} />
+
+      <ScrollOnTop />
+      <Navbar />
+
+      <Routes>
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <ProfilePage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route path="*" element={<h1>404 Not Found</h1>} />
+
+        <Route
+          path="/cart"
+          element={
+            <ProtectedRoute>
+              <CartPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/orders"
+          element={
+            <ProtectedRoute>
+              <OrderPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/wishlist"
+          element={
+            <ProtectedRoute>
+              <WishlistPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/read/:id"
+          element={
+            <ProtectedRoute>
+              <BookReaderPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route path="/" element={<MainPage />} />
+        <Route path="/books" element={<BookPage />} />
+        <Route path="/book/:id" element={<SingleBookPage />} />
+        <Route path="/authors" element={<AuthorPage />} />
+        <Route path="/author/:id" element={<SingleAuthorPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<SignUpPage />} />
+        <Route path="/notifications" element={<NotificationPage />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/enter-otp" element={<EnterOtp />} />
+        <Route path="/confirm-password" element={<ConfirmPassword />} />
+        <Route path="/search" element={<SearchPage />} />
+      </Routes>
+
+      <Footer />
+    </>
+  );
+};
+
 const App = () => {
   return (
-    <div>
-      <ThemeProvider>
-        <NotificationProvider>
-          <Router>
-            <ScrollOnTop />
-
-            <Navbar />
-
-            <Routes>
-              <Route
-                path="/profile"
-                element={
-                  <ProtectedRoute>
-                    <ProfilePage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route path="*" element={<h1>404 Not Found</h1>} />
-              <Route
-                path="/cart"
-                element={
-                  <ProtectedRoute>
-                    <CartPage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/orders"
-                element={
-                  <ProtectedRoute>
-                    <OrderPage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/wishlist"
-                element={
-                  <ProtectedRoute>
-                    <WishlistPage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/read/:id"
-                element={
-                  <ProtectedRoute>
-                    <BookReaderPage />
-                  </ProtectedRoute>
-                }
-              />
-              <Route path="/" element={<MainPage />} />
-              <Route path="/books" element={<BookPage />} />
-              <Route path="/book/:id" element={<SingleBookPage />} />
-              <Route path="/authors" element={<AuthorPage />} />
-              <Route path="/author/:id" element={<SingleAuthorPage />} />
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/signup" element={<SignUpPage />} />
-              <Route path="/notifications" element={<NotificationPage />} />
-              <Route path="/forgot-password" element={<ForgotPassword />} />
-              <Route path="/enter-otp" element={<EnterOtp />} />
-              <Route path="/confirm-password" element={<ConfirmPassword />} />
-              <Route path="/search" element={<SearchPage />} />
-            </Routes>
-
-            <Footer />
-          </Router>
-        </NotificationProvider>
-      </ThemeProvider>
-    </div>
+    <ThemeProvider>
+      <NotificationProvider>
+        <Router>
+          <AppContent />
+        </Router>
+      </NotificationProvider>
+    </ThemeProvider>
   );
 };
 

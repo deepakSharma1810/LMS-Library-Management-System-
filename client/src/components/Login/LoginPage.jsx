@@ -13,8 +13,6 @@ const LoginForm = () => {
     password: "",
   });
 
-  console.log(formData);
-
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");

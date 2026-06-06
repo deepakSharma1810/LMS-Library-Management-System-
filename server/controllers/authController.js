@@ -22,11 +22,13 @@ const createUser = async (req, res) => {
     }
 
     // Email Validation
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
-
-    if (!emailRegex.test(email)) {
+    if (
+      !email.includes("@") ||
+      !email.includes(".") ||
+      email.indexOf("@") > email.lastIndexOf(".")
+    ) {
       return res.status(400).json({
-        error: "Please enter a valid Gmail address",
+        error: "Please enter a valid email address",
       });
     }
 
@@ -61,16 +63,18 @@ const createUser = async (req, res) => {
 
 const login = async (req, res) => {
   try {
-    const { loginId, password } = req.body;
+    const { loginId, uName, password } = req.body;
 
-    if (!loginId || !password) {
+    const userInput = (loginId || uName || "").trim();
+
+    if (!userInput || !password) {
       return res.status(400).json({
         message: "Please fill all the fields",
       });
     }
 
     const user = await User.findOne({
-      $or: [{ uName: loginId }, { email: loginId }],
+      $or: [{ uName: userInput }, { email: userInput }],
     });
 
     if (!user) {
@@ -94,7 +98,7 @@ const login = async (req, res) => {
       },
       process.env.JWT_SECRET,
       {
-        expiresIn: "1h",
+        expiresIn: "30d",
       },
     );
 

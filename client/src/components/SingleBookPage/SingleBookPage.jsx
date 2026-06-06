@@ -74,18 +74,21 @@ const SingleBookPage = () => {
   const [ratingsList, setRatingsList] = useState([]);
   const [hoverRating, setHoverRating] = useState(0);
   const [userReview, setUserReview] = useState(null);
+  const [reviewLoading, setReviewLoading] = useState(false);
 
-  const fetchSingleBook = async () => {
+  const fetchSingleBook = async (showLoader = true) => {
     try {
-      setLoading(true);
+      if (showLoader) setLoading(true);
+
       const res = await axios.get(
         `https://lms-library-management-system-9nhw.onrender.com/book/${id}`,
       );
+
       setBook(res.data.getBook);
     } catch (error) {
       console.log("Error fetching book:", error);
     } finally {
-      setLoading(false);
+      if (showLoader) setLoading(false);
     }
   };
 
@@ -180,20 +183,25 @@ const SingleBookPage = () => {
 
   const submitRating = async () => {
     const token = localStorage.getItem("token");
+
     if (!token) {
       navigate("/login");
       return;
     }
     try {
+      setReviewLoading(true);
+
       await axios.post(
         "https://lms-library-management-system-9nhw.onrender.com/rating/add",
         { rating: userRating, review: reviewText, bookId: book._id },
         { headers: { Authorization: `Bearer ${token}` } },
       );
       fetchRatings();
-      fetchSingleBook();
+      fetchSingleBook(false);
     } catch (err) {
       console.log(err);
+    } finally {
+      setReviewLoading(false);
     }
   };
 
@@ -255,7 +263,7 @@ const SingleBookPage = () => {
         </nav>
 
         {/* Main Card */}
-        <div className="bg-[#162428] rounded-2xl border border-[#1f3a3e] p-6 shadow-lg">
+        <div className="bg-[#162428] rounded-2xl border border-[#1f3a3e] p-4 sm:p-6 shadow-lg">
           <div className="flex flex-col md:flex-row gap-8">
             {/* Cover */}
             <div className="flex-shrink-0 w-full md:w-60">
@@ -351,7 +359,7 @@ const SingleBookPage = () => {
               </p>
 
               {/* Product Details */}
-              <div className="grid grid-cols-2 gap-x-6 gap-y-1.5 text-xs border border-[#1f3a3e] rounded-xl p-4 bg-[#0e1a1c]">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs border border-[#1f3a3e] rounded-xl p-4 bg-[#0e1a1c] w-full overflow-hidden">
                 {[
                   ["ISBN", book.isbn],
                   ["Publisher", book.publisher],
@@ -361,11 +369,17 @@ const SingleBookPage = () => {
                 ]
                   .filter(([, v]) => v)
                   .map(([k, v]) => (
-                    <div key={k} className="flex gap-2">
-                      <span className="text-[#2a5a62] w-20 flex-shrink-0">
+                    <div
+                      key={k}
+                      className="flex flex-col xs:flex-row sm:flex-row gap-1 sm:gap-2 min-w-0"
+                    >
+                      <span className="text-[#2a5a62] sm:w-20 flex-shrink-0">
                         {k}
                       </span>
-                      <span className="text-[#6bbcc4]">{v}</span>
+
+                      <span className="text-[#6bbcc4] break-words leading-relaxed min-w-0">
+                        {v}
+                      </span>
                     </div>
                   ))}
               </div>
@@ -454,9 +468,16 @@ const SingleBookPage = () => {
 
               <button
                 onClick={submitRating}
-                className="mt-3 px-5 py-2 bg-amber-400 hover:bg-amber-500 text-black font-bold rounded-xl text-sm transition"
+                disabled={reviewLoading}
+                className="mt-3 px-5 py-2 bg-amber-400 hover:bg-amber-500 disabled:opacity-70 text-black font-bold rounded-xl text-sm transition flex items-center gap-2"
               >
-                {userReview ? "Update Review" : "Submit Review"}
+                {reviewLoading
+                  ? userReview
+                    ? "Updating..."
+                    : "Submitting..."
+                  : userReview
+                    ? "Update Review"
+                    : "Submit Review"}
               </button>
             </>
           )}
@@ -485,10 +506,10 @@ const SingleBookPage = () => {
                   <div className="flex justify-between items-start">
                     <div className="flex items-center gap-2">
                       <div className="w-7 h-7 rounded-full bg-[#1f3338] border border-[#2dd4e0]/10 flex items-center justify-center text-xs text-[#2dd4e0] font-bold">
-                        {r.user?.name?.[0] || "U"}
+                        {r.user?.fName?.[0] || "U"}
                       </div>
                       <p className="text-sm font-medium text-[#6bbcc4]">
-                        {r.user?.name || "User"}
+                        {r.user?.fName || "User"}
                       </p>
                     </div>
 
@@ -496,7 +517,7 @@ const SingleBookPage = () => {
                       String(localStorage.getItem("userId")) && (
                       <button
                         onClick={() => deleteReview(r._id)}
-                        className="flex items-center gap-1 text-xs text-red-400 hover:text-red-300 transition"
+                        className="flex items-center gap-1 text-xs text-red-400 cursor-pointer hover:text-red-300 transition"
                       >
                         <FiTrash2 /> Delete
                       </button>
