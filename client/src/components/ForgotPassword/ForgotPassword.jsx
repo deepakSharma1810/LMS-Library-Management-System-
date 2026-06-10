@@ -18,12 +18,10 @@ const ForgotPassword = () => {
       setError("Email is required");
       return;
     }
-
     if (!email.includes("@")) {
       setError("Invalid email format");
       return;
     }
-
     try {
       setLoading(true);
       setError("");
@@ -50,7 +48,6 @@ const ForgotPassword = () => {
       );
     }
   };
-
   return (
     <div className="min-h-screen bg-[#0e1a1c] flex items-center justify-center px-4">
       <div className="w-full max-w-md">

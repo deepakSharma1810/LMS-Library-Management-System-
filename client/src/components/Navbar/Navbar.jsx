@@ -1,7 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNotification } from "../../context/NotificationContext";
-import { useTheme } from "../../context/ThemeContext";
-import { MdDarkMode, MdLightMode } from "react-icons/md";
 import { GoBell } from "react-icons/go";
 import { CiSearch } from "react-icons/ci";
 import { CgProfile } from "react-icons/cg";
@@ -12,39 +10,52 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { theme, toggleTheme } = useTheme();
   const { notificationCount } = useNotification();
 
   const [showProfile, setShowProfile] = useState(false);
   const [mobileMenu, setMobileMenu] = useState(false);
-  const [mobileProfileOpen, setMobileProfileOpen] = useState(false);
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [scrolled, setScrolled] = useState(false);
+
+  const mobileSearchRef = useRef(null);
 
   const user = JSON.parse(localStorage.getItem("user"));
   const isLoggedIn = !!localStorage.getItem("token");
 
-  // Shadow on scroll
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 4);
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Escape key closes everything
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (
+        mobileSearchRef.current &&
+        !mobileSearchRef.current.contains(e.target)
+      ) {
+        setMobileSearchOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   useEffect(() => {
     const onKey = (e) => {
       if (e.key === "Escape") {
         setMobileMenu(false);
-        setMobileProfileOpen(false);
         setShowProfile(false);
+        setMobileSearchOpen(false);
       }
     };
+
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  // Lock body scroll when drawer is open
   useEffect(() => {
     document.body.style.overflow = mobileMenu ? "hidden" : "";
     return () => {
@@ -61,14 +72,15 @@ const Navbar = () => {
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+    localStorage.removeItem("userId");
     navigate("/");
   };
 
-  const handleSearch = (closeMobile = false) => {
+  const handleSearch = () => {
     if (search.trim()) {
-      navigate(`/search?q=${search}`);
+      navigate(`/search?q=${search.trim()}`);
       setSearch("");
-      if (closeMobile) setMobileMenu(false);
+      setMobileSearchOpen(false);
     }
   };
 
@@ -91,7 +103,6 @@ const Navbar = () => {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 gap-4">
-          {/* ── LEFT: Logo + Nav ── */}
           <div className="flex items-center gap-5 flex-shrink-0">
             <Link
               to="/"
@@ -99,6 +110,7 @@ const Navbar = () => {
             >
               MyBookStore
             </Link>
+
             <nav className="hidden sm:flex items-center gap-1">
               <Link to="/books" className={navLinkClass("/books")}>
                 Books
@@ -109,10 +121,10 @@ const Navbar = () => {
             </nav>
           </div>
 
-          {/* ── CENTER: Search ── */}
           <div className="flex-1 flex items-center justify-center max-w-xl mx-auto">
             <div className="hidden md:flex items-center w-full bg-[#152528] border border-white/10 hover:border-amber-300/30 focus-within:border-amber-300/50 rounded-xl px-3 py-2 gap-2 transition-colors duration-200">
               <CiSearch size={18} className="text-[#7a9ea0] flex-shrink-0" />
+
               <input
                 type="text"
                 value={search}
@@ -120,8 +132,8 @@ const Navbar = () => {
                 onKeyDown={(e) => e.key === "Enter" && handleSearch()}
                 placeholder="Search books, authors..."
                 className="bg-transparent w-full text-sm outline-none text-[#dbf8fa] placeholder:text-[#7a9ea0]"
-                aria-label="Search"
               />
+
               {search && (
                 <button
                   onClick={() => setSearch("")}
@@ -133,15 +145,13 @@ const Navbar = () => {
             </div>
           </div>
 
-          {/* ── RIGHT: Icons ── */}
           <div className="flex items-center gap-1 flex-shrink-0">
-            {/* Bell */}
             <Link
               to="/notifications"
               className="hidden md:inline-flex p-2 rounded-lg hover:bg-[#1e3840] relative transition-colors duration-200"
-              aria-label="Notifications"
             >
               <GoBell size={20} />
+
               {notificationCount > 0 && (
                 <span className="absolute top-1 right-1 bg-red-500 text-white text-[9px] min-w-[16px] h-[16px] flex items-center justify-center rounded-full px-0.5 font-semibold">
                   {notificationCount > 9 ? "9+" : notificationCount}
@@ -149,7 +159,6 @@ const Navbar = () => {
               )}
             </Link>
 
-            {/* Cart */}
             <Link
               to="/cart"
               className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-[#1e3840] text-sm transition-colors duration-200"
@@ -158,22 +167,8 @@ const Navbar = () => {
               <span className="hidden md:inline">Cart</span>
             </Link>
 
-            {/* Theme toggle
-            <button
-              onClick={toggleTheme}
-              className="p-2 rounded-lg hover:bg-[#1e3840] transition-colors duration-200"
-              aria-label="Toggle theme"
-            >
-              {theme === "dark" ? (
-                <MdLightMode size={20} />
-              ) : (
-                <MdDarkMode size={20} />
-              )}
-            </button> */}
-
-            {/* Profile dropdown */}
             <div
-              className="relative"
+              className="relative hidden sm:block"
               onMouseEnter={() => setShowProfile(true)}
               onMouseLeave={() => setShowProfile(false)}
             >
@@ -189,14 +184,14 @@ const Navbar = () => {
                     <CgProfile size={18} />
                   </div>
                 )}
+
                 <span className="hidden sm:inline text-sm font-medium">
                   {user?.fName || "Sign in"}
                 </span>
               </button>
 
-              {/* Desktop dropdown */}
               {showProfile && (
-                <div className="absolute right-0  w-48 bg-[#152528] border border-white/10 rounded-xl shadow-xl shadow-black/30 overflow-hidden z-40">
+                <div className="absolute right-0 w-48 bg-[#152528] border border-white/10 rounded-xl shadow-xl shadow-black/30 overflow-hidden z-40">
                   {user && (
                     <div className="px-4 py-3 border-b border-white/8">
                       <p className="text-sm font-semibold text-[#dbf8fa] truncate">
@@ -207,6 +202,7 @@ const Navbar = () => {
                       </p>
                     </div>
                   )}
+
                   {[
                     { label: "My Profile", path: "/profile" },
                     { label: "Orders", path: "/orders" },
@@ -219,11 +215,12 @@ const Navbar = () => {
                         setShowProfile(false);
                         handleProtectedNavigation(path);
                       }}
-                      className="w-full text-left px-4 py-2.5 text-sm hover:bg-[#1e3840] hover:text-amber-300 transition-colors duration-150"
+                      className="w-full text-left px-4 py-2.5 text-sm hover:bg-[#1e3840] hover:text-amber-300 transition-colors duration-150 cursor-pointer"
                     >
                       {label}
                     </button>
                   ))}
+
                   <div className="border-t border-white/8">
                     {isLoggedIn ? (
                       <button
@@ -251,11 +248,40 @@ const Navbar = () => {
               )}
             </div>
 
-            {/* Mobile menu toggle */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setMobileSearchOpen((prev) => !prev);
+                setMobileMenu(false);
+              }}
+              className={`sm:hidden p-2 rounded-lg transition-all duration-300 ${
+                mobileSearchOpen
+                  ? "bg-[#1e3840]"
+                  : "hover:bg-[#1e3840] text-[#dbf8fa]"
+              }`}
+            >
+              {mobileSearchOpen ? <HiX size={20} /> : <CiSearch size={22} />}
+            </button>
+
+            <Link
+              to="/notifications"
+              className="sm:hidden relative p-2 rounded-lg hover:bg-[#1e3840] transition-colors duration-200"
+            >
+              <GoBell size={20} />
+
+              {notificationCount > 0 && (
+                <span className="absolute top-1 right-1 bg-red-500 text-white text-[9px] min-w-[14px] h-[14px] flex items-center justify-center rounded-full font-semibold">
+                  {notificationCount > 9 ? "9+" : notificationCount}
+                </span>
+              )}
+            </Link>
+
             <button
               className="sm:hidden p-2 rounded-lg hover:bg-[#1e3840] transition-colors duration-200"
-              onClick={() => setMobileMenu((prev) => !prev)}
-              aria-label="Toggle menu"
+              onClick={() => {
+                setMobileMenu((prev) => !prev);
+                setMobileSearchOpen(false);
+              }}
             >
               {mobileMenu ? <HiX size={22} /> : <HiMenu size={22} />}
             </button>
@@ -263,8 +289,40 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* ── MOBILE DRAWER ── */}
-      {/* Backdrop */}
+      <div
+        ref={mobileSearchRef}
+        className={`sm:hidden overflow-hidden transition-all duration-300 ease-out ${
+          mobileSearchOpen
+            ? "max-h-24 opacity-100 translate-y-0"
+            : "max-h-0 opacity-0 -translate-y-2"
+        }`}
+      >
+        <div className="px-4 pb-3">
+          <div className="flex items-center bg-[#152528] border border-white/10 focus-within:border-amber-300/50 rounded-2xl px-4 py-3 gap-3 shadow-xl shadow-black/20">
+            <CiSearch size={20} className="text-amber-300 flex-shrink-0" />
+
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+              placeholder="Search books, authors..."
+              className="bg-transparent w-full text-sm outline-none text-white placeholder:text-[#7a9ea0]"
+              autoFocus
+            />
+
+            {search && (
+              <button
+                onClick={() => setSearch("")}
+                className="w-6 h-6 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-[#7a9ea0] hover:text-white transition"
+              >
+                <HiX size={12} />
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+
       <div
         className={`fixed inset-0 bg-black/50 z-30 transition-opacity duration-300 ${
           mobileMenu
@@ -274,40 +332,23 @@ const Navbar = () => {
         onClick={() => setMobileMenu(false)}
       />
 
-      {/* Drawer panel */}
       <aside
         className={`fixed top-0 right-0 h-full w-72 max-w-[85vw] bg-[#0f1f22] z-40 flex flex-col transform transition-transform duration-300 ease-in-out ${
           mobileMenu ? "translate-x-0" : "translate-x-full"
         }`}
       >
-        {/* Drawer header */}
         <div className="h-16 flex items-center justify-between px-5 border-b border-white/8 flex-shrink-0">
           <span className="font-bold text-[#dbf8fa]">MyBookStore</span>
+
           <button
             onClick={() => setMobileMenu(false)}
             className="p-1.5 rounded-lg hover:bg-[#1e3840] transition-colors"
-            aria-label="Close menu"
           >
             <HiX size={20} />
           </button>
         </div>
 
-        {/* Drawer body */}
         <nav className="flex-1 overflow-y-auto px-4 py-5 flex flex-col gap-2">
-          {/* Search */}
-          <div className="flex items-center bg-[#152528] border border-white/10 rounded-xl px-3 py-2.5 gap-2 mb-2">
-            <CiSearch size={18} className="text-[#7a9ea0] flex-shrink-0" />
-            <input
-              type="text"
-              placeholder="Search books, authors..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleSearch(true)}
-              className="bg-transparent w-full text-sm outline-none text-white placeholder:text-[#7a9ea0]"
-            />
-          </div>
-
-          {/* Nav links */}
           {[
             { label: "Library", path: "/" },
             { label: "Books", path: "/books" },
@@ -346,6 +387,7 @@ const Navbar = () => {
                 {label}
               </button>
             ))}
+
             {isLoggedIn ? (
               <button
                 onClick={() => {
@@ -370,12 +412,12 @@ const Navbar = () => {
           </div>
         </nav>
 
-        {/* Drawer footer */}
         {user && (
           <div className="px-5 py-4 border-t border-white/8 flex items-center gap-3 flex-shrink-0">
             <div className="w-9 h-9 rounded-full bg-[#1e3840] border border-amber-300/20 flex items-center justify-center flex-shrink-0">
               <CgProfile size={18} />
             </div>
+
             <div className="min-w-0">
               <p className="text-sm font-semibold text-[#dbf8fa] truncate">
                 {user.fName} {user.lName}
