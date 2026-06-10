@@ -48,8 +48,6 @@ const ForgotPassword = () => {
       setError(
         err.response?.data?.message || err.message || "Failed to send OTP",
       );
-
-      setTimeout(() => setError(""), 3000);
     }
   };
 
