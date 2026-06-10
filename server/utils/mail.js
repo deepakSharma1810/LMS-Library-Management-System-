@@ -42,25 +42,32 @@ const sendMail = async ({ to, subject, text, html }) => {
     return { success: true, messageId: info.messageId };
   } catch (err) {
     // PROPER ERROR HANDLING
-    switch (err.code) {
-      case "ECONNECTION":
-      case "ETIMEDOUT":
-        console.error("NETWORK ERROR:", err.message);
-        break;
+    // switch (err.code) {
+    //   case "ECONNECTION":
+    //   case "ETIMEDOUT":
+    //     console.error("NETWORK ERROR:", err.message);
+    //     break;
 
-      case "EAUTH":
-        console.error("AUTH ERROR (Check Email/Password):", err.message);
-        break;
+    //   case "EAUTH":
+    //     console.error("AUTH ERROR (Check Email/Password):", err.message);
+    //     break;
 
-      case "EENVELOPE":
-        console.error("INVALID RECEIVER:", err.rejected);
-        break;
+    //   case "EENVELOPE":
+    //     console.error("INVALID RECEIVER:", err.rejected);
+    //     break;
 
-      default:
-        console.error("MAIL ERROR:", err.message);
-    }
+    //   default:
+    //     console.error("MAIL ERROR:", err.message);
+    // }
 
-    return { success: false, error: err.message };
+    // return { success: false, error: err.message };
+
+    console.error("MAIL ERROR:", err.code, err.message);
+
+    return {
+      success: false,
+      error: `${err.code}: ${err.message}`,
+    };
   }
 };
 
