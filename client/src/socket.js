@@ -1,6 +1,6 @@
 import { io } from "socket.io-client";
 
-const socket = io("http://localhost:5000", {
+const socket = io("https://lms-library-management-system-9nhw.onrender.com", {
   transports: ["websocket"], // faster & stable
 });
 
