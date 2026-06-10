@@ -11,7 +11,9 @@ export const NotificationProvider = ({ children }) => {
   //   Fetch All Notification
   const fetchNotifications = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/notifications");
+      const res = await axios.get(
+        "https://lms-library-management-system-9nhw.onrender.com/notifications",
+      );
 
       setNotifications(res.data.notifications);
 
