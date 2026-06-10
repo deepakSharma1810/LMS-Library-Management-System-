@@ -17,12 +17,12 @@ const router = express.Router();
 
 router.route("/").post(createUser);
 router.route("/login").post(login);
-router.route("/logout").post(verifyToken, logout);
 
 router.route("/forgot-password").post(forgotPassword);
 router.route("/verify-otp").post(verifyOtp);
 router.route("/reset-password").post(resetPassword);
 
+router.route("/logout").post(verifyToken, logout);
 router.route("/change-password").post(verifyToken, changePassword);
 
 router

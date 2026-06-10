@@ -87,7 +87,7 @@ const login = async (req, res) => {
 
     if (!isMatchPass) {
       return res.status(400).json({
-        error: "Invalid Credentials",
+        error: "Incorrect username or password",
       });
     }
 
@@ -214,6 +214,7 @@ const forgotPassword = async (req, res) => {
         message: "Email is not register",
       });
     }
+    console.log(user);
 
     // OTP GENERATE
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
@@ -289,7 +290,7 @@ const forgotPassword = async (req, res) => {
 
     if (!mailRes.success) {
       return res.status(500).json({
-        message: "Failed to send OTP",
+        message: mailRes.error || "Failed to send OTP",
       });
     }
 

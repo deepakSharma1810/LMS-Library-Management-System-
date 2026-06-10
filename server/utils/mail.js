@@ -10,6 +10,10 @@ const transporter = nodemailer.createTransport({
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
   },
+
+  connectionTimeout: 10000,
+  greetingTimeout: 10000,
+  socketTimeout: 10000,
 });
 
 // VERIFY SMTP CONNECTION
@@ -60,7 +64,7 @@ const sendMail = async ({ to, subject, text, html }) => {
         console.error("MAIL ERROR:", err.message);
     }
 
-    return { success: false };
+    return { success: false, error: err.message };
   }
 };
 

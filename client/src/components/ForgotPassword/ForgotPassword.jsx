@@ -33,6 +33,8 @@ const ForgotPassword = () => {
         { email: email.trim() },
       );
 
+      console.log(res);
+
       setLoading(false);
 
       if (res.status === 200) {
