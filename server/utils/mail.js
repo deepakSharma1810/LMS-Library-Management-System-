@@ -63,7 +63,7 @@ const sendMail = async ({ to, subject, text, html }) => {
     // return { success: false, error: err.message };
 
     console.error("MAIL ERROR:", err.code, err.message);
-
+    console.error(err);
     return {
       success: false,
       error: `${err.code}: ${err.message}`,
