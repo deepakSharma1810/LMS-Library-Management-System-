@@ -331,7 +331,7 @@ const MainPage = () => {
         {/* ── LEFT ── */}
         <div className="w-full lg:w-3/5 flex flex-col gap-10">
           {/* Previous Reading */}
-          <div className="w-full">
+          <div className="w-full px-3.5 border border-amber-300">
             <div className="flex justify-between items-center mb-5">
               <p className="text-xl sm:text-2xl font-bold text-[#dbf8fa]">
                 Previous Reading
@@ -346,7 +346,7 @@ const MainPage = () => {
 
             <Slider {...settings}>
               {previousBooks.map((book) => (
-                <div key={book._id} className="px-1.5 pb-3">
+                <div key={book._id} className="px-1.5 pb-3 ">
                   <div className=" bg-[#122125] border border-white/5 hover:border-amber-300/20 rounded-xl overflow-hidden shadow-lg  hover:shadow-amber-300/10 transition-all duration-300 group mx-auto">
                     <Link to={`/book/${book._id}`}>
                       <div className="relative overflow-hidden">
