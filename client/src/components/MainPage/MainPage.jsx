@@ -331,7 +331,7 @@ const MainPage = () => {
         {/* ── LEFT ── */}
         <div className="w-full lg:w-3/5 flex flex-col gap-10">
           {/* Previous Reading */}
-          <div className="w-full px-3.5 border border-amber-300">
+          <div className="w-full px-4">
             <div className="flex justify-between items-center mb-5">
               <p className="text-xl sm:text-2xl font-bold text-[#dbf8fa]">
                 Previous Reading
