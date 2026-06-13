@@ -16,6 +16,7 @@ import {
 } from "react-icons/fi";
 import { MdMarkEmailRead, MdNotificationsOff } from "react-icons/md";
 import { formatDistanceToNow } from "date-fns";
+import API_URL from "../../Constant";
 
 const typeConfig = {
   new_book: {
@@ -200,9 +201,7 @@ const NotificationPage = () => {
   const fetchNotifications = async () => {
     try {
       setLoading(true);
-      const res = await axios.get(
-        "https://lms-library-management-system-9nhw.onrender.com/notifications",
-      );
+      const res = await axios.get(`${API_URL}/notifications`);
       setNotifications(res.data.notifications || []);
     } catch (e) {
       console.log(e);
@@ -228,9 +227,7 @@ const NotificationPage = () => {
 
   const toggleRead = async (id) => {
     try {
-      const res = await axios.patch(
-        `https://lms-library-management-system-9nhw.onrender.com/notifications/${id}/read`,
-      );
+      const res = await axios.patch(`${API_URL}/notifications/${id}/read`);
 
       setNotifications((prev) =>
         prev.map((n) =>
@@ -249,9 +246,7 @@ const NotificationPage = () => {
   const deleteNotification = async (id) => {
     try {
       const deleted = notifications.find((n) => n._id === id);
-      await axios.delete(
-        `https://lms-library-management-system-9nhw.onrender.com/notifications/${id}`,
-      );
+      await axios.delete(`${API_URL}/notifications/${id}`);
 
       setNotifications((prev) => prev.filter((n) => n._id !== id));
 
@@ -265,9 +260,7 @@ const NotificationPage = () => {
 
   const markAllRead = async () => {
     try {
-      await axios.patch(
-        "https://lms-library-management-system-9nhw.onrender.com/notifications/read-all",
-      );
+      await axios.patch(`${API_URL}/notifications/read-all`);
 
       setNotifications((prev) => prev.map((n) => ({ ...n, unread: false })));
       setNotificationCount(0);

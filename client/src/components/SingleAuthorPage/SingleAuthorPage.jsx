@@ -10,6 +10,7 @@ import {
 } from "react-icons/fa";
 import { FiArrowLeft } from "react-icons/fi";
 import axios from "axios";
+import API_URL from "../../Constant";
 
 // ─── SKELETON ─────────────────────────────────────────────────────────────────
 
@@ -57,9 +58,7 @@ const SingleAuthorPage = () => {
   const fetchSingleAuthor = async () => {
     try {
       setLoading(true);
-      const res = await axios.get(
-        `https://lms-library-management-system-9nhw.onrender.com/author/${id}`,
-      );
+      const res = await axios.get(`${API_URL}/author/${id}`);
       setAuthor(res.data.author);
     } catch (error) {
       console.log("Error fetching Author:", error);
@@ -119,7 +118,7 @@ const SingleAuthorPage = () => {
                       <div className="absolute inset-0 bg-[#1f3338] animate-pulse" />
                     )}
                     <img
-                      src={`https://lms-library-management-system-9nhw.onrender.com/${author.coverPhoto}`}
+                      src={`${API_URL}/${author.coverPhoto}`}
                       alt={author.name}
                       onLoad={() => setImgLoaded(true)}
                       onError={() => setImgError(true)}

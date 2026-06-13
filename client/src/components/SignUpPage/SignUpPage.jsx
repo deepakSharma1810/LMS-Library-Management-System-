@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { FiEye, FiEyeOff, FiUser, FiMail, FiLock } from "react-icons/fi";
+import API_URL from "../../Constant";
 
 const SignUpPage = () => {
   const navigate = useNavigate();
@@ -66,10 +67,7 @@ const SignUpPage = () => {
         password: formData.password,
       };
 
-      await axios.post(
-        "https://lms-library-management-system-9nhw.onrender.com/auth/",
-        payload,
-      );
+      await axios.post(`${API_URL}/auth/`, payload);
 
       setSuccessMsg("Account created successfully");
 

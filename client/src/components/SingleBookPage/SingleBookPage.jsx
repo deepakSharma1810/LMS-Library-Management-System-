@@ -5,6 +5,7 @@ import { FaStar, FaShippingFast, FaBook } from "react-icons/fa";
 import { BsBoxSeamFill } from "react-icons/bs";
 import { FiShoppingCart, FiTrash2, FiX } from "react-icons/fi";
 import axios from "axios";
+import API_URL from "../../Constant";
 
 const formatCurrency = (n) =>
   new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" }).format(
@@ -80,9 +81,7 @@ const SingleBookPage = () => {
     try {
       if (showLoader) setLoading(true);
 
-      const res = await axios.get(
-        `https://lms-library-management-system-9nhw.onrender.com/book/${id}`,
-      );
+      const res = await axios.get(`${API_URL}/book/${id}`);
 
       setBook(res.data.getBook);
     } catch (error) {
@@ -98,9 +97,7 @@ const SingleBookPage = () => {
 
   const fetchRatings = async () => {
     try {
-      const res = await axios.get(
-        `https://lms-library-management-system-9nhw.onrender.com/rating/${book._id}`,
-      );
+      const res = await axios.get(`${API_URL}/rating/${book._id}`);
       setRatingsList(res.data.ratings);
       const userId = localStorage.getItem("userId");
       const myReview = res.data.ratings.find((r) => r.user?._id === userId);
@@ -192,7 +189,7 @@ const SingleBookPage = () => {
       setReviewLoading(true);
 
       await axios.post(
-        "https://lms-library-management-system-9nhw.onrender.com/rating/add",
+        `${API_URL}/rating/add`,
         { rating: userRating, review: reviewText, bookId: book._id },
         { headers: { Authorization: `Bearer ${token}` } },
       );
@@ -212,12 +209,9 @@ const SingleBookPage = () => {
       return;
     }
     try {
-      await axios.delete(
-        `https://lms-library-management-system-9nhw.onrender.com/rating/${rid}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        },
-      );
+      await axios.delete(`${API_URL}/rating/${rid}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       fetchRatings();
       fetchSingleBook();
     } catch (err) {
@@ -272,7 +266,7 @@ const SingleBookPage = () => {
                   <div className="absolute inset-0 bg-[#1f3338] animate-pulse" />
                 )}
                 <img
-                  src={`https://lms-library-management-system-9nhw.onrender.com/${book.coverPhoto}`}
+                  src={`${API_URL}/${book.coverPhoto}`}
                   alt={book.name}
                   onLoad={() => setImgLoaded(true)}
                   className={`w-full h-full object-cover transition-opacity duration-500 ${imgLoaded ? "opacity-100" : "opacity-0"}`}

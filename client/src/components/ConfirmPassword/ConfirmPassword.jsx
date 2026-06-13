@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FiLock } from "react-icons/fi";
 import axios from "axios";
+import API_URL from "../../Constant";
 
 const ConfirmPassword = () => {
   const navigate = useNavigate();
@@ -47,13 +48,10 @@ const ConfirmPassword = () => {
     try {
       setLoading(true);
 
-      const res = await axios.post(
-        "https://lms-library-management-system-9nhw.onrender.com/auth/reset-password",
-        {
-          email,
-          password: passwords.password,
-        },
-      );
+      const res = await axios.post(`${API_URL}/auth/reset-password`, {
+        email,
+        password: passwords.password,
+      });
 
       console.log("RESET:", res.data);
 

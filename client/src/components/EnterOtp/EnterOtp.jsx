@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import API_URL from "../../Constant";
 
 const EnterOtp = () => {
   const navigate = useNavigate();
@@ -39,13 +40,10 @@ const EnterOtp = () => {
       setLoading(true);
       setError("");
 
-      const res = await axios.post(
-        "https://lms-library-management-system-9nhw.onrender.com/auth/verify-otp",
-        {
-          email: email.trim(),
-          otp: otp.trim(),
-        },
-      );
+      const res = await axios.post(`${API_URL}/auth/verify-otp`, {
+        email: email.trim(),
+        otp: otp.trim(),
+      });
 
       console.log("API:", res.data);
 

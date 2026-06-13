@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { FiShoppingCart, FiTrash2, FiPlus, FiMinus } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
+import API_URL from "../../Constant";
 
 const formatCurrency = (n) =>
   new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" }).format(
@@ -37,7 +38,7 @@ const CartItem = ({ item, onUpdate, onRemove }) => {
           <div className="absolute inset-0 bg-[#1f3338] animate-pulse" />
         )}
         <img
-          src={`https://lms-library-management-system-9nhw.onrender.com/${item.coverPhoto}`}
+          src={`${API_URL}/${item.coverPhoto}`}
           alt={item.name}
           onLoad={() => setImgLoaded(true)}
           className={`w-full h-full object-cover transition-opacity duration-300 ${imgLoaded ? "opacity-100" : "opacity-0"}`}

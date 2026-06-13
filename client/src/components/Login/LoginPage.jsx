@@ -2,6 +2,7 @@ import axios from "axios";
 import React, { useState } from "react";
 import { FiEye, FiEyeOff, FiUser, FiLock, FiLogIn } from "react-icons/fi";
 import { Link, useNavigate, useLocation } from "react-router-dom";
+import API_URL from "../../Constant";
 
 const LoginForm = () => {
   const navigate = useNavigate();
@@ -46,10 +47,7 @@ const LoginForm = () => {
         password: formData.password,
       };
 
-      const res = await axios.post(
-        "https://lms-library-management-system-9nhw.onrender.com/auth/login",
-        payload,
-      );
+      const res = await axios.post(`${API_URL}/auth/login`, payload);
 
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("user", JSON.stringify(res.data.user));

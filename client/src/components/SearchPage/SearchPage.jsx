@@ -3,6 +3,7 @@ import axios from "axios";
 import { useLocation, useNavigate } from "react-router-dom";
 import { FiShoppingCart, FiSearch } from "react-icons/fi";
 import { FaStar } from "react-icons/fa";
+import API_URL from "../../Constant";
 
 const addToCart = (book) => {
   const cart = JSON.parse(localStorage.getItem("cart")) || [];
@@ -43,7 +44,7 @@ const BookRow = ({ book, onNavigate }) => {
         )}
 
         <img
-          src={`https://lms-library-management-system-9nhw.onrender.com/${book.coverPhoto}`}
+          src={`${API_URL}/${book.coverPhoto}`}
           alt={book.name}
           onLoad={() => setImgLoaded(true)}
           className={`w-full h-full object-cover group-hover:scale-105 transition-all duration-300 ${
@@ -126,7 +127,7 @@ const BookCard = ({ book, onNavigate }) => {
         )}
 
         <img
-          src={`https://lms-library-management-system-9nhw.onrender.com/${book.coverPhoto}`}
+          src={`${API_URL}/${book.coverPhoto}`}
           alt={book.name}
           onLoad={() => setImgLoaded(true)}
           className={`w-full h-full object-cover group-hover:scale-105 transition-all duration-300 ${
@@ -199,15 +200,9 @@ const SearchPage = () => {
         setLoading(true);
 
         const [bookRes, authorRes, catRes] = await Promise.all([
-          axios.get(
-            `https://lms-library-management-system-9nhw.onrender.com/book?search=${search}`,
-          ),
-          axios.get(
-            `https://lms-library-management-system-9nhw.onrender.com/author?search=${search}`,
-          ),
-          axios.get(
-            "https://lms-library-management-system-9nhw.onrender.com/category",
-          ),
+          axios.get(`${API_URL}/book?search=${search}`),
+          axios.get(`${API_URL}/author?search=${search}`),
+          axios.get(`${API_URL}/category`),
         ]);
 
         setBooks(bookRes.data.books || []);

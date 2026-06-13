@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import axios from "axios";
 import socket from "../socket";
+import API_URL from "../Constant";
 
 const NotificationContext = createContext();
 
@@ -11,9 +12,7 @@ export const NotificationProvider = ({ children }) => {
   //   Fetch All Notification
   const fetchNotifications = async () => {
     try {
-      const res = await axios.get(
-        "https://lms-library-management-system-9nhw.onrender.com/notifications",
-      );
+      const res = await axios.get(`${API_URL}/notifications`);
 
       setNotifications(res.data.notifications);
 

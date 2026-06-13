@@ -10,6 +10,7 @@ import {
   FiEyeOff,
 } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
+import API_URL from "../../Constant";
 
 const Input = ({
   label,
@@ -205,14 +206,11 @@ const ProfilePage = () => {
         return;
       }
 
-      const res = await axios.post(
-        "https://lms-library-management-system-9nhw.onrender.com/auth/change-password",
-        {
-          uName: user.uName,
-          currentPassword: pwdState.current,
-          newPassword: pwdState.newPwd,
-        },
-      );
+      const res = await axios.post(`${API_URL}/auth/change-passwor`, {
+        uName: user.uName,
+        currentPassword: pwdState.current,
+        newPassword: pwdState.newPwd,
+      });
 
       setPwdMsg(res.data.message || "Password changed successfully!");
       setPwdState({ current: "", newPwd: "", confirm: "" });

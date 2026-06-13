@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { FiMail, FiArrowLeft } from "react-icons/fi";
 import axios from "axios";
+import API_URL from "../../Constant";
 
 const ForgotPassword = () => {
   const navigate = useNavigate();
@@ -26,10 +27,9 @@ const ForgotPassword = () => {
       setLoading(true);
       setError("");
 
-      const res = await axios.post(
-        "https://lms-library-management-system-9nhw.onrender.com/auth/forgot-password",
-        { email: email.trim() },
-      );
+      const res = await axios.post(`${API_URL}/auth/forgot-password`, {
+        email: email.trim(),
+      });
 
       console.log(res);
 

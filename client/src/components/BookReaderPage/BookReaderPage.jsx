@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
+import API_URL from "../../Constant";
 
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
@@ -23,9 +24,7 @@ const BookReaderPage = () => {
   // ================= FETCH BOOK =================
   const fetchBook = async () => {
     try {
-      const res = await axios.get(
-        `https://lms-library-management-system-9nhw.onrender.com/book/${id}`,
-      );
+      const res = await axios.get(`${API_URL}/book/${id}`);
 
       setBook(res.data.getBook);
       console.log(res.data.getBook);
@@ -89,7 +88,7 @@ const BookReaderPage = () => {
 
   const progress = numPages ? Math.round((pageNumber / numPages) * 100) : 0;
 
-  const pdfUrl = `https://lms-library-management-system-9nhw.onrender.com/${book.actualPdf.replace(/\\/g, "/")}`;
+  const pdfUrl = `${API_URL}/${book.actualPdf.replace(/\\/g, "/")}`;
 
   // console.log(pdfUrl);
 

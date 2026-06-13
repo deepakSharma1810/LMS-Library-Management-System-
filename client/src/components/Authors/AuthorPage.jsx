@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { TbSend2 } from "react-icons/tb";
 import { IoSearch } from "react-icons/io5";
 import { Link } from "react-router-dom";
+import API_URL from "../../Constant";
 
 const SkeletonCard = () => (
   <div className="bg-[#162428] rounded-2xl p-5 flex flex-col gap-4 animate-pulse border border-[#1f3a3e]">
@@ -93,9 +94,7 @@ const AuthorPage = () => {
       setLoading(true);
       setError(false);
 
-      const res = await axios.get(
-        "https://lms-library-management-system-9nhw.onrender.com/author",
-      );
+      const res = await axios.get(`${API_URL}/author`);
 
       setAuthors(Array.isArray(res.data) ? res.data : res.data.authors || []);
     } catch (error) {

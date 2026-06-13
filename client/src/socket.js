@@ -1,6 +1,6 @@
 import { io } from "socket.io-client";
 
-const socket = io("https://lms-library-management-system-9nhw.onrender.com", {
+const socket = io("https://lms-library-management-system-kappa.vercel.app", {
   transports: ["websocket"], // faster & stable
 });
 

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { FiHeart, FiTrash2, FiShoppingCart } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
+import API_URL from "../../Constant";
 
 // ─── WISHLIST CARD ─────────────────────────────────────────────────────────────
 
@@ -31,7 +32,7 @@ const WishlistCard = ({ item, onRemove }) => {
           <div className="absolute inset-0 bg-[#1f3338] animate-pulse" />
         )}
         <img
-          src={`https://lms-library-management-system-9nhw.onrender.com/${item.coverPhoto}`}
+          src={`${API_URL}/${item.coverPhoto}`}
           alt={item.name}
           onLoad={() => setImgLoaded(true)}
           className={`w-full h-full object-cover group-hover:scale-105 transition-all duration-300 ${imgLoaded ? "opacity-100" : "opacity-0"}`}

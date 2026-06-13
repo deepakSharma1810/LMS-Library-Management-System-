@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { IoSearch } from "react-icons/io5";
 import { Link } from "react-router-dom";
 import axios from "axios";
+import API_URL from "../../Constant";
 
 const SkeletonCard = () => (
   <div className="bg-[#162428] rounded-2xl overflow-hidden animate-pulse border border-[#1f3a3e]">
@@ -29,7 +30,7 @@ const BookCard = ({ book }) => {
           )}
 
           <img
-            src={`https://lms-library-management-system-9nhw.onrender.com/${book.coverPhoto}`}
+            src={`${API_URL}/${book.coverPhoto}`}
             alt={book.name}
             onLoad={() => setImgLoaded(true)}
             className={`w-full h-full object-cover transition-all duration-500 group-hover:scale-105 ${
@@ -71,9 +72,7 @@ const BookPage = () => {
       setLoading(true);
       setError(false);
 
-      const res = await axios.get(
-        `https://lms-library-management-system-9nhw.onrender.com/book`,
-      );
+      const res = await axios.get(`${API_URL}/book`);
       setBooks(res.data);
     } catch (error) {
       console.log("Error fetch book", error);
