@@ -81,3 +81,5 @@ const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
   console.log(`SERVER IS RUNNING AT PORT NO ${PORT}`);
 });
+
+module.exports = app;
