@@ -75,26 +75,35 @@
 // module.exports = { transporter, verifySMTP, sendMail };
 
 const nodemailer = require("nodemailer");
+const dns = require("dns");
 require("dotenv").config();
 
-// SMTP TRANSPORTER
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
   port: 587,
   secure: false,
+  requireTLS: true,
+
+  // Force IPv4
+  family: 4,
+
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
+
+  tls: {
+    rejectUnauthorized: false,
+  },
+
+  connectionTimeout: 10000,
+  greetingTimeout: 10000,
+  socketTimeout: 10000,
 });
 
-// VERIFY SMTP
-transporter.verify((error, success) => {
-  if (error) {
-    console.log("SMTP ERROR => ", error);
-  } else {
-    console.log("SMTP READY");
-  }
-});
+// Extra force IPv4 lookup
+transporter.options.lookup = (hostname, options, callback) => {
+  return dns.lookup(hostname, { family: 4 }, callback);
+};
 
 module.exports = transporter;
