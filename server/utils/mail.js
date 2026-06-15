@@ -74,8 +74,10 @@
 
 // module.exports = { transporter, verifySMTP, sendMail };
 
-const nodemailer = require("nodemailer");
 const dns = require("dns");
+dns.setDefaultResultOrder("ipv4first");
+
+const nodemailer = require("nodemailer");
 require("dotenv").config();
 
 const transporter = nodemailer.createTransport({
@@ -83,8 +85,6 @@ const transporter = nodemailer.createTransport({
   port: 587,
   secure: false,
   requireTLS: true,
-
-  // Force IPv4
   family: 4,
 
   auth: {
@@ -92,18 +92,13 @@ const transporter = nodemailer.createTransport({
     pass: process.env.EMAIL_PASS,
   },
 
-  tls: {
-    rejectUnauthorized: false,
+  lookup: (hostname, options, callback) => {
+    return dns.lookup(hostname, { family: 4 }, callback);
   },
 
-  connectionTimeout: 10000,
-  greetingTimeout: 10000,
-  socketTimeout: 10000,
+  connectionTimeout: 20000,
+  greetingTimeout: 20000,
+  socketTimeout: 20000,
 });
-
-// Extra force IPv4 lookup
-transporter.options.lookup = (hostname, options, callback) => {
-  return dns.lookup(hostname, { family: 4 }, callback);
-};
 
 module.exports = transporter;
