@@ -1,7 +1,8 @@
 const User = require("../model/User");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const { sendMail } = require("../utils/mail");
+// const { sendMail } = require("../utils/mail");
+const transporter = require("../utils/mail");
 
 const createUser = async (req, res) => {
   try {
@@ -462,58 +463,58 @@ const forgotPassword = async (req, res) => {
       });
     }
 
-    const user = await User.findOne({ email: email.trim() });
+    const admin = await Admin.findOne({ email: email.trim() });
 
-    if (!user) {
+    if (!admin) {
       return res.status(404).json({
-        message: "Email is not registered",
+        message: "Admin Not Found",
       });
     }
 
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otp = Math.floor(1000 + Math.random() * 9000).toString();
 
-    user.otp = otp;
-    user.otpExpire = Date.now() + 5 * 60 * 1000;
+    admin.otp = otp;
+    admin.otpExpire = Date.now() + 5 * 60 * 1000;
 
-    await user.save();
+    await admin.save();
 
-    const mailRes = await sendMail({
+    await transporter.sendMail({
+      from: `"Admin Panel" <${process.env.EMAIL_USER}>`,
       to: email.trim(),
-      subject: "Password Reset OTP",
+      subject: "Reset Password OTP",
       html: `
-        <div style="font-family: Arial; padding: 20px;">
+        <div style="font-family: Arial, sans-serif; padding: 20px;">
           <h2>Password Reset Request</h2>
           <p>Your OTP is:</p>
-          <h1 style="letter-spacing: 5px; color: #2563eb;">${otp}</h1>
-          <p>This OTP is valid for 5 minutes.</p>
+
+          <h1 style="
+            color: #06b6d4;
+            letter-spacing: 6px;
+            font-size: 36px;
+          ">
+            ${otp}
+          </h1>
+
+          <p>OTP valid for 5 minutes.</p>
           <p>Do not share this OTP with anyone.</p>
         </div>
       `,
-      text: `Your password reset OTP is ${otp}. This OTP is valid for 5 minutes.`,
     });
 
-    if (!mailRes.success) {
-      user.otp = null;
-      user.otpExpire = null;
-      await user.save();
-
-      return res.status(500).json({
-        message: mailRes.error || "Failed to send OTP",
-      });
-    }
-
     return res.status(200).json({
-      message: "OTP sent successfully",
+      message: "OTP Sent Successfully",
     });
   } catch (error) {
     console.log("FORGOT PASSWORD ERROR:", error);
+
     return res.status(500).json({
-      message: "Server error",
+      message: "SERVER ERROR",
       error: error.message,
     });
   }
 };
 
+// ── VERIFY OTP ─────────────────────────────
 const verifyOtp = async (req, res) => {
   try {
     const { email, otp } = req.body;
@@ -524,42 +525,50 @@ const verifyOtp = async (req, res) => {
       });
     }
 
-    const user = await User.findOne({ email: email.trim() });
+    const admin = await Admin.findOne({ email: email.trim() });
 
-    if (!user || !user.otp || !user.otpExpire) {
+    if (!admin) {
+      return res.status(404).json({
+        message: "Admin Not Found",
+      });
+    }
+
+    if (!admin.otp || !admin.otpExpire) {
       return res.status(400).json({
         message: "Invalid request",
       });
     }
 
-    if (user.otpExpire < Date.now()) {
-      user.otp = null;
-      user.otpExpire = null;
-      await user.save();
+    if (admin.otpExpire < Date.now()) {
+      admin.otp = "";
+      admin.otpExpire = null;
+      await admin.save();
 
       return res.status(400).json({
-        message: "OTP expired",
+        message: "OTP Expired",
       });
     }
 
-    if (String(user.otp) !== String(otp)) {
+    if (String(admin.otp) !== String(otp)) {
       return res.status(400).json({
         message: "Invalid OTP",
       });
     }
 
     return res.status(200).json({
-      message: "OTP verified successfully",
+      message: "OTP Verified Successfully",
     });
   } catch (error) {
     console.log("VERIFY OTP ERROR:", error);
+
     return res.status(500).json({
-      message: "Server error",
+      message: "SERVER ERROR",
       error: error.message,
     });
   }
 };
 
+// ── RESET PASSWORD ─────────────────────────────
 const resetPassword = async (req, res) => {
   try {
     const { email, password, confirmPassword } = req.body;
@@ -576,45 +585,44 @@ const resetPassword = async (req, res) => {
       });
     }
 
-    const user = await User.findOne({ email: email.trim() });
+    const admin = await Admin.findOne({ email: email.trim() });
 
-    if (!user) {
+    if (!admin) {
       return res.status(404).json({
-        message: "User not found",
+        message: "Admin Not Found",
       });
     }
 
-    if (!user.otp || !user.otpExpire) {
+    if (!admin.otp || !admin.otpExpire) {
       return res.status(400).json({
         message: "OTP verification required",
       });
     }
 
-    if (user.otpExpire < Date.now()) {
-      user.otp = null;
-      user.otpExpire = null;
-      await user.save();
+    if (admin.otpExpire < Date.now()) {
+      admin.otp = "";
+      admin.otpExpire = null;
+      await admin.save();
 
       return res.status(400).json({
-        message: "OTP expired",
+        message: "OTP Expired",
       });
     }
 
-    const hashPass = await bcrypt.hash(password, 10);
+    admin.password = await bcrypt.hash(password, 10);
+    admin.otp = "";
+    admin.otpExpire = null;
 
-    user.password = hashPass;
-    user.otp = null;
-    user.otpExpire = null;
-
-    await user.save();
+    await admin.save();
 
     return res.status(200).json({
-      message: "Password reset successful",
+      message: "Password Reset Successfully",
     });
   } catch (error) {
     console.log("RESET PASSWORD ERROR:", error);
+
     return res.status(500).json({
-      message: "Server error",
+      message: "SERVER ERROR",
       error: error.message,
     });
   }
