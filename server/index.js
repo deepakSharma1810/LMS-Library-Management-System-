@@ -1,3 +1,4 @@
+import API_URL from "../client/src/Constant";
 const dotenv = require("dotenv");
 // dotenv.config("./.env");
 require("dotenv").config();
@@ -8,7 +9,6 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
-
 const http = require("http");
 const { Server } = require("socket.io");
 
@@ -18,11 +18,7 @@ const app = express();
 const connection = require("./config/connection");
 
 // middleware
-app.use(
-  "/uploads",
-  cors({ origin: "http://localhost:5173" }),
-  express.static("uploads"),
-);
+app.use("/uploads", cors({ origin: `${API_URL}` }), express.static("uploads"));
 app.use(bodyParser.json());
 app.use(cors());
 app.use(express.json());
