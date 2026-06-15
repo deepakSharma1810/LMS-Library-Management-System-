@@ -74,31 +74,25 @@
 
 // module.exports = { transporter, verifySMTP, sendMail };
 
-const dns = require("dns");
-dns.setDefaultResultOrder("ipv4first");
-
 const nodemailer = require("nodemailer");
 require("dotenv").config();
 
 const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
+  host: "smtp-relay.brevo.com",
   port: 587,
   secure: false,
-  requireTLS: true,
-  family: 4,
-
   auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
+    user: process.env.BREVO_EMAIL,
+    pass: process.env.BREVO_SMTP_KEY,
   },
+});
 
-  lookup: (hostname, options, callback) => {
-    return dns.lookup(hostname, { family: 4 }, callback);
-  },
-
-  connectionTimeout: 20000,
-  greetingTimeout: 20000,
-  socketTimeout: 20000,
+transporter.verify((error) => {
+  if (error) {
+    console.log("BREVO SMTP ERROR:", error);
+  } else {
+    console.log("BREVO SMTP READY");
+  }
 });
 
 module.exports = transporter;

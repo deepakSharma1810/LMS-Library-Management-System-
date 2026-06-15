@@ -475,7 +475,7 @@ const forgotPassword = async (req, res) => {
     await user.save();
 
     await transporter.sendMail({
-      from: `"Library Management" <${process.env.EMAIL_USER}>`,
+      from: `"MyBookStore" <${process.env.BREVO_USER}>`,
       to: email.trim(),
       subject: "Reset Password OTP",
       html: `
