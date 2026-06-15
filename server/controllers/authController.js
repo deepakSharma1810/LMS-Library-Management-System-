@@ -458,45 +458,32 @@ const forgotPassword = async (req, res) => {
     const { email } = req.body;
 
     if (!email) {
-      return res.status(400).json({
-        message: "Email is required",
-      });
+      return res.status(400).json({ message: "Email is required" });
     }
 
-    const admin = await Admin.findOne({ email: email.trim() });
+    const user = await User.findOne({ email: email.trim() });
 
-    if (!admin) {
-      return res.status(404).json({
-        message: "Admin Not Found",
-      });
+    if (!user) {
+      return res.status(404).json({ message: "User Not Found" });
     }
 
     const otp = Math.floor(1000 + Math.random() * 9000).toString();
 
-    admin.otp = otp;
-    admin.otpExpire = Date.now() + 5 * 60 * 1000;
+    user.otp = otp;
+    user.otpExpire = Date.now() + 5 * 60 * 1000;
 
-    await admin.save();
+    await user.save();
 
     await transporter.sendMail({
-      from: `"Admin Panel" <${process.env.EMAIL_USER}>`,
+      from: `"Library Management" <${process.env.EMAIL_USER}>`,
       to: email.trim(),
       subject: "Reset Password OTP",
       html: `
         <div style="font-family: Arial, sans-serif; padding: 20px;">
           <h2>Password Reset Request</h2>
           <p>Your OTP is:</p>
-
-          <h1 style="
-            color: #06b6d4;
-            letter-spacing: 6px;
-            font-size: 36px;
-          ">
-            ${otp}
-          </h1>
-
+          <h1 style="color:#06b6d4; letter-spacing:6px;">${otp}</h1>
           <p>OTP valid for 5 minutes.</p>
-          <p>Do not share this OTP with anyone.</p>
         </div>
       `,
     });
@@ -514,7 +501,6 @@ const forgotPassword = async (req, res) => {
   }
 };
 
-// ── VERIFY OTP ─────────────────────────────
 const verifyOtp = async (req, res) => {
   try {
     const { email, otp } = req.body;
@@ -525,34 +511,26 @@ const verifyOtp = async (req, res) => {
       });
     }
 
-    const admin = await Admin.findOne({ email: email.trim() });
+    const user = await User.findOne({ email: email.trim() });
 
-    if (!admin) {
-      return res.status(404).json({
-        message: "Admin Not Found",
-      });
+    if (!user) {
+      return res.status(404).json({ message: "User Not Found" });
     }
 
-    if (!admin.otp || !admin.otpExpire) {
-      return res.status(400).json({
-        message: "Invalid request",
-      });
+    if (!user.otp || !user.otpExpire) {
+      return res.status(400).json({ message: "Invalid request" });
     }
 
-    if (admin.otpExpire < Date.now()) {
-      admin.otp = "";
-      admin.otpExpire = null;
-      await admin.save();
+    if (user.otpExpire < Date.now()) {
+      user.otp = null;
+      user.otpExpire = null;
+      await user.save();
 
-      return res.status(400).json({
-        message: "OTP Expired",
-      });
+      return res.status(400).json({ message: "OTP Expired" });
     }
 
-    if (String(admin.otp) !== String(otp)) {
-      return res.status(400).json({
-        message: "Invalid OTP",
-      });
+    if (String(user.otp) !== String(otp)) {
+      return res.status(400).json({ message: "Invalid OTP" });
     }
 
     return res.status(200).json({
@@ -568,7 +546,6 @@ const verifyOtp = async (req, res) => {
   }
 };
 
-// ── RESET PASSWORD ─────────────────────────────
 const resetPassword = async (req, res) => {
   try {
     const { email, password, confirmPassword } = req.body;
@@ -585,35 +562,31 @@ const resetPassword = async (req, res) => {
       });
     }
 
-    const admin = await Admin.findOne({ email: email.trim() });
+    const user = await User.findOne({ email: email.trim() });
 
-    if (!admin) {
-      return res.status(404).json({
-        message: "Admin Not Found",
-      });
+    if (!user) {
+      return res.status(404).json({ message: "User Not Found" });
     }
 
-    if (!admin.otp || !admin.otpExpire) {
+    if (!user.otp || !user.otpExpire) {
       return res.status(400).json({
         message: "OTP verification required",
       });
     }
 
-    if (admin.otpExpire < Date.now()) {
-      admin.otp = "";
-      admin.otpExpire = null;
-      await admin.save();
+    if (user.otpExpire < Date.now()) {
+      user.otp = null;
+      user.otpExpire = null;
+      await user.save();
 
-      return res.status(400).json({
-        message: "OTP Expired",
-      });
+      return res.status(400).json({ message: "OTP Expired" });
     }
 
-    admin.password = await bcrypt.hash(password, 10);
-    admin.otp = "";
-    admin.otpExpire = null;
+    user.password = await bcrypt.hash(password, 10);
+    user.otp = null;
+    user.otpExpire = null;
 
-    await admin.save();
+    await user.save();
 
     return res.status(200).json({
       message: "Password Reset Successfully",
