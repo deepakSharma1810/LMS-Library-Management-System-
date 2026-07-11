@@ -1,13 +1,15 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import API_URL from "../../Constant";
+
 const Category = () => {
   const [categories, setCategories] = useState([]);
   const [error, setError] = useState("");
 
   const fetchCategories = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/category");
+      const res = await axios.get(`${API_URL}/category`);
       console.log(res.data);
       setCategories(res.data.categories || res.data);
     } catch (error) {
@@ -21,7 +23,7 @@ const Category = () => {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://localhost:5000/category/${id}`);
+      await axios.delete(`${API_URL}/category/${id}`);
       fetchCategories();
     } catch (error) {
       setError("Delete failed");

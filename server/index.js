@@ -34,6 +34,8 @@ const bookRoutes = require("./routes/bookRoutes");
 const authorRoutes = require("./routes/authorRoutes");
 const notificationRoutes = require("./routes/notificationRoutes");
 const ratingRoutes = require("./routes/ratingRoutes");
+const orderRoutes = require("./routes/OrderRoutes");
+const paymentRoutes = require("./routes/paymentRoutes");
 const ImageRouter = require("./middleware/multer");
 
 app.get("/", (req, res) => {
@@ -47,6 +49,8 @@ app.use("/book/status", bookRoutes);
 app.use("/author", authorRoutes);
 app.use("/notifications", notificationRoutes);
 app.use("/rating", ratingRoutes);
+app.use("/order", orderRoutes);
+app.use("/payment", paymentRoutes);
 app.use("/", ImageRouter);
 
 //  SOCKET SERVER

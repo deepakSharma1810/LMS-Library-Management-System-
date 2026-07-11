@@ -7,77 +7,13 @@ import {
   FiChevronDown,
   FiDownload,
 } from "react-icons/fi";
-
-const ordersMock = [
-  {
-    id: "ORD-20251201-001",
-    date: "01 Dec 2025",
-    status: "Delivered",
-    total: 1097,
-    itemsCount: 2,
-    paymentMode: "UPI",
-    address: "Deepak Sharma, 221B Baker Street, New Delhi, India",
-    expected: "Delivered on 03 Dec 2025",
-    items: [
-      {
-        title: "Sunset Over Beach",
-        author: "John Doe",
-        qty: 1,
-        price: 499,
-        image: "https://example.com/images/image1.jpg",
-      },
-      {
-        title: "Mountain Landscape",
-        author: "Jane Smith",
-        qty: 1,
-        price: 598,
-        image: "https://example.com/images/image2.jpg",
-      },
-    ],
-  },
-  {
-    id: "ORD-20251128-014",
-    date: "28 Nov 2025",
-    status: "Shipped",
-    total: 299,
-    itemsCount: 1,
-    paymentMode: "Card",
-    address: "Deepak Sharma, 4th Floor, Mumbai, India",
-    expected: "Arriving by 05 Dec 2025",
-    items: [
-      {
-        title: "Forest Trail",
-        author: "Maria Lee",
-        qty: 1,
-        price: 299,
-        image: "https://example.com/images/image4.jpg",
-      },
-    ],
-  },
-  {
-    id: "ORD-20251120-005",
-    date: "20 Nov 2025",
-    status: "Cancelled",
-    total: 520,
-    itemsCount: 1,
-    paymentMode: "COD",
-    address: "Deepak Sharma, Jaipur, India",
-    expected: "Order cancelled",
-    items: [
-      {
-        title: "City Skyline at Night",
-        author: "Alex Johnson",
-        qty: 1,
-        price: 520,
-        image: "https://example.com/images/image3.jpg",
-      },
-    ],
-  },
-];
+import axios from "axios";
+import API_URL from "../../Constant";
+import { useEffect } from "react";
 
 const formatCurrency = (n) =>
   new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" }).format(
-    n
+    n,
   );
 
 const statusBadge = (status) => {
@@ -108,6 +44,30 @@ const statusIcon = (status) => {
 
 const OrderPage = () => {
   const [expanded, setExpanded] = useState(null);
+  const [orders, setOrders] = useState([]);
+
+  const getOrders = async () => {
+    try {
+      const token = localStorage.getItem("token");
+
+      const { data } = await axios.get(`${API_URL}/order/my-orders`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      console.log(data);
+
+      if (data.success) {
+        setOrders(data.orders);
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  useEffect(() => {
+    getOrders();
+  }, []);
 
   const toggleExpand = (id) => {
     setExpanded((prev) => (prev === id ? null : id));
@@ -128,7 +88,7 @@ const OrderPage = () => {
           Your Orders
         </h1>
 
-        {ordersMock.length === 0 ? (
+        {orders.length === 0 ? (
           <div className="bg-[#122125] rounded-xl p-8 text-center text-gray-300">
             <p className="text-lg mb-3">No orders yet</p>
             <p className="text-sm text-gray-400">
@@ -137,7 +97,7 @@ const OrderPage = () => {
           </div>
         ) : (
           <div className="space-y-4">
-            {ordersMock.map((order) => (
+            {orders.map((order) => (
               <div
                 key={order.id}
                 className="bg-[#122125] rounded-xl p-4 md:p-5 shadow-lg"
@@ -151,9 +111,9 @@ const OrderPage = () => {
                         <span className="text-sm font-semibold text-[#dbf8fa]">
                           {order.status}
                         </span>
-                        <span className={statusBadge(order.status)}>
+                        {/* <span className={statusBadge(order.status)}>
                           {order.status.toUpperCase()}
-                        </span>
+                        </span> */}
                       </div>
                       <p className="text-xs text-gray-400 mt-1">
                         {order.expected}
@@ -164,7 +124,9 @@ const OrderPage = () => {
                       </p>
                       <p className="text-[11px] text-gray-500">
                         Ordered on:{" "}
-                        <span className="text-gray-300">{order.date}</span>
+                        <span className="text-gray-300">
+                          {new Date(order.createdAt).toLocaleDateString()}
+                        </span>
                       </p>
                     </div>
                   </div>
@@ -194,8 +156,8 @@ const OrderPage = () => {
                 {/* First item preview */}
                 <div className="flex gap-3">
                   <img
-                    src={order.items[0].image}
-                    alt={order.items[0].title}
+                    src={`${API_URL}/${order.items[0].book.coverPhoto.replace(/\\/g, "/")}`}
+                    alt={order.items[0].book.name}
                     className="w-14 h-18 md:w-16 md:h-20 object-cover rounded-md border border-gray-700"
                   />
                   <div className="flex-1">
@@ -203,7 +165,7 @@ const OrderPage = () => {
                       {order.items[0].title}
                     </p>
                     <p className="text-xs text-gray-400">
-                      by {order.items[0].author}
+                      by {order.items[0].book.authorName}
                     </p>
                     <p className="text-xs text-gray-400 mt-1">
                       Qty: {order.items[0].qty}

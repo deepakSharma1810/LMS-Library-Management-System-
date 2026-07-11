@@ -3,6 +3,7 @@ import { MdOutlineLibraryBooks } from "react-icons/md";
 import { FiEdit, FiTrash2, FiEye } from "react-icons/fi";
 import { Link } from "react-router-dom";
 import axios from "axios";
+import API_URL from "../../Constant";
 
 const statusStyle = {
   Published: "bg-green-900/30 text-green-400",
@@ -28,7 +29,8 @@ const Books = () => {
   // ================= FETCH BOOKS =================
   const fetchBooks = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/book");
+      const res = await axios.get(`
+        ${API_URL}/book`);
       console.log(res.data);
 
       setBooks(Array.isArray(res.data) ? res.data : res.data.books || []);
@@ -41,7 +43,8 @@ const Books = () => {
   // ================= FETCH AUTHORS =================
   const fetchAuthors = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/author");
+      const res = await axios.get(`
+        ${API_URL}/author`);
       setAuthors(Array.isArray(res.data) ? res.data : res.data.authors || []);
     } catch (error) {
       console.error(error);
@@ -51,7 +54,8 @@ const Books = () => {
 
   const fetchCategories = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/category");
+      const res = await axios.get(`
+        ${API_URL}/category`);
       setCategories(res.data.categories);
       console.log(res.data.categories);
     } catch (error) {
@@ -73,7 +77,8 @@ const Books = () => {
   // ================= DELETE =================
   const deleteBook = async (id) => {
     try {
-      await axios.delete(`http://localhost:5000/book/${id}`);
+      await axios.delete(`
+        ${API_URL}/book/${id}`);
       fetchBooks();
     } catch (error) {
       console.error(error);
@@ -85,9 +90,13 @@ const Books = () => {
     try {
       const newStatus = book.status === "Published" ? "Draft" : "Published";
 
-      await axios.patch(`http://localhost:5000/book/status/${book._id}`, {
-        status: newStatus,
-      });
+      await axios.patch(
+        `
+        ${API_URL}/book/status/${book._id}`,
+        {
+          status: newStatus,
+        },
+      );
 
       fetchBooks();
     } catch (error) {
@@ -98,9 +107,13 @@ const Books = () => {
   // ================= DRAFT =================
   const moveToDraft = async (id) => {
     try {
-      await axios.patch(`http://localhost:5000/book/status/${id}`, {
-        status: "Draft",
-      });
+      await axios.patch(
+        `
+        ${API_URL}/book/status/${id}`,
+        {
+          status: "Draft",
+        },
+      );
 
       fetchBooks();
     } catch (error) {
@@ -125,12 +138,16 @@ const Books = () => {
   // ================= UPDATE =================
   const updateBook = async () => {
     try {
-      await axios.patch(`http://localhost:5000/book/${editBookId}`, {
-        name: form.name,
-        author: [form.author],
-        categories: [form.category],
-        price: form.price,
-      });
+      await axios.patch(
+        `
+        ${API_URL}/book/${editBookId}`,
+        {
+          name: form.name,
+          author: [form.author],
+          categories: [form.category],
+          price: form.price,
+        },
+      );
 
       fetchBooks();
 
@@ -218,7 +235,8 @@ const Books = () => {
               <tr key={book._id} className="border-b border-[#2c4449]">
                 <td className="py-2 flex items-center gap-3">
                   <img
-                    src={`http://localhost:5000/${book.coverPhoto}`}
+                    src={`
+                      ${API_URL}/${book.coverPhoto}`}
                     alt={book.name}
                     className="w-10 h-10 rounded object-cover border border-[#2c4449]"
                   />

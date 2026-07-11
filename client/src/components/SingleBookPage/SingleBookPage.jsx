@@ -161,21 +161,80 @@ const SingleBookPage = () => {
         JSON.stringify([...purchased, { ...book, type: "online" }]),
       );
     }
-    navigate(`/read/${book._id}`);
+    // navigate(`/read/${book._id}`);
+    navigate(`/checkout`);
   };
+
+  // const handlePhysicalPurchase = () => {
+
+  //   const token = localStorage.getItem("token");
+
+  //   if (!token) {
+  //     navigate("/login");
+  //     return;
+  //   }
+
+  //   const orders = JSON.parse(localStorage.getItem("orders")) || [];
+  //   localStorage.setItem(
+  //     "orders",
+  //     JSON.stringify([...orders, { ...book, type: "physical" }]),
+  //   );
+  //   alert("Order placed successfully!");
+  // };
+
+  // const handlePhysicalPurchase = () => {
+  //   const token = localStorage.getItem("token");
+
+  //   if (!token) {
+  //     navigate("/login");
+  //     return;
+  //   }
+
+  //   const cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+  //   const exist = cart.find((item) => item._id === book._id);
+
+  //   let updatedCart;
+
+  //   if (exist) {
+  //     updatedCart = cart.map((item) =>
+  //       item._id === book._id ? { ...item, qty: (item.qty || 1) + 1 } : item,
+  //     );
+  //   } else {
+  //     updatedCart = [
+  //       ...cart,
+  //       {
+  //         ...book,
+  //         qty: 1,
+  //         type: "physical",
+  //       },
+  //     ];
+  //   }
+
+  //   localStorage.setItem("cart", JSON.stringify(updatedCart));
+
+  //   setShowPurchaseModal(false);
+
+  //   navigate("/checkout");
+  // };
 
   const handlePhysicalPurchase = () => {
     const token = localStorage.getItem("token");
+
     if (!token) {
       navigate("/login");
       return;
     }
-    const orders = JSON.parse(localStorage.getItem("orders")) || [];
-    localStorage.setItem(
-      "orders",
-      JSON.stringify([...orders, { ...book, type: "physical" }]),
-    );
-    alert("Order placed successfully!");
+
+    navigate("/checkout", {
+      state: {
+        type: "buyNow",
+        product: {
+          ...book,
+          qty: 1,
+        },
+      },
+    });
   };
 
   const submitRating = async () => {
@@ -582,7 +641,7 @@ const SingleBookPage = () => {
               <div
                 onClick={() => {
                   handlePhysicalPurchase();
-                  setShowPurchaseModal(false);
+                  // setShowPurchaseModal(false);
                 }}
                 className="cursor-pointer border border-[#1f3a3e] hover:border-[#2dd4e0]/40 bg-[#0e1a1c] hover:bg-[#2dd4e0]/5 rounded-xl p-4 flex items-center gap-4 transition-all duration-200 group"
               >

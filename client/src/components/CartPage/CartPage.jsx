@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { FiShoppingCart, FiTrash2, FiPlus, FiMinus } from "react-icons/fi";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import API_URL from "../../Constant";
 
 const formatCurrency = (n) =>
@@ -141,18 +141,6 @@ const CartPage = () => {
 
   const removeItem = (id) => syncCart(cart.filter((item) => item._id !== id));
   const clearCart = () => syncCart([]);
-
-  const handlePlaceOrder = () => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      navigate("/login");
-      return;
-    }
-    const orders = JSON.parse(localStorage.getItem("orders")) || [];
-    localStorage.setItem("orders", JSON.stringify([...orders, ...cart]));
-    localStorage.removeItem("cart");
-    setCart([]);
-  };
 
   return (
     <div className="w-full min-h-screen bg-[#0e1a1c] px-4 md:px-10 py-10 text-[#e8f8fa]">
@@ -296,12 +284,11 @@ const CartPage = () => {
                   )}
                 </div>
 
-                <button
-                  onClick={handlePlaceOrder}
-                  className="w-full mt-5 py-2.5 bg-amber-400 text-black font-bold rounded-xl hover:bg-amber-500 transition text-sm tracking-wide cursor-pointer"
-                >
-                  Place Order
-                </button>
+                <Link to="/checkout" state={{ type: "cart" }}>
+                  <button className="w-full mt-5 py-2.5 bg-amber-400 text-black font-bold rounded-xl hover:bg-amber-500 transition text-sm tracking-wide cursor-pointer">
+                    Checkout
+                  </button>
+                </Link>
 
                 <p className="text-center text-[10px] text-[#2a5a62] mt-3">
                   Free delivery on orders above ₹699

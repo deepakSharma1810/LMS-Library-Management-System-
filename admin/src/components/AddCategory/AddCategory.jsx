@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import API_URL from "../../Constant";
 
 const AddCategory = () => {
   const navigate = useNavigate();
@@ -32,7 +33,7 @@ const AddCategory = () => {
 
     try {
       setLoading(true);
-      await axios.post("http://localhost:5000/category", category);
+      await axios.post(`${API_URL}/category`, category);
       navigate("/categories");
     } catch (error) {
       setError(error.response?.data?.message || "Failed to create category");

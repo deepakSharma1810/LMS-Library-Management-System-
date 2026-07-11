@@ -35,6 +35,7 @@ import ConfirmPassword from "./components/ConfirmPassword/ConfirmPassword";
 import SearchPage from "./components/SearchPage/SearchPage";
 
 import ProtectedRoute from "./components/ProtectedRoute";
+import CheckoutPage from "./components/CheckoutPage/CheckoutPage";
 
 const AppContent = () => {
   const location = useLocation();
@@ -92,6 +93,15 @@ const AppContent = () => {
           element={
             <ProtectedRoute>
               <WishlistPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/checkout"
+          element={
+            <ProtectedRoute>
+              <CheckoutPage />
             </ProtectedRoute>
           }
         />

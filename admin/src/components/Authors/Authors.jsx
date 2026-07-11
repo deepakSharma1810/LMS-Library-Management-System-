@@ -3,6 +3,7 @@ import { FiEdit, FiTrash2, FiUpload } from "react-icons/fi";
 import { IoMdCheckmark } from "react-icons/io";
 import { Link } from "react-router-dom";
 import axios from "axios";
+import API_URL from "../../Constant";
 
 const Authors = () => {
   const [authors, setAuthors] = useState([]);
@@ -23,7 +24,7 @@ const Authors = () => {
 
   const fetchAuthors = async () => {
     try {
-      const data = await axios.get("http://localhost:5000/author");
+      const data = await axios.get(`${API_URL}/author`);
       setAuthors(data.data.authors);
       console.log(data.data.author);
     } catch (err) {
@@ -34,7 +35,7 @@ const Authors = () => {
 
   const fetchBooks = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/book");
+      const res = await axios.get(`${API_URL}/book`);
       console.log(res.data);
 
       setBooks(Array.isArray(res.data) ? res.data : res.data.books || []);
@@ -85,14 +86,11 @@ const Authors = () => {
         formData.append("ImageData", editForm.coverPhoto);
       }
 
-      const image = await axios.post(
-        `http://localhost:5000/uploadmulter`,
-        formData,
-      );
+      const image = await axios.post(`${API_URL}/uploadmulter`, formData);
 
       console.log(image);
 
-      await axios.patch(`http://localhost:5000/author/${id}`, {
+      await axios.patch(`${API_URL}/author/${id}`, {
         name: editForm.name,
         role: editForm.role,
         bio: editForm.bio,
@@ -111,7 +109,7 @@ const Authors = () => {
   // update author
   const updateAuthor = async (id) => {
     try {
-      await axios.patch(`http://localhost:5000/author/${id}`, editForm);
+      await axios.patch(`${API_URL}/author/${id}`, editForm);
 
       fetchAuthors();
       setEditAuthorId(null);
@@ -123,7 +121,7 @@ const Authors = () => {
 
   const deleteAuthor = async (id) => {
     try {
-      await axios.delete(`http://localhost:5000/author/${id}`);
+      await axios.delete(`${API_URL}/author/${id}`);
 
       fetchAuthors();
     } catch (error) {
@@ -174,7 +172,7 @@ const Authors = () => {
                 <td className="flex items-center gap-3 py-2">
                   <span className="md:hidden text-gray-400 w-16">Name</span>
                   <img
-                    src={`http://localhost:5000/${author.coverPhoto}`}
+                    src={`${API_URL}/${author.coverPhoto}`}
                     className="w-10 h-10 rounded"
                     alt=""
                   />

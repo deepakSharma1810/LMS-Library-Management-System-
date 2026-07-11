@@ -11,6 +11,7 @@ import {
 import { FaArrowUp, FaArrowDown } from "react-icons/fa6";
 import { BiCategory } from "react-icons/bi";
 import axios from "axios";
+import API_URL from "../../Constant";
 
 // Dummy Project Data
 const initialBooks = [
@@ -56,7 +57,7 @@ const Dashboard = () => {
   // ================= FETCH DATA =================
   const fetchBooks = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/book");
+      const res = await axios.get(`${API_URL}/book`);
       setBooks(Array.isArray(res.data) ? res.data : res.data.books || []);
       console.log(res.data);
     } catch (error) {
@@ -67,7 +68,7 @@ const Dashboard = () => {
 
   const fetchAuthors = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/author");
+      const res = await axios.get(`${API_URL}/author`);
       setAuthors(Array.isArray(res.data) ? res.data : res.data.authors || []);
     } catch (error) {
       console.error(error);
@@ -77,7 +78,7 @@ const Dashboard = () => {
 
   const fetchCategories = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/category");
+      const res = await axios.get(`${API_URL}/category`);
       setCategories(res.data.categories || []);
       console.log(res.data.categories);
     } catch (error) {
@@ -85,17 +86,6 @@ const Dashboard = () => {
       setCategories([]);
     }
   };
-
-  // dummy users
-  // const fetchUsers = async () => {
-  //   try {
-  //     const res = await axios.get("http://localhost:5000/user");
-  //     setUsers(res.data.users || []);
-  //   } catch (error) {
-  //     console.error(error);
-  //     setUsers([]);
-  //   }
-  // };
 
   useEffect(() => {
     fetchBooks();
