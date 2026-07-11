@@ -3,6 +3,7 @@ const Author = require("../model/Author");
 const Book = require("../model/Book");
 const Category = require("../model/Category");
 const Notification = require("../model/Notification");
+const Order = require("../model/Order");
 
 const createBook = async (req, res) => {
   try {
@@ -388,6 +389,59 @@ const deleteBook = async (req, res) => {
   }
 };
 
+const readEbook = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Book exists?
+    const book = await Book.findById(id);
+
+    if (!book) {
+      return res.status(404).json({
+        success: false,
+        message: "Book not found",
+      });
+    }
+
+    // Physical book cannot be read online
+    if (book.bookType === "physical") {
+      return res.status(400).json({
+        success: false,
+        message: "This is a physical book.",
+      });
+    }
+
+    // User purchased ebook?
+    const order = await Order.findOne({
+      user: req.user.id,
+      paymentStatus: "Paid",
+      items: {
+        $elemMatch: {
+          book: id,
+          accessGranted: true,
+        },
+      },
+    });
+
+    if (!order) {
+      return res.status(403).json({
+        success: false,
+        message: "Please purchase this ebook first.",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      pdf: book.actualPdf,
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+};
+
 module.exports = {
   createBook,
   readAllBook,
@@ -396,4 +450,5 @@ module.exports = {
   updateBook,
   updateBookStatus,
   deleteBook,
+  readEbook,
 };

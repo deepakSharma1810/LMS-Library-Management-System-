@@ -93,6 +93,17 @@ const bookSchema = new mongoose.Schema(
       },
     ],
 
+    bookType: {
+      type: String,
+      enum: ["physical", "ebook"],
+      default: "physical",
+    },
+
+    ebookPdf: {
+      type: String,
+      default: "",
+    },
+
     seller: {
       name: {
         type: String,

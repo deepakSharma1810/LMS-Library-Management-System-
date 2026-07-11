@@ -95,70 +95,6 @@ const CheckoutPage = () => {
     return true;
   };
 
-  // const handleOrder = () => {
-  //   if (!validateForm()) return;
-
-  //   const order = {
-  //     id: Date.now(),
-  //     shipping: formData,
-  //     items: cartItems,
-  //     subtotal,
-  //     discount,
-  //     delivery,
-  //     total,
-  //     status: "Placed",
-  //     createdAt: new Date().toISOString(),
-  //   };
-
-  //   const oldOrders = JSON.parse(localStorage.getItem("orders")) || [];
-  //   localStorage.setItem("orders", JSON.stringify([...oldOrders, order]));
-
-  //   if (localStorage.getItem("buyNowItem")) {
-  //     localStorage.removeItem("buyNowItem");
-  //   } else {
-  //     localStorage.removeItem("cart");
-  //   }
-
-  //   setOrderPlaced(true);
-  //   setCartItems([]);
-  // };
-
-  // const handleOrder = async () => {
-  //   if (!validateForm()) return;
-
-  //   try {
-  //     const token = localStorage.getItem("token");
-
-  //     const orderData = {
-  //       shipping: formData,
-  //       items: cartItems.map((item) => ({
-  //         book: item._id,
-  //         qty: item.qty,
-  //         price: item.price,
-  //       })),
-  //       subtotal,
-  //       discount,
-  //       delivery,
-  //       total,
-  //     };
-
-  //     const res = await axios.post(`${API_URL}/order`, orderData, {
-  //       headers: {
-  //         Authorization: `Bearer ${token}`,
-  //       },
-  //     });
-
-  //     if (res.data.success) {
-  //       localStorage.removeItem("cart");
-  //       setCartItems([]);
-  //       setOrderPlaced(true);
-  //     }
-  //   } catch (err) {
-  //     console.log(err);
-  //     setError(err.response?.data?.message || "Order failed");
-  //   }
-  // };
-
   const handleOrder = async () => {
     if (!validateForm()) return;
 
@@ -259,7 +195,7 @@ const CheckoutPage = () => {
 
           <button
             onClick={() => (window.location.href = "/orders")}
-            className="w-full mt-6 bg-amber-300 text-black py-3 rounded-xl font-bold hover:bg-amber-400 transition"
+            className="w-full mt-6 bg-amber-300 cursor-pointer text-black py-3 rounded-xl font-bold hover:bg-amber-400 transition"
           >
             View Orders
           </button>

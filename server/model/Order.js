@@ -22,6 +22,11 @@ const orderSchema = new mongoose.Schema(
         },
 
         price: Number,
+
+        accessGranted: {
+          type: Boolean,
+          default: false,
+        },
       },
     ],
 
@@ -54,7 +59,7 @@ const orderSchema = new mongoose.Schema(
     orderStatus: {
       type: String,
       enum: ["Pending", "Confirmed", "Shipped", "Delivered", "Cancelled"],
-      default: "Pending",
+      default: "Delivered",
     },
 
     razorpayOrderId: String,

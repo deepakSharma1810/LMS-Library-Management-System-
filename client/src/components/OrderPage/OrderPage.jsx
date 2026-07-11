@@ -10,6 +10,7 @@ import {
 import axios from "axios";
 import API_URL from "../../Constant";
 import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 const formatCurrency = (n) =>
   new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR" }).format(
@@ -43,6 +44,8 @@ const statusIcon = (status) => {
 };
 
 const OrderPage = () => {
+  const navigate = useNavigate();
+
   const [expanded, setExpanded] = useState(null);
   const [orders, setOrders] = useState([]);
 
@@ -69,12 +72,60 @@ const OrderPage = () => {
     getOrders();
   }, []);
 
+  const buyAgain = (order) => {
+    const oldCart = JSON.parse(localStorage.getItem("cart")) || [];
+
+    const newItems = order.items.map((item) => ({
+      ...item.book,
+      qty: item.quantity,
+    }));
+
+    newItems.forEach((newItem) => {
+      const existing = oldCart.find((i) => i._id === newItem._id);
+
+      if (existing) {
+        existing.qty += newItem.qty;
+      } else {
+        oldCart.push(newItem);
+      }
+    });
+
+    localStorage.setItem("cart", JSON.stringify(oldCart));
+
+    navigate("/cart");
+  };
+
   const toggleExpand = (id) => {
     setExpanded((prev) => (prev === id ? null : id));
   };
 
-  const downloadInvoice = (order) => {
-    alert(`Download invoice for ${order.id} (you can hook real PDF here).`);
+  // const downloadInvoice = async (order) => {
+  //   const token = localStorage.getItem("token");
+
+  //   window.open(
+  //     `${API_URL}/order/invoice/${order._id}?token=${token}`,
+  //     "_blank",
+  //   );
+  // };
+
+  const downloadInvoice = async (order) => {
+    const token = localStorage.getItem("token");
+
+    const response = await axios.get(`${API_URL}/order/invoice/${order._id}`, {
+      responseType: "blob",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download = `invoice-${order._id}.pdf`;
+
+    link.click();
   };
 
   const trackOrder = (order) => {
@@ -99,28 +150,30 @@ const OrderPage = () => {
           <div className="space-y-4">
             {orders.map((order) => (
               <div
-                key={order.id}
+                key={order._id}
                 className="bg-[#122125] rounded-xl p-4 md:p-5 shadow-lg"
               >
                 {/* Top row: icon, status, basic info */}
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                   <div className="flex items-start gap-3">
-                    <div className="mt-[2px]">{statusIcon(order.status)}</div>
+                    <div className="mt-[2px]">
+                      {statusIcon(order.orderStatus)}
+                    </div>
                     <div>
                       <div className="flex flex-wrap items-center gap-2">
                         <span className="text-sm font-semibold text-[#dbf8fa]">
-                          {order.status}
+                          {order.orderStatus}
                         </span>
-                        {/* <span className={statusBadge(order.status)}>
-                          {order.status.toUpperCase()}
-                        </span> */}
+                        <span className={statusBadge(order.orderStatus)}>
+                          {order.orderStatus.toUpperCase()}
+                        </span>
                       </div>
                       <p className="text-xs text-gray-400 mt-1">
-                        {order.expected}
+                        Payment : {order.paymentStatus}
                       </p>
                       <p className="text-[11px] text-gray-500 mt-1">
                         Order ID:{" "}
-                        <span className="text-gray-300">{order.id}</span>
+                        <span className="text-gray-300">{order._id}</span>
                       </p>
                       <p className="text-[11px] text-gray-500">
                         Ordered on:{" "}
@@ -138,12 +191,12 @@ const OrderPage = () => {
                       {formatCurrency(order.total)}
                     </p>
                     <p className="text-[11px] text-gray-400 mt-1">
-                      {order.itemsCount} item
-                      {order.itemsCount > 1 ? "s" : ""} • {order.paymentMode}
+                      {order.items.length} item
+                      {order.itemsCount > 1 ? "s" : ""} • {order.paymentMethod}
                     </p>
                     <button
                       onClick={() => downloadInvoice(order)}
-                      className="mt-2 inline-flex items-center gap-1 text-xs text-gray-300 hover:text-amber-300"
+                      className="mt-2 inline-flex items-center gap-1 text-xs text-gray-300 hover:text-amber-300 cursor-pointer"
                     >
                       <FiDownload /> Invoice
                     </button>
@@ -162,17 +215,20 @@ const OrderPage = () => {
                   />
                   <div className="flex-1">
                     <p className="text-sm text-[#dbf8fa] font-medium">
-                      {order.items[0].title}
+                      {order.items[0].book.name}
                     </p>
                     <p className="text-xs text-gray-400">
-                      by {order.items[0].book.authorName}
+                      by{" "}
+                      {order.items[0].book.author
+                        ?.map((a) => a.name)
+                        .join(", ")}
                     </p>
                     <p className="text-xs text-gray-400 mt-1">
-                      Qty: {order.items[0].qty}
+                      Qty: {order.items[0].quantity}
                     </p>
-                    {order.itemsCount > 1 && (
+                    {order.items.length > 1 && (
                       <p className="text-[11px] text-gray-500 mt-1">
-                        + {order.itemsCount - 1} more item
+                        + {order.items.length - 1} more item
                         {order.itemsCount - 1 > 1 ? "s" : ""}
                       </p>
                     )}
@@ -185,19 +241,19 @@ const OrderPage = () => {
                 {/* Expand / collapse + actions */}
                 <div className="mt-3 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
                   <button
-                    onClick={() => toggleExpand(order.id)}
+                    onClick={() => toggleExpand(order._id)}
                     className="inline-flex items-center gap-1 text-xs text-gray-300 hover:text-amber-300"
                   >
                     <FiChevronDown
                       className={`transition-transform ${
-                        expanded === order.id ? "rotate-180" : ""
+                        expanded === order._id ? "rotate-180" : ""
                       }`}
                     />
-                    {expanded === order.id ? "Hide details" : "View details"}
+                    {expanded === order._id ? "Hide details" : "View details"}
                   </button>
 
                   <div className="flex flex-wrap gap-2 justify-start md:justify-end">
-                    {order.status !== "Cancelled" && (
+                    {order.orderStatus !== "Cancelled" && (
                       <button
                         onClick={() => trackOrder(order)}
                         className="px-3 py-1 text-xs rounded-md bg-transparent border border-gray-700 text-gray-200 hover:bg-gray-800"
@@ -205,14 +261,17 @@ const OrderPage = () => {
                         Track Order
                       </button>
                     )}
-                    <button className="px-3 py-1 text-xs rounded-md bg-transparent border border-gray-700 text-gray-200 hover:bg-gray-800">
+                    <button
+                      className="px-3 py-1 text-xs rounded-md bg-transparent border border-gray-700 text-gray-200 hover:bg-gray-800 cursor-pointer"
+                      onClick={() => buyAgain(order)}
+                    >
                       Buy Again
                     </button>
                   </div>
                 </div>
 
                 {/* Expanded content */}
-                {expanded === order.id && (
+                {expanded === order._id && (
                   <div className="mt-4 bg-[#0e1a1c] rounded-lg p-3 md:p-4 border border-gray-800">
                     {/* Items list */}
                     <p className="text-xs font-semibold text-gray-300 mb-2">
@@ -225,19 +284,22 @@ const OrderPage = () => {
                           className="flex gap-3 items-center text-sm"
                         >
                           <img
-                            src={item.image}
-                            alt={item.title}
+                            src={`${API_URL}/${item.book.coverPhoto.replace(/\\/g, "/")}`}
+                            alt={item.book.name}
                             className="w-10 h-14 object-cover rounded border border-gray-700"
                           />
                           <div className="flex-1">
                             <p className="text-[13px] text-[#dbf8fa]">
-                              {item.title}
+                              {item.book.name}
                             </p>
                             <p className="text-[11px] text-gray-400">
-                              by {item.author}
+                              by{" "}
+                              {order.items[0].book.author
+                                ?.map((a) => a.name)
+                                .join(", ")}
                             </p>
                             <p className="text-[11px] text-gray-400 mt-1">
-                              Qty: {item.qty}
+                              Qty: {item.quantity}
                             </p>
                           </div>
                           <p className="text-[13px] text-amber-300">
@@ -251,15 +313,28 @@ const OrderPage = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 text-xs">
                       <div>
                         <p className="text-gray-400 mb-1">Delivery address</p>
-                        <p className="text-gray-300">{order.address}</p>
+                        <div className="text-gray-300">
+                          <p>{order.shipping.fullName}</p>
+                          <p>{order.shipping.phone}</p>
+                          <p>{order.shipping.address}</p>
+                          <p>
+                            {order.shipping.city}, {order.shipping.state} -
+                            {order.shipping.pincode}
+                          </p>
+                        </div>
                       </div>
                       <div>
                         <p className="text-gray-400 mb-1">Payment</p>
                         <p className="text-gray-300">
-                          Mode: {order.paymentMode}
+                          Mode: {order.paymentMethod}
                         </p>
+
                         <p className="text-gray-300">
-                          Order amount: {formatCurrency(order.total)}
+                          Status: {order.paymentStatus}
+                        </p>
+
+                        <p className="text-gray-300">
+                          Amount: {formatCurrency(order.total)}
                         </p>
                       </div>
                     </div>
