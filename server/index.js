@@ -1,6 +1,6 @@
 const dotenv = require("dotenv");
 // dotenv.config("./.env");
-require("dotenv").config();
+dotenv.config();
 
 const { verifySMTP } = require("./utils/mail");
 verifySMTP();
