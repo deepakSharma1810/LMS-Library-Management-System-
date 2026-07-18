@@ -55,6 +55,14 @@ const CartItem = ({ item, onUpdate, onRemove }) => {
             by {item.author?.[0]?.name || "N/A"}
           </p>
 
+          <p className="text-xs text-amber-400 mt-1">
+            {item.bookType === "ebook"
+              ? "E-Book"
+              : item.bookType === "physical"
+                ? "Physical Book"
+                : "Both"}
+          </p>
+
           <div className="flex items-center gap-2 mt-2 flex-wrap">
             <span className="text-base font-bold text-amber-300">
               {formatCurrency(item.price)}

@@ -8,6 +8,7 @@ const {
   readBookByAuthor,
   readAllBook,
   readEbook,
+  myLibrary,
 } = require("../controllers/bookController");
 const verifyToken = require("../middleware/verifyJWT");
 
@@ -23,6 +24,8 @@ router
   .delete(deleteBook)
   .post(readBookByAuthor);
 
+router.get("/read/:id", verifyToken, readEbook);
+router.get("/my-library", verifyToken, myLibrary);
 router.get("/read/:id", verifyToken, readEbook);
 
 module.exports = router;

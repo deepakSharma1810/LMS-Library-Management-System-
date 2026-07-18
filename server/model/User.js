@@ -30,7 +30,13 @@ const userSchema = new mongoose.Schema(
     books: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Books",
+        ref: "book",
+      },
+    ],
+    ebookLibrary: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "book",
       },
     ],
     categories: [

@@ -47,6 +47,9 @@ const MainPage = () => {
       setNewBooks(newRes.data.books);
       setPopularBooks(popularRes.data.books);
       setPreviousBooks(prevRes.data.books);
+      console.log(newRes.data.books);
+      // console.log(popularRes.data.books);
+      // console.log(prevRes.data.books);
     } catch (error) {
       console.log(error);
     }

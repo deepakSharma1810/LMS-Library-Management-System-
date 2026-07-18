@@ -139,6 +139,7 @@ const CheckoutPage = () => {
                   book: item._id,
                   qty: item.qty,
                   price: item.price,
+                  bookType: item.bookType,
                 })),
                 subtotal,
                 discount,

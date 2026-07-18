@@ -34,6 +34,9 @@ const AddBooks = () => {
     language: "English",
     dimensions: "",
     categories: [],
+
+    bookType: "physical",
+
     isNew: false,
     isPopular: false,
   });
@@ -153,6 +156,9 @@ const AddBooks = () => {
         );
         imagePath = uploadImage.data.file;
       }
+
+      console.log("Book Data:", book);
+      console.log("Book Type:", book.bookType);
 
       await axios.post(`${API_URL}/book`, {
         ...book,
@@ -469,6 +475,34 @@ const AddBooks = () => {
                     placeholder="e.g. 10 10 10 (auto-formats to cm)"
                     className={inputCls}
                   />
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="block text-xs font-bold uppercase tracking-wide text-gray-400 mb-2">
+                    Book Type
+                  </label>
+
+                  <select
+                    name="bookType"
+                    value={book.bookType}
+                    onChange={handleChange}
+                    className="w-full rounded-xl border border-[#2b4a52] bg-[#132327] px-4 py-3 text-white outline-none transition-all duration-300 focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20"
+                  >
+                    <option
+                      value="physical"
+                      className="bg-[#132327] text-white"
+                    >
+                      Physical Book
+                    </option>
+
+                    <option value="ebook" className="bg-[#132327] text-white">
+                      E-Book
+                    </option>
+
+                    <option value="both" className="bg-[#132327] text-white">
+                      Both (Physical + E-Book)
+                    </option>
+                  </select>
                 </div>
               </div>
             </div>

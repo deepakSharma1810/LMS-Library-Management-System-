@@ -77,6 +77,8 @@ const SingleBookPage = () => {
   const [userReview, setUserReview] = useState(null);
   const [reviewLoading, setReviewLoading] = useState(false);
 
+  const [showCartModal, setShowCartModal] = useState(false);
+
   const fetchSingleBook = async (showLoader = true) => {
     try {
       if (showLoader) setLoading(true);
@@ -84,6 +86,7 @@ const SingleBookPage = () => {
       const res = await axios.get(`${API_URL}/book/${id}`);
 
       setBook(res.data.getBook);
+      console.log(res.data);
     } catch (error) {
       console.log("Error fetching book:", error);
     } finally {
@@ -135,88 +138,80 @@ const SingleBookPage = () => {
     setIsWishlisted(!exist);
   };
 
+  // const handleAddToCart = () => {
+  //   const existing = JSON.parse(localStorage.getItem("cart")) || [];
+  //   const found = existing.find((item) => item._id === book._id);
+  //   const updated = found
+  //     ? existing.map((item) =>
+  //         item._id === book._id ? { ...item, qty: item.qty + 1 } : item,
+  //       )
+  //     : [...existing, { ...book, qty: 1 }];
+  //   localStorage.setItem("cart", JSON.stringify(updated));
+  //   setCartBtnText("Added ✓");
+  //   setTimeout(() => setCartBtnText("Add to Cart"), 1500);
+  // };
+
   const handleAddToCart = () => {
+    setShowCartModal(true);
+    if (book.bookType === "physical") {
+      addToCart("physical");
+    } else if (book.bookType === "ebook") {
+      addToCart("ebook");
+    } else {
+      setShowCartModal(true);
+    }
+  };
+
+  const addToCart = (selectedType) => {
     const existing = JSON.parse(localStorage.getItem("cart")) || [];
-    const found = existing.find((item) => item._id === book._id);
+
+    const found = existing.find(
+      (item) => item._id === book._id && item.bookType === selectedType,
+    );
+
     const updated = found
       ? existing.map((item) =>
-          item._id === book._id ? { ...item, qty: item.qty + 1 } : item,
+          item._id === book._id && item.bookType === selectedType
+            ? { ...item, qty: item.qty + 1 }
+            : item,
         )
-      : [...existing, { ...book, qty: 1 }];
+      : [
+          ...existing,
+          {
+            ...book,
+            qty: 1,
+            bookType: selectedType,
+          },
+        ];
+
     localStorage.setItem("cart", JSON.stringify(updated));
+
     setCartBtnText("Added ✓");
-    setTimeout(() => setCartBtnText("Add to Cart"), 1500);
+
+    setTimeout(() => {
+      setCartBtnText("Add to Cart");
+    }, 1500);
   };
 
   const handleOnlinePurchase = () => {
     const token = localStorage.getItem("token");
+
     if (!token) {
       navigate("/login");
       return;
     }
-    const purchased = JSON.parse(localStorage.getItem("purchasedBooks")) || [];
-    if (!purchased.find((i) => i._id === book._id)) {
-      localStorage.setItem(
-        "purchasedBooks",
-        JSON.stringify([...purchased, { ...book, type: "online" }]),
-      );
-    }
-    // navigate(`/read/${book._id}`);
-    navigate(`/checkout`);
+
+    navigate("/checkout", {
+      state: {
+        type: "buyNow",
+        product: {
+          ...book,
+          qty: 1,
+          bookType: book.bookType,
+        },
+      },
+    });
   };
-
-  // const handlePhysicalPurchase = () => {
-
-  //   const token = localStorage.getItem("token");
-
-  //   if (!token) {
-  //     navigate("/login");
-  //     return;
-  //   }
-
-  //   const orders = JSON.parse(localStorage.getItem("orders")) || [];
-  //   localStorage.setItem(
-  //     "orders",
-  //     JSON.stringify([...orders, { ...book, type: "physical" }]),
-  //   );
-  //   alert("Order placed successfully!");
-  // };
-
-  // const handlePhysicalPurchase = () => {
-  //   const token = localStorage.getItem("token");
-
-  //   if (!token) {
-  //     navigate("/login");
-  //     return;
-  //   }
-
-  //   const cart = JSON.parse(localStorage.getItem("cart")) || [];
-
-  //   const exist = cart.find((item) => item._id === book._id);
-
-  //   let updatedCart;
-
-  //   if (exist) {
-  //     updatedCart = cart.map((item) =>
-  //       item._id === book._id ? { ...item, qty: (item.qty || 1) + 1 } : item,
-  //     );
-  //   } else {
-  //     updatedCart = [
-  //       ...cart,
-  //       {
-  //         ...book,
-  //         qty: 1,
-  //         type: "physical",
-  //       },
-  //     ];
-  //   }
-
-  //   localStorage.setItem("cart", JSON.stringify(updatedCart));
-
-  //   setShowPurchaseModal(false);
-
-  //   navigate("/checkout");
-  // };
 
   const handlePhysicalPurchase = () => {
     const token = localStorage.getItem("token");
@@ -232,6 +227,7 @@ const SingleBookPage = () => {
         product: {
           ...book,
           qty: 1,
+          bookType: book.bookType,
         },
       },
     });
@@ -275,6 +271,29 @@ const SingleBookPage = () => {
       fetchSingleBook();
     } catch (err) {
       console.log(err);
+    }
+  };
+
+  const handleReadBook = async () => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+
+    try {
+      const res = await axios.get(`${API_URL}/book/read/${book._id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (res.data.success) {
+        navigate(`/read/${book._id}`);
+      }
+    } catch (err) {
+      console.log(err.response?.data?.message || "Access denied");
     }
   };
 
@@ -446,11 +465,18 @@ const SingleBookPage = () => {
                   Buy Now
                 </button>
 
-                <Link to={`/read/${id}`}>
+                {/* <Link to={`/read/${id}`}>
                   <button className="px-5 py-2.5 bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 font-semibold rounded-xl hover:bg-emerald-500/30 transition text-sm">
                     Read Book
                   </button>
-                </Link>
+                </Link> */}
+
+                <button
+                  onClick={handleReadBook}
+                  className="px-5 py-2.5 bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 font-semibold rounded-xl hover:bg-emerald-500/30 transition text-sm"
+                >
+                  Read Book
+                </button>
 
                 <button
                   onClick={handleAddToCart}
@@ -615,51 +641,61 @@ const SingleBookPage = () => {
             </p>
 
             <div className="space-y-3">
-              <div
-                onClick={() => {
-                  handleOnlinePurchase();
-                  setShowPurchaseModal(false);
-                }}
-                className="cursor-pointer border border-[#1f3a3e] hover:border-emerald-400/40 bg-[#0e1a1c] hover:bg-emerald-400/5 rounded-xl p-4 flex items-center gap-4 transition-all duration-200 group"
-              >
-                <div className="w-10 h-10 rounded-xl bg-emerald-400/10 border border-emerald-400/20 flex items-center justify-center text-emerald-400">
-                  <FaBook />
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm font-semibold text-[#dbf8fa] group-hover:text-emerald-300 transition">
-                    Online Book
-                  </p>
-                  <p className="text-xs text-[#4a8a92]">
-                    Read instantly in our reader (PDF)
-                  </p>
-                </div>
-                <span className="text-xs text-emerald-400 font-semibold">
-                  Instant
-                </span>
-              </div>
+              {(book.bookType === "ebook" || book.bookType === "both") && (
+                <div
+                  onClick={() => {
+                    handleOnlinePurchase();
+                    setShowPurchaseModal(false);
+                  }}
+                  className="cursor-pointer border border-[#1f3a3e] hover:border-emerald-400/40 bg-[#0e1a1c] hover:bg-emerald-400/5 rounded-xl p-4 flex items-center gap-4 transition-all duration-200 group"
+                >
+                  <div className="w-10 h-10 rounded-xl bg-emerald-400/10 border border-emerald-400/20 flex items-center justify-center text-emerald-400">
+                    <FaBook />
+                  </div>
 
-              <div
-                onClick={() => {
-                  handlePhysicalPurchase();
-                  // setShowPurchaseModal(false);
-                }}
-                className="cursor-pointer border border-[#1f3a3e] hover:border-[#2dd4e0]/40 bg-[#0e1a1c] hover:bg-[#2dd4e0]/5 rounded-xl p-4 flex items-center gap-4 transition-all duration-200 group"
-              >
-                <div className="w-10 h-10 rounded-xl bg-[#2dd4e0]/10 border border-[#2dd4e0]/20 flex items-center justify-center text-[#2dd4e0]">
-                  <BsBoxSeamFill />
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold text-[#dbf8fa] group-hover:text-emerald-300 transition">
+                      E-Book
+                    </p>
+
+                    <p className="text-xs text-[#4a8a92]">
+                      Read instantly after successful payment
+                    </p>
+                  </div>
+
+                  <span className="text-xs text-emerald-400 font-semibold">
+                    Instant
+                  </span>
                 </div>
-                <div className="flex-1">
-                  <p className="text-sm font-semibold text-[#dbf8fa] group-hover:text-[#2dd4e0] transition">
-                    Physical Book
-                  </p>
-                  <p className="text-xs text-[#4a8a92]">
-                    Printed copy delivered to your home
-                  </p>
+              )}
+
+              {(book.bookType === "physical" || book.bookType === "both") && (
+                <div
+                  onClick={() => {
+                    handlePhysicalPurchase();
+                    setShowPurchaseModal(false);
+                  }}
+                  className="cursor-pointer border border-[#1f3a3e] hover:border-[#2dd4e0]/40 bg-[#0e1a1c] hover:bg-[#2dd4e0]/5 rounded-xl p-4 flex items-center gap-4 transition-all duration-200 group"
+                >
+                  <div className="w-10 h-10 rounded-xl bg-[#2dd4e0]/10 border border-[#2dd4e0]/20 flex items-center justify-center text-[#2dd4e0]">
+                    <BsBoxSeamFill />
+                  </div>
+
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold text-[#dbf8fa] group-hover:text-[#2dd4e0] transition">
+                      Physical Book
+                    </p>
+
+                    <p className="text-xs text-[#4a8a92]">
+                      Printed copy delivered to your address
+                    </p>
+                  </div>
+
+                  <span className="text-xs text-[#2dd4e0] font-semibold">
+                    Delivery
+                  </span>
                 </div>
-                <span className="text-xs text-[#2dd4e0] font-semibold">
-                  2-5 Days
-                </span>
-              </div>
+              )}
             </div>
 
             <button
@@ -668,6 +704,106 @@ const SingleBookPage = () => {
             >
               Cancel
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Cart Modal */}
+      {showCartModal && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+          <div className="w-full max-w-md rounded-[22px] bg-[#18282d] border border-[#274149] shadow-[0_25px_80px_rgba(0,0,0,0.45)] overflow-hidden">
+            {/* Header */}
+            <div className="flex items-start justify-between px-6 pt-6">
+              <div>
+                <h2 className="text-3xl font-bold text-[#E8F8FA]">
+                  Choose Format
+                </h2>
+
+                <p className="text-[#6E9BA3] text-sm mt-2">
+                  Select how you want to enjoy this book
+                </p>
+              </div>
+
+              <button
+                onClick={() => setShowCartModal(false)}
+                className="w-10 h-10 rounded-xl border border-[#29505A] flex items-center justify-center text-[#6E9BA3] hover:text-white hover:border-cyan-400 transition"
+              >
+                <FiX size={18} />
+              </button>
+            </div>
+
+            {/* Options */}
+            <div className="px-6 py-5 space-y-4">
+              {(book.bookType === "ebook" || book.bookType === "both") && (
+                <button
+                  onClick={() => {
+                    addToCart("ebook");
+                    setShowCartModal(false);
+                  }}
+                  className="w-full cursor-pointer rounded-2xl border border-[#21414A] bg-[#132126] hover:border-emerald-400 hover:bg-[#163036] transition-all duration-300"
+                >
+                  <div className="flex items-center gap-4 p-5">
+                    <div className="w-14 h-14 rounded-2xl bg-[#0F3C35] flex items-center justify-center">
+                      <FaBook className="text-emerald-400 text-xl" />
+                    </div>
+
+                    <div className="flex-1 text-left">
+                      <h3 className="text-lg font-semibold text-white">
+                        E-Book
+                      </h3>
+
+                      <p className="text-sm text-[#6E9BA3] mt-1">
+                        Read instantly after successful payment
+                      </p>
+                    </div>
+
+                    <span className="text-emerald-400 font-semibold">
+                      Instant
+                    </span>
+                  </div>
+                </button>
+              )}
+
+              {(book.bookType === "physical" || book.bookType === "both") && (
+                <button
+                  onClick={() => {
+                    addToCart("physical");
+                    setShowCartModal(false);
+                  }}
+                  className="w-full cursor-pointer rounded-2xl border border-[#21414A] bg-[#132126] hover:border-cyan-400 hover:bg-[#173038] transition-all duration-300"
+                >
+                  <div className="flex items-center gap-4 p-5">
+                    <div className="w-14 h-14 rounded-2xl bg-[#123845] flex items-center justify-center">
+                      <BsBoxSeamFill className="text-cyan-400 text-xl" />
+                    </div>
+
+                    <div className="flex-1 text-left">
+                      <h3 className="text-lg font-semibold text-white">
+                        Physical Book
+                      </h3>
+
+                      <p className="text-sm text-[#6E9BA3] mt-1">
+                        Printed copy delivered to your address
+                      </p>
+                    </div>
+
+                    <span className="text-cyan-400 font-semibold">
+                      Delivery
+                    </span>
+                  </div>
+                </button>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="px-6 pb-6">
+              <button
+                onClick={() => setShowCartModal(false)}
+                className="w-full h-12 rounded-2xl border border-[#2A4750] text-[#7AA5AD] hover:border-cyan-400 hover:text-white transition"
+              >
+                Cancel
+              </button>
+            </div>
           </div>
         </div>
       )}

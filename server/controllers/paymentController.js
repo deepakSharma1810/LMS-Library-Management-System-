@@ -1,6 +1,8 @@
 const razorpay = require("../config/razorpay");
 const crypto = require("crypto");
 const Order = require("../model/Order");
+const User = require("../model/User");
+const Book = require("../model/Book");
 
 // Create Razorpay Order
 const createPaymentOrder = async (req, res) => {
@@ -47,6 +49,7 @@ const verifyPayment = async (req, res) => {
       total,
     } = req.body;
 
+    // Verify Signature
     const sign = crypto
       .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
       .update(`${razorpay_order_id}|${razorpay_payment_id}`)
@@ -59,6 +62,7 @@ const verifyPayment = async (req, res) => {
       });
     }
 
+    // Create Order
     const order = await Order.create({
       user: req.user.id,
       shipping,
@@ -72,6 +76,32 @@ const verifyPayment = async (req, res) => {
       razorpay_order_id,
       razorpay_payment_id,
     });
+
+    const purchasedBooks = [];
+
+    for (const item of items) {
+      const book = await Book.findById(item.book);
+
+      if (!book) continue;
+
+      if (book.bookType === "ebook") {
+        purchasedBooks.push(book._id);
+      }
+    }
+
+    if (purchasedBooks.length > 0) {
+      await User.findByIdAndUpdate(
+        req.user.id,
+        {
+          $addToSet: {
+            ebookLibrary: {
+              $each: purchasedBooks,
+            },
+          },
+        },
+        { new: true },
+      );
+    }
 
     res.status(201).json({
       success: true,

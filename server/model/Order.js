@@ -27,6 +27,12 @@ const orderSchema = new mongoose.Schema(
           type: Boolean,
           default: false,
         },
+
+        bookType: {
+          type: String,
+          enum: ["physical", "ebook", "both"],
+          required: true,
+        },
       },
     ],
 

@@ -181,6 +181,20 @@ const OrderPage = () => {
                           {new Date(order.createdAt).toLocaleDateString()}
                         </span>
                       </p>
+                      {order.items.map((item, idx) => (
+                        <div key={idx}>
+                          <p className="text-[11px] text-gray-500">
+                            Book Type:{" "}
+                            <span className="text-[11px] text-gray-300">
+                              {item.bookType === "ebook"
+                                ? "E-Book"
+                                : item.bookType === "physical"
+                                  ? "Physical Book"
+                                  : "Both"}
+                            </span>
+                          </p>
+                        </div>
+                      ))}
                     </div>
                   </div>
 

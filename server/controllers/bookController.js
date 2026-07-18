@@ -3,10 +3,13 @@ const Author = require("../model/Author");
 const Book = require("../model/Book");
 const Category = require("../model/Category");
 const Notification = require("../model/Notification");
+const User = require("../model/User");
 const Order = require("../model/Order");
 
 const createBook = async (req, res) => {
   try {
+    console.log("Request Body:", req.body);
+    console.log("Book Type:", req.body.bookType);
     const {
       name,
       author,
@@ -14,6 +17,7 @@ const createBook = async (req, res) => {
       mrp,
       coverPhoto,
       actualPdf,
+      bookType,
       description,
       rating,
       reviews,
@@ -31,8 +35,20 @@ const createBook = async (req, res) => {
       isPopular,
     } = req.body;
 
-    if (!name || !author || !price || !mrp || !coverPhoto || !actualPdf) {
+    if (!name || !author || !price || !mrp || !coverPhoto || !bookType) {
       return res.status(400).json({ message: "Please fill all the feilds" });
+    }
+
+    if ((bookType === "ebook" || bookType === "both") && !actualPdf) {
+      return res.status(400).json({
+        message: "PDF file is required",
+      });
+    }
+
+    if ((bookType === "physical" || bookType === "both") && stock == null) {
+      return res.status(400).json({
+        message: "Stock is required",
+      });
     }
 
     const duplicate = await Book.findOne({ name });
@@ -66,6 +82,12 @@ const createBook = async (req, res) => {
       mrp,
       coverPhoto,
       actualPdf,
+      bookType:
+        bookType === "ebook"
+          ? "ebook"
+          : bookType === "both"
+            ? "both"
+            : "physical",
       description,
       rating,
       reviews,
@@ -229,6 +251,7 @@ const updateBook = async (req, res) => {
       mrp,
       coverPhoto,
       actualPdf,
+      bookType,
       description,
       rating,
       reviews,
@@ -290,6 +313,26 @@ const updateBook = async (req, res) => {
       }
     }
 
+    if (
+      (bookType === "ebook" || bookType === "both") &&
+      !actualPdf &&
+      !existingBook.actualPdf
+    ) {
+      return res.status(400).json({
+        message: "PDF is required",
+      });
+    }
+
+    if (
+      (bookType === "physical" || bookType === "both") &&
+      stock == null &&
+      existingBook.stock == null
+    ) {
+      return res.status(400).json({
+        message: "Stock is required",
+      });
+    }
+
     // update fields only if provided
     existingBook.name = name || existingBook.name;
     existingBook.author = author || existingBook.author;
@@ -297,6 +340,7 @@ const updateBook = async (req, res) => {
     existingBook.mrp = mrp || existingBook.mrp;
     existingBook.coverPhoto = coverPhoto || existingBook.coverPhoto;
     existingBook.actualPdf = actualPdf || existingBook.actualPdf;
+    existingBook.bookType = bookType || existingBook.bookType;
     existingBook.description = description || existingBook.description;
     existingBook.rating = rating ?? existingBook.rating;
     existingBook.reviews = reviews ?? existingBook.reviews;
@@ -393,7 +437,6 @@ const readEbook = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Book exists?
     const book = await Book.findById(id);
 
     if (!book) {
@@ -403,7 +446,6 @@ const readEbook = async (req, res) => {
       });
     }
 
-    // Physical book cannot be read online
     if (book.bookType === "physical") {
       return res.status(400).json({
         success: false,
@@ -411,19 +453,13 @@ const readEbook = async (req, res) => {
       });
     }
 
-    // User purchased ebook?
-    const order = await Order.findOne({
-      user: req.user.id,
-      paymentStatus: "Paid",
-      items: {
-        $elemMatch: {
-          book: id,
-          accessGranted: true,
-        },
-      },
-    });
+    const user = await User.findById(req.user.id);
 
-    if (!order) {
+    const hasAccess = user.ebookLibrary.some(
+      (bookId) => bookId.toString() === id,
+    );
+
+    if (!hasAccess) {
       return res.status(403).json({
         success: false,
         message: "Please purchase this ebook first.",
@@ -442,6 +478,15 @@ const readEbook = async (req, res) => {
   }
 };
 
+const myLibrary = async (req, res) => {
+  const user = await User.findById(req.user.id).populate("ebookLibrary");
+
+  res.json({
+    success: true,
+    books: user.ebookLibrary,
+  });
+};
+
 module.exports = {
   createBook,
   readAllBook,
@@ -451,4 +496,5 @@ module.exports = {
   updateBookStatus,
   deleteBook,
   readEbook,
+  myLibrary,
 };
