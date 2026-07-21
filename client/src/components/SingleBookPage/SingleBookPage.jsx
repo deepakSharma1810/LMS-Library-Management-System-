@@ -207,7 +207,9 @@ const SingleBookPage = () => {
         product: {
           ...book,
           qty: 1,
+          // bookType: "ebook",
           bookType: book.bookType,
+          // purchaseType: "ebook",
         },
       },
     });
@@ -227,7 +229,9 @@ const SingleBookPage = () => {
         product: {
           ...book,
           qty: 1,
+          // bookType: "physical",
           bookType: book.bookType,
+          // purchaseType: "physical",
         },
       },
     });
@@ -622,7 +626,7 @@ const SingleBookPage = () => {
       </div>
 
       {/* Purchase Modal */}
-      {showPurchaseModal && (
+      {/* {showPurchaseModal && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 px-4">
           <div className="bg-[#162428] border border-[#1f3a3e] rounded-2xl w-full max-w-md p-6 shadow-2xl">
             <div className="flex items-center justify-between mb-1">
@@ -706,104 +710,204 @@ const SingleBookPage = () => {
             </button>
           </div>
         </div>
+      )} */}
+
+      {showPurchaseModal && (
+        <div
+          className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 px-4 animate-[fadeIn_0.2s_ease-out]"
+          onClick={() => setShowPurchaseModal(false)}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-[#162428] border border-[#1f3a3e] rounded-2xl w-full max-w-md p-6 shadow-2xl animate-[scaleIn_0.2s_ease-out]"
+          >
+            <div className="flex items-center justify-between mb-1">
+              <h2 className="text-xl font-bold text-[#dbf8fa]">
+                Choose Format
+              </h2>
+
+              <button
+                onClick={() => setShowPurchaseModal(false)}
+                className="w-8 h-8 rounded-xl bg-[#0e1a1c] border border-[#1f3a3e] flex items-center justify-center text-[#4a8a92] hover:text-[#dbf8fa] transition cursor-pointer"
+              >
+                <FiX />
+              </button>
+            </div>
+
+            <p className="text-xs text-[#4a8a92] mb-5">
+              Select how you want to enjoy this book
+            </p>
+
+            <div className="space-y-3">
+              {(book.bookType === "ebook" || book.bookType === "both") && (
+                <div
+                  onClick={() => {
+                    handleOnlinePurchase();
+                    setShowPurchaseModal(false);
+                  }}
+                  className="cursor-pointer border border-[#1f3a3e] hover:border-emerald-400/40 bg-[#0e1a1c] hover:bg-emerald-400/5 rounded-xl p-4 flex items-center gap-4 transition-all duration-200 active:scale-[0.98] group"
+                >
+                  <div className="w-10 h-10 rounded-xl bg-emerald-400/10 border border-emerald-400/20 flex items-center justify-center text-emerald-400 group-hover:scale-105 transition-transform duration-200">
+                    <FaBook />
+                  </div>
+
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold text-[#dbf8fa] group-hover:text-emerald-300 transition">
+                      E-Book
+                    </p>
+
+                    <p className="text-xs text-[#4a8a92]">
+                      Read instantly after successful payment
+                    </p>
+                  </div>
+
+                  <span className="text-xs text-emerald-400 font-semibold">
+                    Instant
+                  </span>
+                </div>
+              )}
+
+              {(book.bookType === "physical" || book.bookType === "both") && (
+                <div
+                  onClick={() => {
+                    handlePhysicalPurchase();
+                    setShowPurchaseModal(false);
+                  }}
+                  className="cursor-pointer border border-[#1f3a3e] hover:border-[#2dd4e0]/40 bg-[#0e1a1c] hover:bg-[#2dd4e0]/5 rounded-xl p-4 flex items-center gap-4 transition-all duration-200 active:scale-[0.98] group"
+                >
+                  <div className="w-10 h-10 rounded-xl bg-[#2dd4e0]/10 border border-[#2dd4e0]/20 flex items-center justify-center text-[#2dd4e0] group-hover:scale-105 transition-transform duration-200">
+                    <BsBoxSeamFill />
+                  </div>
+
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold text-[#dbf8fa] group-hover:text-[#2dd4e0] transition">
+                      Physical Book
+                    </p>
+
+                    <p className="text-xs text-[#4a8a92]">
+                      Printed copy delivered to your address
+                    </p>
+                  </div>
+
+                  <span className="text-xs text-[#2dd4e0] font-semibold">
+                    Delivery
+                  </span>
+                </div>
+              )}
+            </div>
+
+            <button
+              onClick={() => setShowPurchaseModal(false)}
+              className="w-full mt-4 py-2 rounded-xl border border-[#1f3a3e] text-[#4a8a92] text-sm hover:text-[#6bbcc4] hover:border-[#2a5a62] transition cursor-pointer"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
       )}
 
       {/* Cart Modal */}
       {showCartModal && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-          <div className="w-full max-w-md rounded-[22px] bg-[#18282d] border border-[#274149] shadow-[0_25px_80px_rgba(0,0,0,0.45)] overflow-hidden">
+        <div
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-[fadeIn_0.2s_ease-out]"
+          onClick={() => setShowCartModal(false)}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-md bg-[#18282d] border border-[#274149] rounded-2xl p-6 shadow-[0_25px_80px_rgba(0,0,0,0.45)] animate-[scaleIn_0.2s_ease-out]"
+          >
             {/* Header */}
-            <div className="flex items-start justify-between px-6 pt-6">
-              <div>
-                <h2 className="text-3xl font-bold text-[#E8F8FA]">
-                  Choose Format
-                </h2>
-
-                <p className="text-[#6E9BA3] text-sm mt-2">
-                  Select how you want to enjoy this book
-                </p>
-              </div>
+            <div className="flex items-center justify-between mb-1">
+              <h2 className="text-xl font-bold text-[#E8F8FA]">
+                Choose Format
+              </h2>
 
               <button
                 onClick={() => setShowCartModal(false)}
-                className="w-10 h-10 rounded-xl border border-[#29505A] flex items-center justify-center text-[#6E9BA3] hover:text-white hover:border-cyan-400 transition"
+                className="w-8 h-8 rounded-xl border border-[#29505A] flex items-center justify-center text-[#6E9BA3] hover:text-white hover:border-cyan-400 transition-all duration-200 cursor-pointer"
               >
-                <FiX size={18} />
+                <FiX />
               </button>
             </div>
 
+            <p className="text-xs text-[#6E9BA3] mb-5">
+              Select how you want to enjoy this book
+            </p>
+
             {/* Options */}
-            <div className="px-6 py-5 space-y-4">
+            <div className="space-y-3">
               {(book.bookType === "ebook" || book.bookType === "both") && (
-                <button
+                <div
                   onClick={() => {
                     addToCart("ebook");
                     setShowCartModal(false);
                   }}
-                  className="w-full cursor-pointer rounded-2xl border border-[#21414A] bg-[#132126] hover:border-emerald-400 hover:bg-[#163036] transition-all duration-300"
+                  className="cursor-pointer border border-[#21414A] hover:border-emerald-400/40 bg-[#132126] hover:bg-[#163036] rounded-xl p-4 flex items-center gap-4 transition-all duration-200 active:scale-[0.98] group"
                 >
-                  <div className="flex items-center gap-4 p-5">
-                    <div className="w-14 h-14 rounded-2xl bg-[#0F3C35] flex items-center justify-center">
-                      <FaBook className="text-emerald-400 text-xl" />
-                    </div>
-
-                    <div className="flex-1 text-left">
-                      <h3 className="text-lg font-semibold text-white">
-                        E-Book
-                      </h3>
-
-                      <p className="text-sm text-[#6E9BA3] mt-1">
-                        Read instantly after successful payment
-                      </p>
-                    </div>
-
-                    <span className="text-emerald-400 font-semibold">
-                      Instant
-                    </span>
+                  <div className="w-10 h-10 rounded-xl bg-[#0F3C35] border border-emerald-400/20 flex items-center justify-center text-emerald-400 group-hover:scale-105 transition-transform duration-200">
+                    <FaBook />
                   </div>
-                </button>
+
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold text-white group-hover:text-emerald-300 transition">
+                      E-Book
+                    </p>
+
+                    <p className="text-xs text-[#6E9BA3]">
+                      Read instantly after successful payment
+                    </p>
+                  </div>
+
+                  <span className="text-xs text-emerald-400 font-semibold">
+                    Instant
+                  </span>
+                </div>
               )}
 
               {(book.bookType === "physical" || book.bookType === "both") && (
-                <button
+                <div
                   onClick={() => {
                     addToCart("physical");
                     setShowCartModal(false);
                   }}
-                  className="w-full cursor-pointer rounded-2xl border border-[#21414A] bg-[#132126] hover:border-cyan-400 hover:bg-[#173038] transition-all duration-300"
+                  className="cursor-pointer border border-[#21414A] hover:border-cyan-400/40 bg-[#132126] hover:bg-[#173038] rounded-xl p-4 flex items-center gap-4 transition-all duration-200 active:scale-[0.98] group"
                 >
-                  <div className="flex items-center gap-4 p-5">
-                    <div className="w-14 h-14 rounded-2xl bg-[#123845] flex items-center justify-center">
-                      <BsBoxSeamFill className="text-cyan-400 text-xl" />
-                    </div>
-
-                    <div className="flex-1 text-left">
-                      <h3 className="text-lg font-semibold text-white">
-                        Physical Book
-                      </h3>
-
-                      <p className="text-sm text-[#6E9BA3] mt-1">
-                        Printed copy delivered to your address
-                      </p>
-                    </div>
-
-                    <span className="text-cyan-400 font-semibold">
-                      Delivery
-                    </span>
+                  <div className="w-10 h-10 rounded-xl bg-[#123845] border border-cyan-400/20 flex items-center justify-center text-cyan-400 group-hover:scale-105 transition-transform duration-200">
+                    <BsBoxSeamFill />
                   </div>
-                </button>
+
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold text-white group-hover:text-cyan-300 transition">
+                      Physical Book
+                    </p>
+
+                    <p className="text-xs text-[#6E9BA3]">
+                      Printed copy delivered to your address
+                    </p>
+                  </div>
+
+                  <span className="text-xs text-cyan-400 font-semibold">
+                    Delivery
+                  </span>
+                </div>
               )}
+
+              {book.bookType !== "ebook" &&
+                book.bookType !== "physical" &&
+                book.bookType !== "both" && (
+                  <p className="text-center text-sm text-[#6E9BA3] py-6">
+                    No formats available for this book right now.
+                  </p>
+                )}
             </div>
 
             {/* Footer */}
-            <div className="px-6 pb-6">
-              <button
-                onClick={() => setShowCartModal(false)}
-                className="w-full h-12 rounded-2xl border border-[#2A4750] text-[#7AA5AD] hover:border-cyan-400 hover:text-white transition"
-              >
-                Cancel
-              </button>
-            </div>
+            <button
+              onClick={() => setShowCartModal(false)}
+              className="w-full mt-4 py-2 rounded-xl border border-[#29505A] text-[#6E9BA3] text-sm hover:text-white hover:border-cyan-400 transition-all duration-200 cursor-pointer"
+            >
+              Cancel
+            </button>
           </div>
         </div>
       )}

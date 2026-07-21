@@ -95,11 +95,33 @@ const CheckoutPage = () => {
     return true;
   };
 
+  // useEffect(() => {
+  //   console.log("Location State:", location.state);
+  //   console.log("Product:", location.state?.product);
+  // }, []);
+
   const handleOrder = async () => {
     if (!validateForm()) return;
 
+    console.log(cartItems);
+
     try {
       const token = localStorage.getItem("token");
+
+      const purchaseCheck = await axios.post(
+        `${API_URL}/payment/check-purchase`,
+        {
+          items: cartItems.map((item) => ({
+            book: item._id,
+            bookType: item.bookType,
+          })),
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
 
       const { data } = await axios.post(
         `${API_URL}/payment/create-order`,
@@ -137,9 +159,10 @@ const CheckoutPage = () => {
                 shipping: formData,
                 items: cartItems.map((item) => ({
                   book: item._id,
-                  qty: item.qty,
+                  quantity: item.qty,
                   price: item.price,
                   bookType: item.bookType,
+                  // bookType: item.purchaseType,
                 })),
                 subtotal,
                 discount,
@@ -174,32 +197,72 @@ const CheckoutPage = () => {
 
       razorpay.open();
     } catch (err) {
-      console.log(err);
+      console.log(err.response?.data?.message || "Something went wrong");
     }
   };
 
   if (orderPlaced) {
     return (
-      <div className="min-h-screen bg-[#0e1a1c] flex items-center justify-center px-4 text-white">
-        <div className="max-w-md w-full bg-[#1b2e31] border border-[#2c4449] rounded-3xl p-8 text-center shadow-2xl">
-          <div className="w-20 h-20 mx-auto rounded-full bg-green-500/10 border border-green-400/30 flex items-center justify-center mb-5">
-            <FaCheckCircle className="text-green-400 text-4xl" />
+      <div className="min-h-screen bg-[#0e1a1c] flex items-center justify-center px-4 relative overflow-hidden">
+        {/* Background Glow */}
+        <div className="absolute w-72 h-72 bg-green-500/10 blur-[120px] rounded-full -top-16 -left-16" />
+        <div className="absolute w-80 h-80 bg-cyan-500/10 blur-[120px] rounded-full -bottom-20 -right-20" />
+
+        <div className="relative w-full max-w-md rounded-3xl border border-[#274149] bg-[#18282d] shadow-[0_25px_80px_rgba(0,0,0,0.45)] p-8 text-center">
+          {/* Success Icon */}
+          <div className="relative flex justify-center">
+            <div className="absolute w-24 h-24 rounded-full bg-green-400/10 animate-ping" />
+            <div className="relative w-24 h-24 rounded-full bg-green-500/10 border border-green-400/30 flex items-center justify-center">
+              <FaCheckCircle className="text-green-400 text-5xl" />
+            </div>
           </div>
 
-          <h2 className="text-2xl font-bold text-[#dbf8fa]">
-            Order Placed Successfully
+          {/* Heading */}
+          <h2 className="mt-7 text-3xl font-bold text-[#E8F8FA]">
+            Order Confirmed
           </h2>
 
-          <p className="text-gray-400 text-sm mt-2">
-            Your order has been placed. You can check it from your orders page.
+          {/* Description */}
+          <p className="mt-2 text-[#7AA5AD] leading-7">
+            Thank you for your purchase.
+            <br />
+            Your order has been placed successfully and is now being processed.
           </p>
 
-          <button
-            onClick={() => (window.location.href = "/orders")}
-            className="w-full mt-6 bg-amber-300 cursor-pointer text-black py-3 rounded-xl font-bold hover:bg-amber-400 transition"
-          >
-            View Orders
-          </button>
+          {/* Divider */}
+          <div className="my-5 border-t border-[#274149]" />
+
+          {/* Info Box */}
+          <div className="rounded-2xl border border-[#274149] bg-[#132126] p-4 text-left">
+            <div className="flex justify-between text-sm">
+              <span className="text-[#7AA5AD]">Status</span>
+              <span className="font-semibold text-green-400">Confirmed</span>
+            </div>
+
+            <div className="flex justify-between text-sm mt-3">
+              <span className="text-[#7AA5AD]">Delivery</span>
+              <span className="font-semibold text-white">
+                Check Orders Page
+              </span>
+            </div>
+          </div>
+
+          {/* Buttons */}
+          <div className="mt-8 space-y-3">
+            <button
+              onClick={() => (window.location.href = "/orders")}
+              className="w-full h-12 rounded-2xl bg-amber-300 text-black font-semibold hover:bg-amber-400 transition-all duration-200 active:scale-[0.98] cursor-pointer"
+            >
+              View Orders
+            </button>
+
+            <button
+              onClick={() => (window.location.href = "/")}
+              className="w-full h-12 rounded-2xl border border-[#2A4750] text-[#7AA5AD] hover:text-white hover:border-cyan-400 hover:bg-[#1c333a] transition-all duration-200 active:scale-[0.98] cursor-pointer"
+            >
+              Continue Shopping
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -306,12 +369,6 @@ const CheckoutPage = () => {
                 />
               </div>
             </div>
-
-            {/* {error && (
-              <div className="bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-3 rounded-2xl text-sm">
-                {error}
-              </div>
-            )} */}
           </div>
 
           {/* RIGHT SUMMARY */}

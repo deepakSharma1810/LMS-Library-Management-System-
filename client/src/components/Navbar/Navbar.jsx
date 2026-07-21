@@ -206,6 +206,7 @@ const Navbar = () => {
                   {[
                     { label: "My Profile", path: "/profile" },
                     { label: "Orders", path: "/orders" },
+                    { label: "My Library", path: "/my-library" },
                     { label: "Notifications", path: "/notifications" },
                     { label: "Wishlist", path: "/wishlist" },
                   ].map(({ label, path }) => (

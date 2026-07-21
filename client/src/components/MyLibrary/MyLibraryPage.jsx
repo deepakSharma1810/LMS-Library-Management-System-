@@ -1,0 +1,236 @@
+// import React, { useEffect, useState } from "react";
+// import axios from "axios";
+// import { Link } from "react-router-dom";
+// import API_URL from "../../Constant";
+
+// const MyLibraryPage = () => {
+//   const [books, setBooks] = useState([]);
+//   const [loading, setLoading] = useState(true);
+
+//   const fetchLibrary = async () => {
+//     const token = localStorage.getItem("token");
+
+//     const res = await axios.get(`${API_URL}/book/my-library`, {
+//       headers: {
+//         Authorization: `Bearer ${token}`,
+//       },
+//     });
+
+//     setBooks(res.data.books);
+//     console.log(res.data.books);
+
+//     setLoading(false);
+//   };
+
+//   useEffect(() => {
+//     fetchLibrary();
+//   }, []);
+
+//   if (loading) {
+//     return (
+//       <div className="min-h-screen bg-[#0e1a1c] p-8">
+//         <div className="grid grid-cols-5 gap-5">
+//           {Array.from({ length: 10 }).map((_, i) => (
+//             <div key={i} className="animate-pulse bg-[#162428] rounded-2xl p-4">
+//               <div className="h-72 rounded-xl bg-[#20353a]" />
+//               <div className="h-4 bg-[#20353a] rounded mt-4" />
+//               <div className="h-4 bg-[#20353a] rounded w-1/2 mt-3" />
+//               <div className="h-10 bg-[#20353a] rounded-xl mt-6" />
+//             </div>
+//           ))}
+//         </div>
+//       </div>
+//     );
+//   }
+
+//   return (
+//     <div className="min-h-screen bg-[#0e1a1c] p-8">
+//       <div className="max-w-7xl mx-auto">
+//         <h1 className="text-4xl font-bold text-white mb-8">My Library</h1>
+
+//         {books.length === 0 ? (
+//           <div className="text-center py-24">
+//             <h2 className="text-2xl text-gray-300">No Ebooks Purchased</h2>
+
+//             <p className="text-gray-500 mt-3">
+//               Purchase an ebook to see it here.
+//             </p>
+//           </div>
+//         ) : (
+//           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+//             {books.map((book) => (
+//               <div
+//                 key={book._id}
+//                 className="bg-[#162428] rounded-2xl overflow-hidden border border-[#1f3a3e]"
+//               >
+//                 <img
+//                   src={`${API_URL}/${book.coverPhoto}`}
+//                   className="w-full h-72 object-cover"
+//                 />
+
+//                 <div className="p-4">
+//                   <h2 className="text-white font-semibold line-clamp-2">
+//                     {book.name}
+//                   </h2>
+
+//                   <p className="text-gray-400 text-sm mt-1">
+//                     {book.author?.[0]?.name}
+//                   </p>
+
+//                   <Link to={`/read/${book._id}`}>
+//                     <button className="mt-4 w-full py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 font-semibold">
+//                       Read Now
+//                     </button>
+//                   </Link>
+//                 </div>
+//               </div>
+//             ))}
+//           </div>
+//         )}
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default MyLibraryPage;
+
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { Link } from "react-router-dom";
+import { BookOpen, Library } from "lucide-react";
+import API_URL from "../../Constant";
+
+const MyLibraryPage = () => {
+  const [books, setBooks] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchLibrary = async () => {
+    try {
+      const token = localStorage.getItem("token");
+
+      const res = await axios.get(`${API_URL}/book/my-library`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      setBooks(res.data.books);
+    } catch (err) {
+      console.error("Failed to fetch library:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchLibrary();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#0e1a1c] p-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="h-9 w-56 bg-[#162428] rounded-lg animate-pulse mb-2" />
+          <div className="h-4 w-40 bg-[#162428] rounded-lg animate-pulse mb-10" />
+
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+            {Array.from({ length: 10 }).map((_, i) => (
+              <div
+                key={i}
+                className="animate-pulse bg-[#162428] rounded-2xl p-4 border border-[#1f3a3e]"
+              >
+                <div className="h-72 rounded-xl bg-[#20353a]" />
+                <div className="h-4 bg-[#20353a] rounded mt-4" />
+                <div className="h-4 bg-[#20353a] rounded w-1/2 mt-3" />
+                <div className="h-10 bg-[#20353a] rounded-xl mt-6" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-[#0e1a1c] p-8">
+      <div className="max-w-7xl mx-auto">
+        <div className="flex items-center justify-between mb-10">
+          <div>
+            <h1 className="text-4xl font-bold text-white tracking-tight">
+              My Library
+            </h1>
+            <p className="text-gray-500 mt-2 text-sm">
+              {books.length > 0
+                ? `${books.length} ${books.length === 1 ? "book" : "books"} in your collection`
+                : "Your personal ebook collection"}
+            </p>
+          </div>
+
+          <div className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-xl bg-[#162428] border border-[#1f3a3e]">
+            <Library className="w-5 h-5 text-emerald-500" />
+            <span className="text-white font-semibold">{books.length}</span>
+          </div>
+        </div>
+
+        {books.length === 0 ? (
+          <div className="flex flex-col items-center justify-center text-center py-20 bg-[#162428]/50 rounded-3xl border border-dashed border-[#1f3a3e]">
+            <div className="w-16 h-16 rounded-2xl bg-[#1f3a3e] flex items-center justify-center mb-6">
+              <BookOpen className="w-8 h-8 text-emerald-500" />
+            </div>
+
+            <h2 className="text-2xl font-semibold text-gray-200">
+              No Ebooks Purchased
+            </h2>
+
+            <p className="text-gray-500 mt-2 max-w-sm">
+              Purchase an ebook to see it here and start reading right away.
+            </p>
+
+            <Link to="/">
+              <button className="mt-8 px-6 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 transition-colors font-semibold text-white shadow-lg shadow-emerald-500/10 cursor-pointer">
+                Browse Ebooks
+              </button>
+            </Link>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+            {books.map((book) => (
+              <div
+                key={book._id}
+                className="group bg-[#162428] rounded-2xl overflow-hidden border border-[#1f3a3e] hover:border-emerald-500/40 transition-all duration-300 hover:shadow-xl hover:shadow-emerald-500/5 hover:-translate-y-1"
+              >
+                <div className="relative overflow-hidden">
+                  <img
+                    src={`${API_URL}/${book.coverPhoto}`}
+                    alt={book.name}
+                    className="w-full h-72 object-cover transition-transform duration-300 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                </div>
+
+                <div className="p-4">
+                  <h2 className="text-white font-semibold line-clamp-2 leading-snug min-h-[2.75rem]">
+                    {book.name}
+                  </h2>
+
+                  <p className="text-gray-400 text-sm mt-1 truncate">
+                    {book.author?.[0]?.name || "Unknown Author"}
+                  </p>
+
+                  <Link to={`/read/${book._id}`}>
+                    <button className="mt-4 w-full py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 active:scale-[0.98] transition-all font-semibold text-white flex items-center justify-center gap-2">
+                      <BookOpen className="w-4 h-4" />
+                      Read Now
+                    </button>
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default MyLibraryPage;

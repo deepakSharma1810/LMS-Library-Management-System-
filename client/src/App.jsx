@@ -36,6 +36,7 @@ import SearchPage from "./components/SearchPage/SearchPage";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 import CheckoutPage from "./components/CheckoutPage/CheckoutPage";
+import MyLibraryPage from "./components/MyLibrary/MyLibraryPage";
 
 const AppContent = () => {
   const location = useLocation();
@@ -84,6 +85,15 @@ const AppContent = () => {
           element={
             <ProtectedRoute>
               <OrderPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/my-library"
+          element={
+            <ProtectedRoute>
+              <MyLibraryPage />
             </ProtectedRoute>
           }
         />
