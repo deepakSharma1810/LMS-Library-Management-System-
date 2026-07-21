@@ -479,7 +479,12 @@ const readEbook = async (req, res) => {
 };
 
 const myLibrary = async (req, res) => {
-  const user = await User.findById(req.user.id).populate("ebookLibrary");
+  const user = await User.findById(req.user.id).populate({
+    path: "ebookLibrary",
+    populate: {
+      path: "author",
+    },
+  });
 
   res.json({
     success: true,
