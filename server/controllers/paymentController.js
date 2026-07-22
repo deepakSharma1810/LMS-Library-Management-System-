@@ -78,13 +78,20 @@ const verifyPayment = async (req, res) => {
       }
 
       //  Book type validation
-      if (
-        (book.bookType === "ebook" && item.bookType !== "ebook") ||
-        (book.bookType === "physical" && item.bookType !== "physical")
-      ) {
+      // if (
+      //   (book.bookType === "ebook" && item.bookType !== "ebook") ||
+      //   (book.bookType === "physical" && item.bookType !== "physical")
+      // ) {
+      //   return res.status(400).json({
+      //     success: false,
+      //     message: `${book.name} does not support ${item.bookType}`,
+      //   });
+      // }
+
+      if (!book.bookType.includes(item.bookType)) {
         return res.status(400).json({
           success: false,
-          message: `${book.name} does not support ${item.bookType}`,
+          message: `${book.name} doesn't support ${item.bookType}`,
         });
       }
 
@@ -128,11 +135,11 @@ const verifyPayment = async (req, res) => {
     const purchasedBooks = [];
 
     for (const item of validatedItems) {
-      const book = await Book.findById(item.book);
+      // const book = await Book.findById(item.book);
 
-      if (!book) continue;
+      // if (!book) continue;
 
-      if (book.bookType === "ebook" || item.bookType === "both") {
+      if (item.bookType === "ebook") {
         purchasedBooks.push(item.book);
       }
     }
@@ -175,30 +182,33 @@ const checkPurchase = async (req, res) => {
   try {
     const { items } = req.body;
 
-    // console.log("Items:", items);
-
     const user = await User.findById(req.user.id);
 
-    // console.log("User Library:", user.ebookLibrary);
-
     for (const item of items) {
-      // console.log("Checking:", item);
+      const book = await Book.findById(item.book);
 
-      if (item.bookType !== "ebook") continue;
-
-      const alreadyPurchased = user.ebookLibrary.some(
-        (id) => id.toString() === item.book._id,
-      );
-
-      // console.log("Already Purchased:", alreadyPurchased);
-
-      if (alreadyPurchased) {
-        const book = await Book.findById(item.book);
-
-        return res.status(400).json({
+      if (!book) {
+        return res.status(404).json({
           success: false,
-          message: `${book.name} ebook is already purchased.`,
+          message: "Book not found",
         });
+      }
+
+      if (item.bookType !== "ebook") {
+        continue;
+      }
+
+      if (book.bookType.includes("ebook")) {
+        const alreadyPurchased = user.ebookLibrary.some(
+          (id) => id.toString() === book._id.toString(),
+        );
+
+        if (alreadyPurchased) {
+          return res.status(400).json({
+            success: false,
+            message: `${book.name} ebook is already purchased.`,
+          });
+        }
       }
     }
 

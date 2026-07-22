@@ -123,6 +123,11 @@ const CheckoutPage = () => {
         },
       );
 
+      if (!purchaseCheck.data.success) {
+        setError(purchaseCheck.data.message);
+        return;
+      }
+
       const { data } = await axios.post(
         `${API_URL}/payment/create-order`,
         {
@@ -197,7 +202,8 @@ const CheckoutPage = () => {
 
       razorpay.open();
     } catch (err) {
-      console.log(err.response?.data?.message || "Something went wrong");
+      const message = err.response?.data?.message || "Something went wrong";
+      setError(message);
     }
   };
 
@@ -403,6 +409,9 @@ const CheckoutPage = () => {
                       <p className="font-medium text-sm text-[#dbf8fa] line-clamp-2">
                         {item.title || item.name}
                       </p>
+                      <p className="text-xs text-cyan-400 capitalize">
+                        {item.bookType}
+                      </p>
                       <p className="text-xs text-gray-400 mt-1">
                         Qty: {item.qty || 1}
                       </p>
@@ -432,8 +441,14 @@ const CheckoutPage = () => {
               </div>
             </div>
 
-            {error && (
+            {/* {error && (
               <div className="mt-2  text-red-400  text-sm">{error}</div>
+            )} */}
+
+            {error && (
+              <div className="mt-4 rounded-xl border border-red-500/40 bg-red-500/10 px-4 py-3">
+                <p className="text-red-400 font-medium">{error}</p>
+              </div>
             )}
 
             <button

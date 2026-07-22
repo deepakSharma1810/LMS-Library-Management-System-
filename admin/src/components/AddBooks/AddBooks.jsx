@@ -48,6 +48,7 @@ const AddBooks = () => {
   const [categories, setCategories] = useState([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [bookTypes, setBookTypes] = useState(["physical"]);
 
   // ================= FETCH =================
   const fetchAuthors = async () => {
@@ -130,9 +131,33 @@ const AddBooks = () => {
     if (!book.name || !book.author || !book.price || !book.mrp) {
       setError("Please fill all required fields");
       setLoading(false);
-      setTimeout(() => {
-        setError("");
-      }, 2000);
+      // setTimeout(() => {
+      //   setError("");
+      // }, 2000);
+      return;
+    }
+
+    if (bookTypes.length === 0) {
+      setError("Please select at least one book type");
+      setLoading(false);
+      return;
+    }
+
+    if (bookTypes.includes("ebook") && !pdf) {
+      setError("Please upload PDF for Ebook");
+      setLoading(false);
+      return;
+    }
+
+    if (bookTypes.includes("physical") && !book.stock) {
+      setError("Please enter stock for Physical Book");
+      setLoading(false);
+      return;
+    }
+
+    if (!image) {
+      setError("Please upload cover image");
+      setLoading(false);
       return;
     }
 
@@ -162,6 +187,7 @@ const AddBooks = () => {
 
       await axios.post(`${API_URL}/book`, {
         ...book,
+        bookType: bookTypes,
         coverPhoto: imagePath,
         actualPdf: pdfPath,
       });
@@ -183,6 +209,7 @@ const AddBooks = () => {
         isNew: false,
         isPopular: false,
       });
+      setBookTypes([]);
       setPdf(null);
       setImage(null);
       setPreview(null);
@@ -193,6 +220,16 @@ const AddBooks = () => {
       setLoading(false);
       if (err.response?.data?.message) setError(err.response.data.message);
       else setError("Failed to add book");
+    }
+  };
+
+  const handleBookType = (e) => {
+    const value = e.target.value;
+
+    if (e.target.checked) {
+      setBookTypes((prev) => [...prev, value]);
+    } else {
+      setBookTypes((prev) => prev.filter((x) => x !== value));
     }
   };
 
@@ -482,7 +519,7 @@ const AddBooks = () => {
                     Book Type
                   </label>
 
-                  <select
+                  {/* <select
                     name="bookType"
                     value={book.bookType}
                     onChange={handleChange}
@@ -502,7 +539,34 @@ const AddBooks = () => {
                     <option value="both" className="bg-[#132327] text-white">
                       Both (Physical + E-Book)
                     </option>
-                  </select>
+                  </select> */}
+                  <div className="grid grid-cols-2 gap-3 mt-5">
+                    <label className="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#0e1a1c]/60 border border-[#2c4449] cursor-pointer hover:border-amber-300/50 transition">
+                      <input
+                        type="checkbox"
+                        value="physical"
+                        checked={bookTypes.includes("physical")}
+                        onChange={handleBookType}
+                        className="w-4 h-4 accent-amber-300"
+                      />
+                      <span className="text-sm text-gray-200 font-medium">
+                        Physical
+                      </span>
+                    </label>
+
+                    <label className="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#0e1a1c]/60 border border-[#2c4449] cursor-pointer hover:border-amber-300/50 transition">
+                      <input
+                        type="checkbox"
+                        value="ebook"
+                        checked={bookTypes.includes("ebook")}
+                        onChange={handleBookType}
+                        className="w-4 h-4 accent-amber-300"
+                      />
+                      <span className="text-sm text-gray-200 font-medium">
+                        Ebook
+                      </span>
+                    </label>
+                  </div>
                 </div>
               </div>
             </div>
@@ -723,8 +787,12 @@ const AddBooks = () => {
                       <p className="text-[10px] uppercase text-gray-500">
                         Language
                       </p>
+
                       <p className="text-sm text-gray-200 font-semibold">
                         {book.language || "—"}
+                      </p>
+                      <p className="text-xs text-gray-400 mt-2">
+                        {bookTypes.join(" + ")}
                       </p>
                     </div>
                     <div>

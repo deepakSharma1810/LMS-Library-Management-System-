@@ -153,9 +153,23 @@ const SingleBookPage = () => {
 
   const handleAddToCart = () => {
     setShowCartModal(true);
-    if (book.bookType === "physical") {
+    // if (book.bookType === "physical") {
+    //   addToCart("physical");
+    // } else if (book.bookType === "ebook") {
+    //   addToCart("ebook");
+    // } else {
+    //   setShowCartModal(true);
+    // }
+
+    if (
+      book.bookType.includes("physical") &&
+      !book.bookType.includes("ebook")
+    ) {
       addToCart("physical");
-    } else if (book.bookType === "ebook") {
+    } else if (
+      book.bookType.includes("ebook") &&
+      !book.bookType.includes("physical")
+    ) {
       addToCart("ebook");
     } else {
       setShowCartModal(true);
@@ -207,8 +221,8 @@ const SingleBookPage = () => {
         product: {
           ...book,
           qty: 1,
-          // bookType: "ebook",
-          bookType: book.bookType,
+          bookType: "ebook",
+          // bookType: book.bookType,
           // purchaseType: "ebook",
         },
       },
@@ -229,8 +243,8 @@ const SingleBookPage = () => {
         product: {
           ...book,
           qty: 1,
-          // bookType: "physical",
-          bookType: book.bookType,
+          bookType: "physical",
+          // bookType: book.bookType,
           // purchaseType: "physical",
         },
       },
@@ -464,7 +478,7 @@ const SingleBookPage = () => {
               <div className="flex items-center gap-3 flex-wrap mt-1">
                 <button
                   onClick={() => setShowPurchaseModal(true)}
-                  className="px-5 py-2.5 bg-amber-400 text-black font-bold rounded-xl hover:bg-amber-500 transition text-sm"
+                  className="px-5 py-2.5 bg-amber-400 text-black font-bold rounded-xl hover:bg-amber-500 transition text-sm cursor-pointer"
                 >
                   Buy Now
                 </button>
@@ -477,7 +491,7 @@ const SingleBookPage = () => {
 
                 <button
                   onClick={handleReadBook}
-                  className="px-5 py-2.5 bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 font-semibold rounded-xl hover:bg-emerald-500/30 transition text-sm"
+                  className="px-5 py-2.5 bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 font-semibold rounded-xl hover:bg-emerald-500/30 transition text-sm cursor-pointer"
                 >
                   Read Book
                 </button>
@@ -487,7 +501,7 @@ const SingleBookPage = () => {
                   className={`px-5 py-2.5 rounded-xl border text-sm font-semibold transition ${
                     CartBtnText !== "Add to Cart"
                       ? "bg-[#2dd4e0]/10 border-[#2dd4e0]/30 text-[#2dd4e0]"
-                      : "bg-[#162428] border-[#1f3a3e] text-[#4a8a92] hover:border-[#2dd4e0]/30 hover:text-[#2dd4e0]"
+                      : "bg-[#162428] border-[#1f3a3e] text-[#4a8a92] hover:border-[#2dd4e0]/30 hover:text-[#2dd4e0] cursor-pointer"
                   }`}
                 >
                   <span className="flex items-center gap-1.5">
@@ -498,7 +512,7 @@ const SingleBookPage = () => {
 
                 <button
                   onClick={handleWishlist}
-                  className="ml-auto flex items-center gap-1.5 text-sm text-[#4a8a92] hover:text-[#6bbcc4] transition"
+                  className="ml-auto flex items-center gap-1.5 text-sm text-[#4a8a92] hover:text-[#6bbcc4] transition cursor-pointer"
                 >
                   <IoMdHeart
                     className={`text-xl transition ${isWishlisted ? "text-rose-400" : ""}`}
@@ -739,7 +753,8 @@ const SingleBookPage = () => {
             </p>
 
             <div className="space-y-3">
-              {(book.bookType === "ebook" || book.bookType === "both") && (
+              {/* {(book.bookType === "ebook" || book.bookType === "both") && ( */}
+              {book.bookType.includes("ebook") && (
                 <div
                   onClick={() => {
                     handleOnlinePurchase();
@@ -767,7 +782,8 @@ const SingleBookPage = () => {
                 </div>
               )}
 
-              {(book.bookType === "physical" || book.bookType === "both") && (
+              {/* {(book.bookType === "physical" || book.bookType === "both") && ( */}
+              {book.bookType.includes("physical") && (
                 <div
                   onClick={() => {
                     handlePhysicalPurchase();
@@ -836,7 +852,8 @@ const SingleBookPage = () => {
 
             {/* Options */}
             <div className="space-y-3">
-              {(book.bookType === "ebook" || book.bookType === "both") && (
+              {/* {(book.bookType === "ebook" || book.bookType === "both") && ( */}
+              {book.bookType.includes("ebook") && (
                 <div
                   onClick={() => {
                     addToCart("ebook");
@@ -864,7 +881,8 @@ const SingleBookPage = () => {
                 </div>
               )}
 
-              {(book.bookType === "physical" || book.bookType === "both") && (
+              {/* {(book.bookType === "physical" || book.bookType === "both") && ( */}
+              {book.bookType.includes("physical") && (
                 <div
                   onClick={() => {
                     addToCart("physical");
@@ -892,9 +910,8 @@ const SingleBookPage = () => {
                 </div>
               )}
 
-              {book.bookType !== "ebook" &&
-                book.bookType !== "physical" &&
-                book.bookType !== "both" && (
+              {!book.bookType.includes("ebook") &&
+                !book.bookType.includes("physical") && (
                   <p className="text-center text-sm text-[#6E9BA3] py-6">
                     No formats available for this book right now.
                   </p>

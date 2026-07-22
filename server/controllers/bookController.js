@@ -39,13 +39,27 @@ const createBook = async (req, res) => {
       return res.status(400).json({ message: "Please fill all the feilds" });
     }
 
-    if ((bookType === "ebook" || bookType === "both") && !actualPdf) {
+    // if ((bookType === "ebook" || bookType === "both") && !actualPdf) {
+    //   return res.status(400).json({
+    //     message: "PDF file is required",
+    //   });
+    // }
+
+    // if ((bookType === "physical" || bookType === "both") && stock == null) {
+    //   return res.status(400).json({
+    //     message: "Stock is required",
+    //   });
+    // }
+
+    const types = Array.isArray(bookType) ? bookType : JSON.parse(bookType);
+
+    if (types.includes("ebook") && !actualPdf) {
       return res.status(400).json({
         message: "PDF file is required",
       });
     }
 
-    if ((bookType === "physical" || bookType === "both") && stock == null) {
+    if (types.includes("physical") && stock == null) {
       return res.status(400).json({
         message: "Stock is required",
       });
@@ -82,12 +96,13 @@ const createBook = async (req, res) => {
       mrp,
       coverPhoto,
       actualPdf,
-      bookType:
-        bookType === "ebook"
-          ? "ebook"
-          : bookType === "both"
-            ? "both"
-            : "physical",
+      // bookType:
+      //   bookType === "ebook"
+      //     ? "ebook"
+      //     : bookType === "both"
+      //       ? "both"
+      //       : "physical",
+      bookType: Array.isArray(bookType) ? bookType : JSON.parse(bookType),
       description,
       rating,
       reviews,
@@ -313,21 +328,35 @@ const updateBook = async (req, res) => {
       }
     }
 
-    if (
-      (bookType === "ebook" || bookType === "both") &&
-      !actualPdf &&
-      !existingBook.actualPdf
-    ) {
+    // if (
+    //   (bookType === "ebook" || bookType === "both") &&
+    //   !actualPdf &&
+    //   !existingBook.actualPdf
+    // ) {
+    //   return res.status(400).json({
+    //     message: "PDF is required",
+    //   });
+    // }
+
+    const types = Array.isArray(bookType) ? bookType : JSON.parse(bookType);
+
+    if (types.includes("ebook") && !actualPdf) {
       return res.status(400).json({
-        message: "PDF is required",
+        message: "PDF file is required",
       });
     }
 
-    if (
-      (bookType === "physical" || bookType === "both") &&
-      stock == null &&
-      existingBook.stock == null
-    ) {
+    // if (
+    //   (bookType === "physical" || bookType === "both") &&
+    //   stock == null &&
+    //   existingBook.stock == null
+    // ) {
+    //   return res.status(400).json({
+    //     message: "Stock is required",
+    //   });
+    // }
+
+    if (types.includes("physical") && stock == null) {
       return res.status(400).json({
         message: "Stock is required",
       });
@@ -340,7 +369,17 @@ const updateBook = async (req, res) => {
     existingBook.mrp = mrp || existingBook.mrp;
     existingBook.coverPhoto = coverPhoto || existingBook.coverPhoto;
     existingBook.actualPdf = actualPdf || existingBook.actualPdf;
-    existingBook.bookType = bookType || existingBook.bookType;
+
+    // existingBook.bookType = bookType || existingBook.bookType;
+    // existingBook.bookType = Array.isArray(bookType)
+    //   ? bookType
+    //   : JSON.parse(bookType);
+
+    existingBook.bookType = bookType
+      ? Array.isArray(bookType)
+        ? bookType
+        : JSON.parse(bookType)
+      : existingBook.bookType;
     existingBook.description = description || existingBook.description;
     existingBook.rating = rating ?? existingBook.rating;
     existingBook.reviews = reviews ?? existingBook.reviews;
@@ -446,7 +485,8 @@ const readEbook = async (req, res) => {
       });
     }
 
-    if (book.bookType === "physical") {
+    // if (book.bookType === "physical") {
+    if (!book.bookType.includes("ebook")) {
       return res.status(400).json({
         success: false,
         message: "This is a physical book.",

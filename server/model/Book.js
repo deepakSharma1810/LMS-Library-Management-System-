@@ -94,9 +94,9 @@ const bookSchema = new mongoose.Schema(
     ],
 
     bookType: {
-      type: String,
-      enum: ["physical", "ebook", "both"],
-      default: "physical",
+      type: [String],
+      enum: ["physical", "ebook"],
+      default: ["physical"],
       required: true,
     },
 
