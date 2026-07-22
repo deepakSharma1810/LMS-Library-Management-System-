@@ -355,6 +355,7 @@ const Navbar = () => {
             { label: "Books", path: "/books" },
             { label: "Authors", path: "/authors" },
             { label: "Cart", path: "/cart" },
+            { label: "My Library", path: "/my-library" },
             { label: "Notifications", path: "/notifications" },
           ].map(({ label, path }) => (
             <Link
