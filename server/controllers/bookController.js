@@ -170,6 +170,7 @@ const readAllBook = async (req, res) => {
 
     // MAIN BOOKS (with search + type)
     let booksQuery = Book.find(filter).populate("author");
+    // .populate("categories", "name");
 
     if (type === "new") {
       booksQuery = booksQuery.sort({ createdAt: -1 }).limit(10);
@@ -191,6 +192,7 @@ const readAllBook = async (req, res) => {
         isPopular: true,
       })
         .populate("author")
+        // .populate("categories", "name")
         .limit(6);
 
       latest = await Book.find({
@@ -199,6 +201,7 @@ const readAllBook = async (req, res) => {
       })
         .sort({ createdAt: -1 })
         .populate("author")
+        // .populate("categories", "name")
         .limit(6);
     }
 
@@ -217,6 +220,7 @@ const readBook = async (req, res) => {
   try {
     const { id } = req.params;
     const getBook = await Book.findById(id).populate("author");
+    // .populate("categories");
     if (!getBook) {
       return res.status(404).json({ message: "Book not found" });
     }
@@ -229,16 +233,10 @@ const readBook = async (req, res) => {
 
 const readBookByAuthor = async (req, res) => {
   try {
-    // const { name } = req.body;
-    // const books = await Book.findOne({ authorName: name });
-    // if (!books) {
-    //   return res.status(404).json({ message: "Book not found" });
-    // }
-    // res.status(200).json({ message: "Book Successfully found" });
-
     const { authorId } = req.params;
 
     const books = await Book.find({ author: authorId }).populate("author");
+    // .populate("categories", "name");
 
     if (!books.length) {
       return res.status(404).json({
@@ -328,16 +326,6 @@ const updateBook = async (req, res) => {
       }
     }
 
-    // if (
-    //   (bookType === "ebook" || bookType === "both") &&
-    //   !actualPdf &&
-    //   !existingBook.actualPdf
-    // ) {
-    //   return res.status(400).json({
-    //     message: "PDF is required",
-    //   });
-    // }
-
     const types = Array.isArray(bookType) ? bookType : JSON.parse(bookType);
 
     if (types.includes("ebook") && !actualPdf) {
@@ -345,16 +333,6 @@ const updateBook = async (req, res) => {
         message: "PDF file is required",
       });
     }
-
-    // if (
-    //   (bookType === "physical" || bookType === "both") &&
-    //   stock == null &&
-    //   existingBook.stock == null
-    // ) {
-    //   return res.status(400).json({
-    //     message: "Stock is required",
-    //   });
-    // }
 
     if (types.includes("physical") && stock == null) {
       return res.status(400).json({
@@ -369,11 +347,6 @@ const updateBook = async (req, res) => {
     existingBook.mrp = mrp || existingBook.mrp;
     existingBook.coverPhoto = coverPhoto || existingBook.coverPhoto;
     existingBook.actualPdf = actualPdf || existingBook.actualPdf;
-
-    // existingBook.bookType = bookType || existingBook.bookType;
-    // existingBook.bookType = Array.isArray(bookType)
-    //   ? bookType
-    //   : JSON.parse(bookType);
 
     existingBook.bookType = bookType
       ? Array.isArray(bookType)
@@ -521,9 +494,15 @@ const readEbook = async (req, res) => {
 const myLibrary = async (req, res) => {
   const user = await User.findById(req.user.id).populate({
     path: "ebookLibrary",
-    populate: {
-      path: "author",
-    },
+    populate: [
+      {
+        path: "author",
+      },
+      // {
+      //   path: "categories",
+      //   select: "name",
+      // },
+    ],
   });
 
   res.json({

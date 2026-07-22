@@ -115,6 +115,7 @@ const MyLibraryPage = () => {
       });
 
       setBooks(res.data.books);
+      console.log(res.data.books);
     } catch (err) {
       console.error("Failed to fetch library:", err);
     } finally {
@@ -193,36 +194,70 @@ const MyLibraryPage = () => {
             </Link>
           </div>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
             {books.map((book) => (
-              <div
-                key={book._id}
-                className="group bg-[#162428] rounded-2xl overflow-hidden border border-[#1f3a3e] hover:border-emerald-500/40 transition-all duration-300 hover:shadow-xl hover:shadow-emerald-500/5 hover:-translate-y-1"
-              >
-                <div className="relative overflow-hidden">
-                  <img
-                    src={`${API_URL}/${book.coverPhoto}`}
-                    alt={book.name}
-                    className="w-full h-72 object-cover transition-transform duration-300 group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                </div>
-
-                <div className="p-4">
-                  <h2 className="text-white font-semibold line-clamp-2 leading-snug min-h-[2.75rem]">
-                    {book.name}
-                  </h2>
-
-                  <p className="text-gray-400 text-sm mt-1 truncate">
-                    {book.author?.[0]?.name || "Unknown Author"}
-                  </p>
-
+              <div key={book._id} className="group">
+                <div className="bg-[#122125] border border-white/5 hover:border-emerald-400/20 rounded-xl overflow-hidden shadow-lg hover:shadow-emerald-500/10 transition-all duration-300 hover:-translate-y-0.5">
+                  {/* Cover */}
                   <Link to={`/read/${book._id}`}>
-                    <button className="mt-4 w-full py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 active:scale-[0.98] transition-all font-semibold text-white flex items-center justify-center gap-2">
-                      <BookOpen className="w-4 h-4" />
-                      Read Now
-                    </button>
+                    <div className="relative overflow-hidden">
+                      <img
+                        src={`${API_URL}/${book.coverPhoto}`}
+                        alt={book.name}
+                        className="w-full h-44 sm:h-52 object-cover transition-transform duration-300"
+                      />
+
+                      {/* <div className="absolute top-2 left-2">
+                        <span className="bg-emerald-500 text-white text-[10px] font-semibold px-2 py-1 rounded-full">
+                          Ebook
+                        </span>
+                      </div> */}
+                    </div>
                   </Link>
+
+                  {/* Content */}
+                  <div className="px-3 py-3 flex flex-col gap-2">
+                    {/* Title + Price */}
+                    <div className="flex justify-between items-start gap-2">
+                      <h3 className="text-sm font-semibold text-white line-clamp-2 leading-snug group-hover:text-emerald-400 transition-colors">
+                        {book.name}
+                      </h3>
+
+                      <span className="text-xs font-bold text-emerald-400 whitespace-nowrap bg-emerald-500/10 px-2 py-0.5 rounded-full">
+                        ₹{book.price}
+                      </span>
+                    </div>
+
+                    {/* Author */}
+                    <p className="text-xs text-gray-400 truncate">
+                      by {book.author?.[0]?.name || "Unknown Author"}
+                    </p>
+
+                    {/* Categories */}
+                    <div className="flex flex-wrap gap-1">
+                      {book.categories?.length ? (
+                        book.categories.slice(0, 2).map((cat, index) => (
+                          <span
+                            key={index}
+                            className="text-[10px] px-2 py-0.5 rounded-full bg-[#1b3338] text-emerald-400 border border-emerald-400/20"
+                          >
+                            {cat.name || cat}
+                          </span>
+                        ))
+                      ) : (
+                        <span className="text-[10px] text-gray-500">
+                          No Category
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Button */}
+                    <Link to={`/read/${book._id}`} className="mt-2">
+                      <button className="w-full py-2 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-medium transition-all duration-300 cursor-pointer">
+                        Read Now
+                      </button>
+                    </Link>
+                  </div>
                 </div>
               </div>
             ))}

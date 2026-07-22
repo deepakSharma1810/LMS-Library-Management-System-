@@ -326,29 +326,11 @@ const MainPage = () => {
       <div className="w-full flex flex-col lg:flex-row gap-8 px-4 md:px-8 py-8">
         {/* ── LEFT ── */}
         <div className="w-full lg:w-3/5 flex flex-col gap-10">
-          {/* <div className="flex justify-between items-center">
-            <p className="text-xl sm:text-2xl font-bold text-[#dbf8fa]">
-              Previous Reading
-            </p>
-            <div className="flex items-center gap-2 cursor-pointer group">
-              <p className="text-sm text-yellow-300 group-hover:text-yellow-400 transition-colors">
-                Filter
-              </p>
-              <RiEqualizerFill className="text-yellow-300 group-hover:text-yellow-400 rotate-90 transition-colors" />
-            </div>
-          </div> */}
-          {/* Previous Reading */}
           <div className="w-full px-4">
             <div className="flex justify-between items-center mb-5">
               <p className="text-xl sm:text-2xl font-bold text-[#dbf8fa]">
                 Previous Reading
               </p>
-              <div className="flex items-center gap-2 cursor-pointer group">
-                <p className="text-sm text-yellow-300 group-hover:text-yellow-400 transition-colors">
-                  Filter
-                </p>
-                <RiEqualizerFill className="text-yellow-300 group-hover:text-yellow-400 rotate-90 transition-colors" />
-              </div>
             </div>
 
             <Slider {...settings}>

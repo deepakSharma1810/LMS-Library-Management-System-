@@ -67,6 +67,11 @@ const BookPage = () => {
   const [search, setSearch] = useState("");
   const [error, setError] = useState(false);
 
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [selectedType, setSelectedType] = useState("");
+  const [selectedLanguage, setSelectedLanguage] = useState("");
+  const [sortBy, setSortBy] = useState("");
+
   const fetchBook = async () => {
     try {
       setLoading(true);
@@ -86,36 +91,122 @@ const BookPage = () => {
     fetchBook();
   }, []);
 
-  const filtered = books?.books?.filter((b) =>
-    b.name.toLowerCase().includes(search.toLowerCase()),
-  );
+  const categories = [
+    ...new Set(books?.books?.map((b) => b.category).filter(Boolean)),
+  ];
+
+  const languages = [
+    ...new Set(books?.books?.map((b) => b.language).filter(Boolean)),
+  ];
+
+  const filtered = books?.books
+    ?.filter((book) => {
+      const matchesSearch = book.name
+        .toLowerCase()
+        .includes(search.toLowerCase());
+
+      const matchesCategory =
+        !selectedCategory || book.category === selectedCategory;
+
+      const matchesType =
+        !selectedType || book.bookType?.includes(selectedType);
+
+      const matchesLanguage =
+        !selectedLanguage || book.language === selectedLanguage;
+
+      return matchesSearch && matchesCategory && matchesType && matchesLanguage;
+    })
+    ?.sort((a, b) => {
+      switch (sortBy) {
+        case "nameAsc":
+          return a.name.localeCompare(b.name);
+
+        case "nameDesc":
+          return b.name.localeCompare(a.name);
+
+        case "priceLow":
+          return a.price - b.price;
+
+        case "priceHigh":
+          return b.price - a.price;
+
+        case "newest":
+          return new Date(b.createdAt) - new Date(a.createdAt);
+
+        default:
+          return 0;
+      }
+    });
 
   return (
     <div className="w-full min-h-screen bg-[#0e1a1c] px-4 md:px-10 py-10">
       <div className="max-w-6xl mx-auto mb-10">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h2 className="text-3xl font-bold text-[#dbf8fa] tracking-tight">
-              All Books
-            </h2>
+        <div className="space-y-6">
+          {/* Top Header */}
+          <div className="flex  md:flex-row md:items-center md:justify-between gap-5">
+            {/* Left */}
+            <div>
+              <h2 className="text-2xl sm:text-3xl font-bold text-[#dbf8fa] tracking-tight">
+                All Books
+              </h2>
 
-            {!loading && books && (
-              <p className="text-sm text-[#4a8a92] mt-1">
-                {filtered?.length ?? 0} titles available
-              </p>
-            )}
-          </div>
+              {!loading && books && (
+                <p className="mt-1 text-sm text-[#6b9197]">
+                  {filtered?.length ?? 0}{" "}
+                  {filtered?.length === 1 ? "title" : "titles"} available
+                </p>
+              )}
+            </div>
 
-          <div className="relative w-full sm:w-64">
-            <IoSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-[#4a8a92] text-base" />
+            {/* Filters */}
+            <div className="flex flex-wrap gap-3">
+              {/* Search */}
+              <div className="relative w-full md:w-72">
+                <IoSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-[#4a8a92]" />
 
-            <input
-              type="text"
-              placeholder="Search books..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-[#162428] border border-[#1f3a3e] text-[#dbf8fa] placeholder-[#4a8a92] text-sm rounded-xl pl-9 pr-4 py-2.5 outline-none focus:border-amber-300/40 focus:ring-1 focus:ring-amber-300/20 transition"
-            />
+                <input
+                  type="text"
+                  placeholder="Search books..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="w-full bg-[#162428] border border-[#2c4449] rounded-xl pl-10 pr-4 py-3 text-white placeholder:text-[#6b9197] focus:border-amber-300/50 focus:ring-2 focus:ring-amber-300/20 outline-none transition"
+                />
+              </div>
+
+              <select
+                value={selectedType}
+                onChange={(e) => setSelectedType(e.target.value)}
+                className="bg-[#162428] border border-[#2c4449] rounded-xl px-4 py-3 text-white  cursor-pointer"
+              >
+                <option value="">Book Type</option>
+                <option value="ebook">Ebook</option>
+                <option value="physical">Physical</option>
+              </select>
+
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="bg-[#162428] border border-[#2c4449] rounded-xl px-4 py-3 text-white  cursor-pointer"
+              >
+                <option value="">Sort By</option>
+                <option value="newest">Newest</option>
+                <option value="nameAsc">A-Z</option>
+                <option value="nameDesc">Z-A</option>
+                <option value="priceLow">Price: Low → High</option>
+                <option value="priceHigh">Price: High → Low</option>
+              </select>
+
+              <button
+                onClick={() => {
+                  setSearch("");
+                  setSelectedType("");
+                  setSortBy("");
+                }}
+                className="px-5 py-3 rounded-xl bg-red-500 hover:bg-red-600 text-white font-medium transition cursor-pointer"
+              >
+                Clear
+              </button>
+            </div>
           </div>
         </div>
       </div>

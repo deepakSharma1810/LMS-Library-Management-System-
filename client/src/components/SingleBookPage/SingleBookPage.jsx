@@ -78,6 +78,7 @@ const SingleBookPage = () => {
   const [reviewLoading, setReviewLoading] = useState(false);
 
   const [showCartModal, setShowCartModal] = useState(false);
+  const [readError, setReadError] = useState("");
 
   const fetchSingleBook = async (showLoader = true) => {
     try {
@@ -153,13 +154,6 @@ const SingleBookPage = () => {
 
   const handleAddToCart = () => {
     setShowCartModal(true);
-    // if (book.bookType === "physical") {
-    //   addToCart("physical");
-    // } else if (book.bookType === "ebook") {
-    //   addToCart("ebook");
-    // } else {
-    //   setShowCartModal(true);
-    // }
 
     if (
       book.bookType.includes("physical") &&
@@ -300,6 +294,8 @@ const SingleBookPage = () => {
       return;
     }
 
+    setReadError("");
+
     try {
       const res = await axios.get(`${API_URL}/book/read/${book._id}`, {
         headers: {
@@ -311,7 +307,10 @@ const SingleBookPage = () => {
         navigate(`/read/${book._id}`);
       }
     } catch (err) {
-      console.log(err.response?.data?.message || "Access denied");
+      setReadError(
+        err.response?.data?.message ||
+          "Unable to read this book without purchase",
+      );
     }
   };
 
@@ -473,6 +472,12 @@ const SingleBookPage = () => {
                     </div>
                   ))}
               </div>
+
+              {readError && (
+                <div className="w-full rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+                  {readError}
+                </div>
+              )}
 
               {/* Action Buttons */}
               <div className="flex items-center gap-3 flex-wrap mt-1">
