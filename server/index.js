@@ -1,5 +1,5 @@
+const path = require("path");
 const dotenv = require("dotenv");
-// dotenv.config("./.env");
 dotenv.config();
 
 const { verifySMTP } = require("./utils/mail");
@@ -17,15 +17,34 @@ const app = express();
 // DB connection
 const connection = require("./config/connection");
 
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:5174",
+  "https://library-ms-client.netlify.app",
+];
+
+app.use(
+  cors({
+    origin(origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
+  }),
+);
+
 // middleware
 app.use(
   "/uploads",
-  cors({ origin: "http://localhost:5173" }),
+  // cors({ origin: "http://localhost:5173" }),
   // express.static("uploads"),
   express.static(path.join(__dirname, "uploads")),
 );
 app.use(bodyParser.json());
-app.use(cors());
+// app.use(cors());
 app.use(express.json());
 
 // Routes
