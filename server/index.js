@@ -21,7 +21,8 @@ const connection = require("./config/connection");
 app.use(
   "/uploads",
   cors({ origin: "http://localhost:5173" }),
-  express.static("uploads"),
+  // express.static("uploads"),
+  express.static(path.join(__dirname, "uploads")),
 );
 app.use(bodyParser.json());
 app.use(cors());
