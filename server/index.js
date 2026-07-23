@@ -79,7 +79,11 @@ const server = http.createServer(app);
 // SOCKET INIT
 const io = new Server(server, {
   cors: {
-    origin: ["http://localhost:5173", "http://localhost:5174"],
+    origin: [
+      "http://localhost:5173",
+      "http://localhost:5174",
+      "https://library-ms-client.netlify.app",
+    ],
     methods: ["GET", "POST", "PATCH", "DELETE"],
   },
 });
