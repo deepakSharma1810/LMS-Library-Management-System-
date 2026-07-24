@@ -2,50 +2,38 @@ const path = require("path");
 const dotenv = require("dotenv");
 dotenv.config();
 
-const { verifySMTP } = require("./utils/mail");
-verifySMTP();
-
 const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
-
 const http = require("http");
 const { Server } = require("socket.io");
+
+const { verifySMTP } = require("./utils/mail");
+verifySMTP();
 
 const app = express();
 
 // DB connection
 const connection = require("./config/connection");
 
-const allowedOrigins = [
-  "http://localhost:5173",
-  "http://localhost:5174",
-  "https://library-ms-client.netlify.app",
-];
+// ================= CORS =================
+const corsOptions = require("./config/corsOptions");
 
-app.use(
-  cors({
-    origin(origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
-    credentials: true,
-  }),
-);
+app.use(cors(corsOptions));
+
+// Handle Preflight Requests
+app.options("*", cors(corsOptions));
 
 // middleware
+app.use(bodyParser.json());
+app.use(express.json());
+
+// Static Uploads
 app.use(
   "/uploads",
-  // cors({ origin: "http://localhost:5173" }),
-  // express.static("uploads"),
+  cors(corsOptions),
   express.static(path.join(__dirname, "uploads")),
 );
-app.use(bodyParser.json());
-// app.use(cors());
-app.use(express.json());
 
 // Routes
 const authRoutes = require("./routes/authRoutes");
@@ -79,12 +67,9 @@ const server = http.createServer(app);
 // SOCKET INIT
 const io = new Server(server, {
   cors: {
-    origin: [
-      "http://localhost:5173",
-      "http://localhost:5174",
-      "https://library-ms-client.netlify.app",
-    ],
-    methods: ["GET", "POST", "PATCH", "DELETE"],
+    origin: require("./config/whitelist"),
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+    credentials: true,
   },
 });
 
