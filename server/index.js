@@ -22,7 +22,7 @@ const corsOptions = require("./config/corsOptions");
 app.use(cors(corsOptions));
 
 // Handle Preflight Requests
-app.options("*", cors(corsOptions));
+app.options("/.*/", cors(corsOptions));
 
 // middleware
 app.use(bodyParser.json());
