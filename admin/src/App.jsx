@@ -18,7 +18,6 @@ import Navbar from "./components/Navbar/Navbar";
 import ScrollOnTop from "./components/ScrollOnTop";
 import Category from "./components/Categorys/Category";
 import AddCategory from "./components/AddCategory/AddCategory";
-import NotificationPage from "../../client/src/components/NotificationPage/NotificationPage";
 
 const App = () => {
   const [isOpen, setIsOpen] = useState(true);
