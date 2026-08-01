@@ -44,7 +44,7 @@ const BookRow = ({ book, onNavigate }) => {
         )}
 
         <img
-          src={`${API_URL}/${book.coverPhoto}`}
+          src={`${book.coverPhoto}`}
           alt={book.name}
           onLoad={() => setImgLoaded(true)}
           className={`w-full h-full object-cover group-hover:scale-105 transition-all duration-300 ${
@@ -127,7 +127,7 @@ const BookCard = ({ book, onNavigate }) => {
         )}
 
         <img
-          src={`${API_URL}/${book.coverPhoto}`}
+          src={`${book.coverPhoto}`}
           alt={book.name}
           onLoad={() => setImgLoaded(true)}
           className={`w-full h-full object-cover group-hover:scale-105 transition-all duration-300 ${

@@ -1,99 +1,3 @@
-// import React, { useEffect, useState } from "react";
-// import axios from "axios";
-// import { Link } from "react-router-dom";
-// import API_URL from "../../Constant";
-
-// const MyLibraryPage = () => {
-//   const [books, setBooks] = useState([]);
-//   const [loading, setLoading] = useState(true);
-
-//   const fetchLibrary = async () => {
-//     const token = localStorage.getItem("token");
-
-//     const res = await axios.get(`${API_URL}/book/my-library`, {
-//       headers: {
-//         Authorization: `Bearer ${token}`,
-//       },
-//     });
-
-//     setBooks(res.data.books);
-//     console.log(res.data.books);
-
-//     setLoading(false);
-//   };
-
-//   useEffect(() => {
-//     fetchLibrary();
-//   }, []);
-
-//   if (loading) {
-//     return (
-//       <div className="min-h-screen bg-[#0e1a1c] p-8">
-//         <div className="grid grid-cols-5 gap-5">
-//           {Array.from({ length: 10 }).map((_, i) => (
-//             <div key={i} className="animate-pulse bg-[#162428] rounded-2xl p-4">
-//               <div className="h-72 rounded-xl bg-[#20353a]" />
-//               <div className="h-4 bg-[#20353a] rounded mt-4" />
-//               <div className="h-4 bg-[#20353a] rounded w-1/2 mt-3" />
-//               <div className="h-10 bg-[#20353a] rounded-xl mt-6" />
-//             </div>
-//           ))}
-//         </div>
-//       </div>
-//     );
-//   }
-
-//   return (
-//     <div className="min-h-screen bg-[#0e1a1c] p-8">
-//       <div className="max-w-7xl mx-auto">
-//         <h1 className="text-4xl font-bold text-white mb-8">My Library</h1>
-
-//         {books.length === 0 ? (
-//           <div className="text-center py-24">
-//             <h2 className="text-2xl text-gray-300">No Ebooks Purchased</h2>
-
-//             <p className="text-gray-500 mt-3">
-//               Purchase an ebook to see it here.
-//             </p>
-//           </div>
-//         ) : (
-//           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-//             {books.map((book) => (
-//               <div
-//                 key={book._id}
-//                 className="bg-[#162428] rounded-2xl overflow-hidden border border-[#1f3a3e]"
-//               >
-//                 <img
-//                   src={`${API_URL}/${book.coverPhoto}`}
-//                   className="w-full h-72 object-cover"
-//                 />
-
-//                 <div className="p-4">
-//                   <h2 className="text-white font-semibold line-clamp-2">
-//                     {book.name}
-//                   </h2>
-
-//                   <p className="text-gray-400 text-sm mt-1">
-//                     {book.author?.[0]?.name}
-//                   </p>
-
-//                   <Link to={`/read/${book._id}`}>
-//                     <button className="mt-4 w-full py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 font-semibold">
-//                       Read Now
-//                     </button>
-//                   </Link>
-//                 </div>
-//               </div>
-//             ))}
-//           </div>
-//         )}
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default MyLibraryPage;
-
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
@@ -202,7 +106,7 @@ const MyLibraryPage = () => {
                   <Link to={`/read/${book._id}`}>
                     <div className="relative overflow-hidden">
                       <img
-                        src={`${API_URL}/${book.coverPhoto}`}
+                        src={`${book.coverPhoto}`}
                         alt={book.name}
                         className="w-full h-44 sm:h-52 object-cover transition-transform duration-300"
                       />

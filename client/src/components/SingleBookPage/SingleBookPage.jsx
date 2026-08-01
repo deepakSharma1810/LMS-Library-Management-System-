@@ -361,7 +361,7 @@ const SingleBookPage = () => {
                   <div className="absolute inset-0 bg-[#1f3338] animate-pulse" />
                 )}
                 <img
-                  src={`${API_URL}/${book.coverPhoto}`}
+                  src={`${book.coverPhoto}`}
                   alt={book.name}
                   onLoad={() => setImgLoaded(true)}
                   className={`w-full h-full object-cover transition-opacity duration-500 ${imgLoaded ? "opacity-100" : "opacity-0"}`}

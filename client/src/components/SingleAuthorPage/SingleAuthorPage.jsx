@@ -118,7 +118,7 @@ const SingleAuthorPage = () => {
                       <div className="absolute inset-0 bg-[#1f3338] animate-pulse" />
                     )}
                     <img
-                      src={`${API_URL}/${author.coverPhoto}`}
+                      src={`${author.coverPhoto}`}
                       alt={author.name}
                       onLoad={() => setImgLoaded(true)}
                       onError={() => setImgError(true)}

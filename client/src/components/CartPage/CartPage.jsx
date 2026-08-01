@@ -38,7 +38,7 @@ const CartItem = ({ item, onUpdate, onRemove }) => {
           <div className="absolute inset-0 bg-[#1f3338] animate-pulse" />
         )}
         <img
-          src={`${API_URL}/${item.coverPhoto}`}
+          src={`${item.coverPhoto}`}
           alt={item.name}
           onLoad={() => setImgLoaded(true)}
           className={`w-full h-full object-cover transition-opacity duration-300 ${imgLoaded ? "opacity-100" : "opacity-0"}`}

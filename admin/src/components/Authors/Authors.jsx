@@ -172,7 +172,7 @@ const Authors = () => {
                 <td className="flex items-center gap-3 py-2">
                   <span className="md:hidden text-gray-400 w-16">Name</span>
                   <img
-                    src={`${API_URL}/${author.coverPhoto}`}
+                    src={`${author.coverPhoto}`}
                     className="w-10 h-10 rounded"
                     alt=""
                   />

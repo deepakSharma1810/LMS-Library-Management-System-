@@ -235,8 +235,7 @@ const Books = () => {
               <tr key={book._id} className="border-b border-[#2c4449]">
                 <td className="py-2 flex items-center gap-3">
                   <img
-                    src={`
-                      ${API_URL}/${book.coverPhoto}`}
+                    src={`${book.coverPhoto}`}
                     alt={book.name}
                     className="w-10 h-10 rounded object-cover border border-[#2c4449]"
                   />

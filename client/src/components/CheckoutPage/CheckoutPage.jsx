@@ -398,7 +398,7 @@ const CheckoutPage = () => {
                       src={
                         item.image ||
                         (item.coverPhoto
-                          ? `${API_URL}/${item.coverPhoto.replace(/\\/g, "/")}`
+                          ? `${item.coverPhoto}`
                           : "/no-image.png")
                       }
                       alt={item.title || item.name}

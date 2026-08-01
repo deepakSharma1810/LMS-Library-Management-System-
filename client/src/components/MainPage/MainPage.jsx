@@ -340,7 +340,7 @@ const MainPage = () => {
                     <Link to={`/book/${book._id}`}>
                       <div className="relative overflow-hidden">
                         <img
-                          src={`${API_URL}/${book.coverPhoto}`}
+                          src={`${book.coverPhoto}`}
                           alt={book.name}
                           className="w-full h-44 object-cover group-hover:scale-105 transition-transform duration-300"
                         />
@@ -441,7 +441,7 @@ const MainPage = () => {
                   <div className="min-w-[140px] sm:min-w-[158px] lg:min-w-[138px] flex-shrink-0 group hover:border-amber-300/20 rounded-xl hover:shadow-md hover:shadow-amber-300/8 transition-all duration-300 group cursor-pointer border border-white/5 overflow-hidden">
                     <div className="relative overflow-hidden">
                       <img
-                        src={`${API_URL}/${book.coverPhoto}`}
+                        src={`${book.coverPhoto}`}
                         alt={book.name}
                         className="w-full h-[140px] object-cover group-hover:scale-105 transition-transform duration-300"
                       />
@@ -487,7 +487,7 @@ const MainPage = () => {
                   <div className=" bg-[#122125] border border-white/5 hover:border-amber-300/20 rounded-xl overflow-hidden hover:-translate-y-1 hover:shadow-md hover:shadow-amber-300/10 transition-all duration-300 group cursor-pointer">
                     <div className="relative overflow-hidden">
                       <img
-                        src={`${API_URL}/${book.coverPhoto}`}
+                        src={`${book.coverPhoto}`}
                         alt={book.name}
                         className="w-full h-28 md:h-28 object-cover group-hover:scale-105 transition-transform duration-300"
                       />
@@ -525,7 +525,7 @@ const MainPage = () => {
                     <div className="flex justify-between items-start">
                       <div className="relative ">
                         <img
-                          src={`${API_URL}/${author.coverPhoto}`}
+                          src={`${author.coverPhoto}`}
                           alt={author.name}
                           className="w-12 h-12 rounded-full object-cover border-2 border-amber-300/30 group-hover:border-amber-300/60 transition-colors duration-200"
                         />

@@ -30,7 +30,7 @@ const BookCard = ({ book }) => {
           )}
 
           <img
-            src={`${API_URL}/${book.coverPhoto}`}
+            src={`${book.coverPhoto}`}
             alt={book.name}
             onLoad={() => setImgLoaded(true)}
             className={`w-full h-full object-cover transition-all duration-500 group-hover:scale-105 ${
