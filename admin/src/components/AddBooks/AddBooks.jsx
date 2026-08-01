@@ -166,8 +166,8 @@ const AddBooks = () => {
       let pdfPath = "";
 
       if (pdf) {
-        const formData = new FormData();
-        formData.append("pdf", pdf);
+        const pdfData = new FormData();
+        pdfData.append("pdf", pdf);
         const uploadPdf = await axios.post(`${API_URL}/upload-pdf`, pdfData);
         pdfPath = uploadPdf.data.file;
       }
