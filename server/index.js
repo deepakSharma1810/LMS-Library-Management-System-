@@ -1,10 +1,12 @@
-const path = require("path");
+// const path = require("path");
+
 const dotenv = require("dotenv");
 dotenv.config();
 
 const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
+
 const http = require("http");
 const { Server } = require("socket.io");
 
@@ -26,11 +28,11 @@ app.use(bodyParser.json());
 app.use(express.json());
 
 // Static Uploads
-app.use(
-  "/uploads",
-  cors(corsOptions),
-  express.static(path.join(__dirname, "uploads")),
-);
+// app.use(
+//   "/uploads",
+//   cors(corsOptions),
+//   express.static(path.join(__dirname, "uploads")),
+// );
 
 // Routes
 const authRoutes = require("./routes/authRoutes");

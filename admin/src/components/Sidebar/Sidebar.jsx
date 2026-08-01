@@ -9,7 +9,7 @@ import { Link, NavLink } from "react-router-dom";
 const Sidebar = ({ isOpen, setIsOpen }) => {
   const [active, setActive] = useState("Dashboard");
   const navItems = [
-    { name: "Dashboard", icon: <MdDashboard size={20} />, path: "/" },
+    { name: "Dashboard", icon: <MdDashboard size={20} />, path: "/dashboard" },
     {
       name: "Books",
       icon: <MdOutlineLibraryBooks size={20} />,
