@@ -298,7 +298,7 @@ const OrderPage = () => {
                           className="flex gap-3 items-center text-sm"
                         >
                           <img
-                            src={`${API_URL}/${item.book.coverPhoto.replace(/\\/g, "/")}`}
+                            src={`${item.book.coverPhoto}`}
                             alt={item.book.name}
                             className="w-10 h-14 object-cover rounded border border-gray-700"
                           />
