@@ -92,12 +92,12 @@ const login = async (req, res) => {
     }
 
     // Only admin and super admin can login
-    if (user.role !== "admin" && user.role !== "super_admin") {
-      return res.status(403).json({
-        success: false,
-        message: "Only admin can sign in.",
-      });
-    }
+    // if (user.role !== "admin" && user.role !== "super_admin") {
+    //   return res.status(403).json({
+    //     success: false,
+    //     message: "Only admin can sign in.",
+    //   });
+    // }
 
     const token = jwt.sign(
       {

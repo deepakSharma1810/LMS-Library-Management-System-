@@ -223,8 +223,8 @@ const OrderPage = () => {
                 {/* First item preview */}
                 <div className="flex gap-3">
                   <img
-                    src={`${order.items[0].book.coverPhoto}`}
-                    alt={order.items[0].book.name}
+                    src={`${order.items[0]?.book?.coverPhoto}`}
+                    alt={order.items[0]?.book?.name}
                     className="w-14 h-18 md:w-16 md:h-20 object-cover rounded-md border border-gray-700"
                   />
                   <div className="flex-1">
@@ -298,8 +298,8 @@ const OrderPage = () => {
                           className="flex gap-3 items-center text-sm"
                         >
                           <img
-                            src={`${item.book.coverPhoto}`}
-                            alt={item.book.name}
+                            src={`${item.book?.coverPhoto}`}
+                            alt={item.book?.name}
                             className="w-10 h-14 object-cover rounded border border-gray-700"
                           />
                           <div className="flex-1">

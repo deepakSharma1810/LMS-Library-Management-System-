@@ -88,7 +88,7 @@ const BookReaderPage = () => {
 
   const progress = numPages ? Math.round((pageNumber / numPages) * 100) : 0;
 
-  const pdfUrl = `${API_URL}/${book.actualPdf.replace(/\\/g, "/")}`;
+  const pdfUrl = book.actualPdf;
 
   // console.log(pdfUrl);
 
