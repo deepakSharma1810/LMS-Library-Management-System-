@@ -1,5 +1,6 @@
 const Order = require("../model/Order");
-const puppeteer = require("puppeteer");
+const puppeteer = require("puppeteer-core");
+const chromium = require("@sparticuz/chromium");
 
 const createOrder = async (req, res) => {
   try {
@@ -80,8 +81,9 @@ const downloadInvoice = async (req, res) => {
     }
 
     const browser = await puppeteer.launch({
-      headless: "new",
-      args: ["--no-sandbox", "--disable-setuid-sandbox"],
+      args: chromium.args,
+      executablePath: await chromium.executablePath(),
+      headless: chromium.headless,
     });
 
     const page = await browser.newPage();
