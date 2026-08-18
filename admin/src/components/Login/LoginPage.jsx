@@ -65,10 +65,6 @@ const LoginForm = () => {
         return;
       }
 
-      // localStorage.setItem("adminToken", res.data.token);
-      // localStorage.setItem("user", JSON.stringify(res.data.user));
-      // localStorage.setItem("userId", res.data.user._id);
-
       login(res.data.token, res.data.user);
 
       setMessage("Login Successful");
@@ -81,9 +77,9 @@ const LoginForm = () => {
         } else if (role === "super_admin") {
           navigate("/super-admin-dashboard");
         } else if (role === "admin") {
-          navigate("/dashboard");
+          navigate("/dashboard", { replace: true });
         } else {
-          navigate("/");
+          navigate("/admin-login", { replace: true });
         }
       }, 500);
     } catch (error) {

@@ -1,5 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 
 import Sidebar from "./components/Sidebar/Sidebar";
 import Navbar from "./components/Navbar/Navbar";
@@ -46,8 +51,13 @@ const App = () => {
         } transition-all duration-300 h-screen overflow-auto bg-gray-50`}
       >
         <Routes>
-          {/* Public Routes */}
+          {/* Root URL → Admin Login */}
+          <Route path="/" element={<Navigate to="/admin-signin" replace />} />
+
+          {/* Admin Login */}
           <Route path="/admin-signin" element={<LoginForm />} />
+
+          {/* Public Routes */}
           <Route path="/admin-signup" element={<SignUpPage />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/enter-otp" element={<EnterOtp />} />

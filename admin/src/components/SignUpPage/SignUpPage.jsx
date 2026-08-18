@@ -297,7 +297,7 @@ const SignUpPage = () => {
           <p className="mt-5 text-xs text-center text-[#4a8a92]">
             Already have an account?{" "}
             <Link
-              to="/login"
+              to="/admin-signin"
               className="text-amber-400 hover:text-amber-300 font-semibold transition"
             >
               Login
