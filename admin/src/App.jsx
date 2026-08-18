@@ -53,7 +53,7 @@ const AppContent = () => {
   const showAdminLayout = token && !isAuthPage;
 
   return (
-    <Router>
+    <>
       <ScrollOnTop />
       {/* ================= ADMIN SIDEBAR ================= */}
       {showAdminLayout && <Sidebar isOpen={isOpen} setIsOpen={setIsOpen} />}
@@ -185,7 +185,7 @@ const AppContent = () => {
           />
         </Routes>
       </main>
-    </Router>
+    </>
   );
 };
 
