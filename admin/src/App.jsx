@@ -4,6 +4,7 @@ import {
   Routes,
   Route,
   Navigate,
+  useLocation,
 } from "react-router-dom";
 
 import Sidebar from "./components/Sidebar/Sidebar";
@@ -35,20 +36,40 @@ const App = () => {
   const [isOpen, setIsOpen] = useState(true);
 
   const { token } = useAuth();
+  const location = useLocation();
+
+  // Public/Auth pages
+  const authPages = [
+    "/admin-signin",
+    "/admin-signup",
+    "/forgot-password",
+    "/enter-otp",
+    "/confirm-password",
+  ];
+
+  const isAuthPage = authPages.includes(location.pathname);
+
+  // Sidebar + Navbar only on protected/admin pages
+  const showAdminLayout = token && !isAuthPage;
 
   return (
     <Router>
       <ScrollOnTop />
-      {token && (
-        <>
-          <Sidebar isOpen={isOpen} setIsOpen={setIsOpen} />
-          <Navbar isOpen={isOpen} setIsOpen={setIsOpen} />
-        </>
-      )}
+      {/* ================= ADMIN SIDEBAR ================= */}
+      {showAdminLayout && <Sidebar isOpen={isOpen} setIsOpen={setIsOpen} />}
+
+      {/* ================= ADMIN NAVBAR ================= */}
+      {showAdminLayout && <Navbar isOpen={isOpen} setIsOpen={setIsOpen} />}
+
       <main
-        className={`${
-          token ? (isOpen ? "ml-64" : "ml-20") : ""
-        } transition-all duration-300 h-screen overflow-auto bg-gray-50`}
+        className={`
+          ${showAdminLayout ? (isOpen ? "ml-64" : "ml-20") : ""}
+          transition-all
+          duration-300
+          min-h-screen
+          overflow-auto
+          bg-gray-50
+        `}
       >
         <Routes>
           {/* Root URL → Admin Login */}
