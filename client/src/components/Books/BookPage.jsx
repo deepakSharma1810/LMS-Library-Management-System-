@@ -143,69 +143,171 @@ const BookPage = () => {
       <div className="max-w-6xl mx-auto mb-10">
         <div className="space-y-6">
           {/* Top Header */}
-          <div className="flex  md:flex-row md:items-center md:justify-between gap-5">
-            {/* Left */}
-            <div>
-              <h2 className="text-2xl sm:text-3xl font-bold text-[#dbf8fa] tracking-tight">
-                All Books
-              </h2>
+          <div className="w-full">
+            <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
+              {/* ================= LEFT SECTION ================= */}
+              <div className="w-full xl:w-auto">
+                <h2 className="text-2xl sm:text-3xl font-bold text-[#dbf8fa] tracking-tight">
+                  All Books
+                </h2>
 
-              {!loading && books && (
-                <p className="mt-1 text-sm text-[#6b9197]">
-                  {filtered?.length ?? 0}{" "}
-                  {filtered?.length === 1 ? "title" : "titles"} available
-                </p>
-              )}
-            </div>
-
-            {/* Filters */}
-            <div className="flex flex-wrap gap-3">
-              {/* Search */}
-              <div className="relative w-full md:w-72">
-                <IoSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-[#4a8a92]" />
-
-                <input
-                  type="text"
-                  placeholder="Search books..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="w-full bg-[#162428] border border-[#2c4449] rounded-xl pl-10 pr-4 py-3 text-white placeholder:text-[#6b9197] focus:border-amber-300/50 focus:ring-2 focus:ring-amber-300/20 outline-none transition"
-                />
+                {!loading && books && (
+                  <p className="mt-1 text-sm text-[#6b9197]">
+                    {filtered?.length ?? 0}{" "}
+                    {filtered?.length === 1 ? "title" : "titles"} available
+                  </p>
+                )}
               </div>
 
-              <select
-                value={selectedType}
-                onChange={(e) => setSelectedType(e.target.value)}
-                className="bg-[#162428] border border-[#2c4449] rounded-xl px-4 py-3 text-white  cursor-pointer"
-              >
-                <option value="">Book Type</option>
-                <option value="ebook">Ebook</option>
-                <option value="physical">Physical</option>
-              </select>
+              {/* ================= FILTER SECTION ================= */}
+              <div className="w-full xl:flex-1 xl:max-w-5xl">
+                <div
+                  className="
+          grid
+          grid-cols-1
+          gap-3
+          sm:grid-cols-2
+          lg:grid-cols-4
+          xl:flex
+          xl:flex-wrap
+          xl:justify-end
+        "
+                >
+                  {/* ================= SEARCH ================= */}
+                  <div
+                    className="
+            relative
+            w-full
+            sm:col-span-2
+            lg:col-span-2
+            xl:w-72
+            2xl:w-80
+          "
+                  >
+                    <IoSearch
+                      className="
+              absolute
+              left-3
+              top-1/2
+              -translate-y-1/2
+              text-[#4a8a92]
+              text-lg
+            "
+                    />
 
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="bg-[#162428] border border-[#2c4449] rounded-xl px-4 py-3 text-white  cursor-pointer"
-              >
-                <option value="">Sort By</option>
-                <option value="newest">Newest</option>
-                <option value="nameAsc">A-Z</option>
-                <option value="nameDesc">Z-A</option>
-                <option value="priceLow">Price: Low → High</option>
-                <option value="priceHigh">Price: High → Low</option>
-              </select>
+                    <input
+                      type="text"
+                      placeholder="Search books..."
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                      className="
+              w-full
+              h-12
+              bg-[#162428]
+              border
+              border-[#2c4449]
+              rounded-xl
+              pl-10
+              pr-4
+              text-white
+              placeholder:text-[#6b9197]
+              focus:border-amber-300/50
+              focus:ring-2
+              focus:ring-amber-300/20
+              outline-none
+              transition
+            "
+                    />
+                  </div>
 
-              <button
-                onClick={() => {
-                  setSearch("");
-                  setSelectedType("");
-                  setSortBy("");
-                }}
-                className="px-5 py-3 rounded-xl bg-red-500 hover:bg-red-600 text-white font-medium transition cursor-pointer"
-              >
-                Clear
-              </button>
+                  {/* ================= BOOK TYPE ================= */}
+                  <select
+                    value={selectedType}
+                    onChange={(e) => setSelectedType(e.target.value)}
+                    className="
+            w-full
+            h-12
+            bg-[#162428]
+            border
+            border-[#2c4449]
+            rounded-xl
+            px-3
+            sm:px-4
+            text-white
+            cursor-pointer
+            outline-none
+            focus:border-amber-300/50
+            focus:ring-2
+            focus:ring-amber-300/20
+            transition
+            xl:w-36
+            2xl:w-40
+          "
+                  >
+                    <option value="">Book Type</option>
+                    <option value="ebook">Ebook</option>
+                    <option value="physical">Physical</option>
+                  </select>
+
+                  {/* ================= SORT ================= */}
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    className="
+            w-full
+            h-12
+            bg-[#162428]
+            border
+            border-[#2c4449]
+            rounded-xl
+            px-3
+            sm:px-4
+            text-white
+            cursor-pointer
+            outline-none
+            focus:border-amber-300/50
+            focus:ring-2
+            focus:ring-amber-300/20
+            transition
+            xl:w-40
+            2xl:w-44
+          "
+                  >
+                    <option value="">Sort By</option>
+                    <option value="newest">Newest</option>
+                    <option value="nameAsc">A-Z</option>
+                    <option value="nameDesc">Z-A</option>
+                    <option value="priceLow">Price: Low → High</option>
+                    <option value="priceHigh">Price: High → Low</option>
+                  </select>
+
+                  {/* ================= CLEAR ================= */}
+                  <button
+                    onClick={() => {
+                      setSearch("");
+                      setSelectedType("");
+                      setSortBy("");
+                    }}
+                    className="
+            w-full
+            h-12
+            px-5
+            rounded-xl
+            bg-red-500
+            hover:bg-red-600
+            active:bg-red-700
+            text-white
+            font-medium
+            transition
+            cursor-pointer
+            whitespace-nowrap
+            xl:w-auto
+          "
+                  >
+                    Clear
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>

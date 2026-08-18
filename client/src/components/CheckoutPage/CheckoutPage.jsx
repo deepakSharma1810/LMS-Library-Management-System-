@@ -51,23 +51,6 @@ const CheckoutPage = () => {
   const delivery = subtotal > 500 ? 0 : 40;
   const total = subtotal - discount + delivery;
 
-  // const handleChange = (e) => {
-
-  //   const { name, value } = e.target;
-
-  //   setFormData((prev) => ({
-  //     ...prev,
-  //     [name]: value,
-  //   }));
-
-  //   setFieldErrors((prev) => ({
-  //     ...prev,
-  //     [name]: false,
-  //   }));
-
-  //   setError("");
-  // };
-
   const handleChange = async (e) => {
     const { name, value } = e.target;
 
@@ -168,11 +151,6 @@ const CheckoutPage = () => {
     setError("");
     return true;
   };
-
-  // useEffect(() => {
-  //   console.log("Location State:", location.state);
-  //   console.log("Product:", location.state?.product);
-  // }, []);
 
   const handleOrder = async () => {
     if (!validateForm()) return;

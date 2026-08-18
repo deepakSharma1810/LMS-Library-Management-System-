@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import Slider from "react-slick";
-import "slick-carousel/slick/slick.css";
-import "slick-carousel/slick/slick-theme.css";
+// import Slider from "react-slick";
+// import "slick-carousel/slick/slick.css";
+// import "slick-carousel/slick/slick-theme.css";
 import { IoMdHeart } from "react-icons/io";
 import { RiEqualizerFill } from "react-icons/ri";
 import axios from "axios";
@@ -10,23 +10,26 @@ import { FaArrowRightLong } from "react-icons/fa6";
 import { Link, useNavigate } from "react-router-dom";
 import API_URL from "../../Constant";
 
-const settings = {
-  dots: false,
-  infinite: true,
-  speed: 500,
-  slidesToShow: 3,
-  slidesToScroll: 2,
-  responsive: [
-    {
-      breakpoint: 1024,
-      settings: { slidesToShow: 2, slidesToScroll: 1 },
-    },
-    {
-      breakpoint: 640,
-      settings: { slidesToShow: 1, slidesToScroll: 1 },
-    },
-  ],
-};
+import { useRef } from "react";
+import { IoChevronBack, IoChevronForward } from "react-icons/io5";
+
+// const settings = {
+//   dots: false,
+//   infinite: true,
+//   speed: 500,
+//   slidesToShow: 3,
+//   slidesToScroll: 2,
+//   responsive: [
+//     {
+//       breakpoint: 1024,
+//       settings: { slidesToShow: 2, slidesToScroll: 1 },
+//     },
+//     {
+//       breakpoint: 640,
+//       settings: { slidesToShow: 1, slidesToScroll: 1 },
+//     },
+//   ],
+// };
 
 const MainPage = () => {
   const navigate = useNavigate();
@@ -256,6 +259,27 @@ const MainPage = () => {
     );
   };
 
+  const carouselRef = useRef(null);
+
+  const scrollBooks = (direction) => {
+    if (!carouselRef.current) return;
+
+    const container = carouselRef.current;
+
+    const card = container.querySelector(".book-card");
+
+    if (!card) return;
+
+    const gap = 12;
+    const cardWidth = card.offsetWidth + gap;
+
+    // Ek click par 2 books scroll
+    container.scrollBy({
+      left: direction === "next" ? cardWidth * 2 : -cardWidth * 2,
+      behavior: "smooth",
+    });
+  };
+
   if (loading) {
     return <PageSkeleton />;
   }
@@ -333,52 +357,240 @@ const MainPage = () => {
               </p>
             </div>
 
-            <Slider {...settings}>
-              {previousBooks.map((book) => (
-                <div key={book._id} className="px-1.5 pb-3 ">
-                  <div className=" bg-[#122125] border border-white/5 hover:border-amber-300/20 rounded-xl overflow-hidden shadow-lg  hover:shadow-amber-300/10 transition-all duration-300 group mx-auto">
-                    <Link to={`/book/${book._id}`}>
-                      <div className="relative overflow-hidden">
-                        <img
-                          src={`${book.coverPhoto}`}
-                          alt={book.name}
-                          className="w-full h-44 object-cover group-hover:scale-105 transition-transform duration-300"
-                        />
-                      </div>
-                      <div className="px-3 py-2.5 flex flex-col gap-1.5">
-                        <div className="flex justify-between items-start gap-2 text-amber-50">
-                          <p className="text-sm font-semibold line-clamp-2 leading-snug group-hover:text-amber-300 transition-colors duration-200">
-                            {book.name}
-                          </p>
-                          <span className="text-xs font-bold text-amber-300 whitespace-nowrap mt-0.5 bg-amber-300/10 px-2 py-0.5 rounded-full">
-                            ₹{book.price}
-                          </span>
+            <div className="relative w-full">
+              {/* Previous Button */}
+              <button
+                onClick={() => scrollBooks("prev")}
+                className="
+                absolute
+                left-0
+                top-1/2
+                -translate-y-1/2
+                z-10
+
+                w-8
+                h-8
+                sm:w-9
+                sm:h-9
+
+                rounded-full
+                bg-[#162428]/95
+                border
+                border-amber-300/20
+                text-amber-300
+
+                flex
+                items-center
+                justify-center
+
+                shadow-lg
+                hover:bg-amber-300
+                hover:text-[#122125]
+
+                transition-all
+                duration-200
+
+                -translate-x-1/2
+                cursor-pointer
+              "
+              >
+                <IoChevronBack className="text-sm" />
+              </button>
+
+              {/* Books Container */}
+              <div
+                ref={carouselRef}
+                className="
+      flex
+      gap-3
+      px-5
+      overflow-x-auto
+      scroll-smooth
+
+      snap-x
+      snap-mandatory
+
+      scrollbar-hide
+
+      px-1
+    "
+              >
+                {previousBooks?.map((book) => (
+                  <div
+                    key={book._id}
+                    className="
+          book-card
+          flex-shrink-0
+          snap-start
+
+          w-[85%]
+          sm:w-[48%]
+          md:w-[31.5%]
+          lg:w-[25%]
+          xl:w-[30%]
+        "
+                  >
+                    <div
+                      className="
+            h-full
+            bg-[#122125]
+            border
+            border-white/5
+            hover:border-amber-300/20
+
+            rounded-xl
+            overflow-hidden
+
+            shadow-lg
+            hover:shadow-amber-300/10
+
+            transition-all
+            duration-300
+
+            group
+          "
+                    >
+                      <Link to={`/book/${book._id}`}>
+                        {/* Cover */}
+                        <div className="relative overflow-hidden">
+                          <img
+                            src={book.coverPhoto}
+                            alt={book.name}
+                            className="
+                  w-full
+                  h-44
+                  sm:h-48
+                  md:h-52
+                  lg:h-56
+
+                  object-cover
+
+                  group-hover:scale-105
+                  transition-transform
+                  duration-300
+                "
+                          />
                         </div>
-                        <p className="text-xs text-gray-400">
-                          by {book.author?.[0]?.name || "Unknown"}
-                        </p>
-                        <div className="flex gap-1 flex-wrap">
-                          {book.categories?.length > 0 ? (
-                            book.categories.slice(0, 2).map((cat, index) => (
-                              <span
-                                key={index}
-                                className="text-[9px] px-2 py-0.5 bg-[#1e3840] text-amber-300 rounded-full border border-amber-300/15"
-                              >
-                                {cat.name || cat}
-                              </span>
-                            ))
-                          ) : (
-                            <span className="text-[9px] text-gray-500">
-                              No Category
+
+                        {/* Content */}
+                        <div className="px-3 py-3 flex flex-col gap-1.5">
+                          {/* Name + Price */}
+                          <div className="flex justify-between items-start gap-2">
+                            <p
+                              className="
+                    text-sm
+                    font-semibold
+                    text-amber-50
+
+                    line-clamp-2
+                    leading-snug
+
+                    group-hover:text-amber-300
+                    transition-colors
+                  "
+                            >
+                              {book.name}
+                            </p>
+
+                            <span
+                              className="
+                    shrink-0
+
+                    text-xs
+                    font-bold
+                    text-amber-300
+
+                    bg-amber-300/10
+                    px-2
+                    py-0.5
+
+                    rounded-full
+                  "
+                            >
+                              ₹{book.price}
                             </span>
-                          )}
+                          </div>
+
+                          {/* Author */}
+                          <p className="text-xs text-gray-400 truncate">
+                            by {book.author?.[0]?.name || "Unknown"}
+                          </p>
+
+                          {/* Categories */}
+                          <div className="flex gap-1 flex-wrap">
+                            {book.categories?.length > 0 ? (
+                              book.categories.slice(0, 2).map((cat, index) => (
+                                <span
+                                  key={index}
+                                  className="
+                        text-[9px]
+                        px-2
+                        py-0.5
+
+                        bg-[#1e3840]
+                        text-amber-300
+
+                        rounded-full
+                        border
+                        border-amber-300/15
+
+                        truncate
+                        max-w-[100px]
+                      "
+                                >
+                                  {cat.name || cat}
+                                </span>
+                              ))
+                            ) : (
+                              <span className="text-[9px] text-gray-500">
+                                No Category
+                              </span>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    </Link>
+                      </Link>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </Slider>
+                ))}
+              </div>
+
+              {/* Next Button */}
+              <button
+                onClick={() => scrollBooks("next")}
+                className="
+      absolute
+      right-0
+      top-1/2
+      -translate-y-1/2
+      z-10
+
+      w-8 h-8
+                sm:w-9
+                sm:h-9
+      rounded-full
+      bg-[#162428]/95
+      border
+      border-amber-300/20
+      text-amber-300
+
+      flex
+      items-center
+      justify-center
+
+      shadow-lg
+      hover:bg-amber-300
+      hover:text-[#122125]
+
+      transition-all
+      duration-200
+
+      translate-x-1/2
+      cursor-pointer
+    "
+              >
+                <IoChevronForward className="text-xl" />
+              </button>
+            </div>
           </div>
 
           {/* Subjects Section */}
