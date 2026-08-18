@@ -51,7 +51,24 @@ const CheckoutPage = () => {
   const delivery = subtotal > 500 ? 0 : 40;
   const total = subtotal - discount + delivery;
 
-  const handleChange = (e) => {
+  // const handleChange = (e) => {
+
+  //   const { name, value } = e.target;
+
+  //   setFormData((prev) => ({
+  //     ...prev,
+  //     [name]: value,
+  //   }));
+
+  //   setFieldErrors((prev) => ({
+  //     ...prev,
+  //     [name]: false,
+  //   }));
+
+  //   setError("");
+  // };
+
+  const handleChange = async (e) => {
     const { name, value } = e.target;
 
     setFormData((prev) => ({
@@ -65,6 +82,63 @@ const CheckoutPage = () => {
     }));
 
     setError("");
+
+    // Pincode lookup
+    if (name === "pincode") {
+      const pincode = value.replace(/\D/g, "").slice(0, 6);
+
+      setFormData((prev) => ({
+        ...prev,
+        pincode,
+      }));
+
+      // API call only when 6 digits are entered
+      if (pincode.length === 6) {
+        try {
+          const response = await axios.get(
+            `https://api.postalpincode.in/pincode/${pincode}`,
+          );
+
+          const data = response.data;
+          console.log(data);
+
+          if (data[0]?.Status === "Success" && data[0]?.PostOffice?.length) {
+            const postOffice = data[0].PostOffice[0];
+
+            setFormData((prev) => ({
+              ...prev,
+              pincode,
+              address: postOffice.Name || "",
+              city: postOffice.District || "",
+              state: postOffice.State || "",
+            }));
+
+            setFieldErrors((prev) => ({
+              ...prev,
+              city: false,
+              state: false,
+              pincode: false,
+            }));
+          } else {
+            setError("Invalid pincode or pincode not found");
+
+            setFormData((prev) => ({
+              ...prev,
+              city: "",
+              state: "",
+            }));
+
+            setFieldErrors((prev) => ({
+              ...prev,
+              pincode: true,
+            }));
+          }
+        } catch (err) {
+          console.error("Pincode API Error:", err);
+          setError("Unable to fetch pincode details");
+        }
+      }
+    }
   };
 
   const validateForm = () => {
@@ -329,6 +403,16 @@ const CheckoutPage = () => {
                   error={fieldErrors.phone}
                 />
 
+                <InputBox
+                  icon={<FaMapMarkerAlt />}
+                  name="pincode"
+                  placeholder="Pincode"
+                  value={formData.pincode}
+                  onChange={handleChange}
+                  error={fieldErrors.pincode}
+                  className="md:col-span-2"
+                />
+
                 <div className="md:col-span-2 relative">
                   <MdLocationPin className="absolute left-4 top-4 text-gray-500" />
 
@@ -362,16 +446,6 @@ const CheckoutPage = () => {
                   value={formData.state}
                   onChange={handleChange}
                   error={fieldErrors.state}
-                />
-
-                <InputBox
-                  icon={<FaMapMarkerAlt />}
-                  name="pincode"
-                  placeholder="Pincode"
-                  value={formData.pincode}
-                  onChange={handleChange}
-                  error={fieldErrors.pincode}
-                  className="md:col-span-2"
                 />
               </div>
             </div>
