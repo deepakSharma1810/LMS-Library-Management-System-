@@ -273,9 +273,9 @@ const MainPage = () => {
     const gap = 12;
     const cardWidth = card.offsetWidth + gap;
 
-    // Ek click par 2 books scroll
+    // Ek click par 1 books scroll
     container.scrollBy({
-      left: direction === "next" ? cardWidth * 2 : -cardWidth * 2,
+      left: direction === "next" ? cardWidth : -cardWidth,
       behavior: "smooth",
     });
   };
@@ -403,10 +403,9 @@ const MainPage = () => {
                 className="
       flex
       gap-3
-      px-5
+      px-7
       overflow-x-auto
       scroll-smooth
-
       snap-x
       snap-mandatory
 
@@ -427,7 +426,7 @@ const MainPage = () => {
           sm:w-[48%]
           md:w-[31.5%]
           lg:w-[25%]
-          xl:w-[30%]
+          xl:w-[32%]
         "
                   >
                     <div
