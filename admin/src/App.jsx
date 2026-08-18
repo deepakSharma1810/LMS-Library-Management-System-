@@ -32,7 +32,7 @@ import Profile from "./components/Profile/Profile";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { useAuth } from "./context/AuthContext";
 
-const App = () => {
+const AppContent = () => {
   const [isOpen, setIsOpen] = useState(true);
 
   const { token } = useAuth();
@@ -185,6 +185,14 @@ const App = () => {
           />
         </Routes>
       </main>
+    </Router>
+  );
+};
+
+const App = () => {
+  return (
+    <Router>
+      <AppContent />
     </Router>
   );
 };
